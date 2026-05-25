@@ -23,7 +23,6 @@ export default function UnsubscribePage() {
           body: JSON.stringify({ email }),
         });
 
-        const data = await res.json();
         if (res.ok) {
           setStatus("success");
         } else {
@@ -37,44 +36,80 @@ export default function UnsubscribePage() {
     unsubscribe();
   }, []);
 
-  const renderContent = () => {
-    if (status === "processing") {
-      return <p>Processing your request...</p>;
-    }
-
-    const statusContent = {
-      success: {
-        title: "Unsubscribed",
-        message: "You have been successfully removed from our subscribers list.",
-        color: "text-green-600",
-      },
-      error: {
-        title: "Error",
-        message: "Something went wrong. Please try again later.",
-        color: "text-red-600",
-      },
-      invalid: {
-        title: "Invalid Request",
-        message: "No valid email found in the link.",
-        color: "text-yellow-600",
-      },
-    };
-
-    const { title, message, color } = statusContent[status] || {};
-
-    return (
-      <div className="text-center">
-        <h1 className={`text-2xl font-bold mb-2 ${color}`}>{title}</h1>
-        <p className="mb-4 text-black font-normal">{message}</p>
-        <Link
-          href="/"
-          className="inline-block border-t border-zinc-300 cursor-pointer bg-[var(--sage)] text-white hover:bg-zinc-500 transition px-4 py-2 rounded transition"
-        >
-          Go back to homepage
-        </Link>
-      </div>
-    );
+  const content = {
+    processing: {
+      title: "Processing your request",
+      message: "We’re updating your preferences…",
+      color: "text-zinc-600",
+    },
+    success: {
+      title: "You’ve been unsubscribed",
+      message:
+        "You will no longer receive emails from MOKÉS. You can resubscribe anytime if you change your mind.",
+      color: "text-green-600",
+      icon: "✓",
+    },
+    error: {
+      title: "Something went wrong",
+      message:
+        "We couldn’t complete your request right now. Please try again later.",
+      color: "text-red-600",
+      icon: "!",
+    },
+    invalid: {
+      title: "Invalid link",
+      message:
+        "This unsubscribe link is missing required information or has expired.",
+      color: "text-yellow-600",
+      icon: "⚠",
+    },
   };
 
-  return <div className="min-h-screen flex items-center justify-center p-4">{renderContent()}</div>;
+  const { title, message, color, icon } = content[status];
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md bg-white border border-zinc-200 rounded-2xl shadow-sm p-8 text-center">
+
+        {/* ICON */}
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 flex items-center justify-center rounded-full bg-zinc-100 text-xl font-bold">
+            {status === "processing" ? "..." : icon}
+          </div>
+        </div>
+
+        {/* TITLE */}
+        <h1 className={`text-xl font-semibold mb-2 ${color}`}>
+          {title}
+        </h1>
+
+        {/* MESSAGE */}
+        <p className="text-sm text-zinc-600 leading-relaxed mb-6">
+          {message}
+        </p>
+
+        {/* LOADING STATE */}
+        {status === "processing" && (
+          <div className="flex justify-center mb-6">
+            <div className="w-5 h-5 border-2 border-zinc-300 border-t-black rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* ACTION */}
+        {status !== "processing" && (
+          <Link
+            href="/"
+            className="inline-block w-full px-4 py-3 text-sm bg-black text-white rounded-lg hover:bg-zinc-800 transition"
+          >
+            Return to MOKÉS
+          </Link>
+        )}
+
+        {/* FOOTNOTE */}
+        <p className="text-xs text-zinc-400 mt-6">
+          You can always rejoin our newsletter anytime.
+        </p>
+      </div>
+    </div>
+  );
 }
