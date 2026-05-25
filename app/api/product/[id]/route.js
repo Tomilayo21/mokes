@@ -5,9 +5,9 @@ import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
 
-export const config = {
-  api: { bodyParser: false },
-};
+// export const config = {
+//   api: { bodyParser: false },
+// };
 
 // ✅ Cloudinary setup
 cloudinary.config({
