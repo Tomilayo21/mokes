@@ -108,10 +108,10 @@ export async function POST(req) {
           <div style="margin-top: 40px; font-size: 13px; color: #777; text-align: center; line-height: 1.6;">
             <p>
               Didn’t sign up for this? You can
-              <a href="https://nokes.vercel.app/unsubscribe?email=${encodeURIComponent(email)}"
+              <a href="https://mokes.vercel.app/unsubscribe?email=${encodeURIComponent(email)}"
                 style="color: #000; text-decoration: underline;">
                 unsubscribe here
-              </a>.
+              </a>
             </p>
 
             <p>&copy; ${new Date().getFullYear()} <strong>MOKÉS</strong>. All rights reserved.</p>
