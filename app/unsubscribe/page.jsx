@@ -65,10 +65,10 @@ export default function UnsubscribePage() {
     return (
       <div className="text-center">
         <h1 className={`text-2xl font-bold mb-2 ${color}`}>{title}</h1>
-        <p className="mb-4">{message}</p>
+        <p className="mb-4 text-black font-normal">{message}</p>
         <Link
           href="/"
-          className="inline-block bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
+          className="inline-block border-t border-zinc-300 cursor-pointer bg-[var(--sage)] text-white hover:bg-zinc-500 transition px-4 py-2 rounded transition"
         >
           Go back to homepage
         </Link>
