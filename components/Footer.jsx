@@ -3,6 +3,7 @@
 
 import { BsInstagram } from "react-icons/bs"
 import { FaSquareXTwitter } from "react-icons/fa6";
+import Newsletter from "./NewsLetter";
 
 import {
   FaCcVisa,
@@ -96,27 +97,7 @@ export default function Footer() {
           </div>
 
           {/* NEWSLETTER */}
-          <div>
-            <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
-              Newsletter
-            </h3>
-
-            <p className="text-sm text-zinc-600 mb-4">
-              Subscribe for updates, releases, and exclusive offers.
-            </p>
-
-            <div className="flex flex-col border border-zinc-300 overflow-hidden">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="w-full px-4 py-3 text-sm outline-none"
-              />
-
-              <button className="w-full px-5 py-3 text-sm border-t border-zinc-300 cursor-pointer bg-[var(--sage)] text-white hover:bg-zinc-500 transition uppercase">
-                Subscribe
-              </button>
-            </div>
-          </div>
+          <Newsletter />
 
         </div>
 

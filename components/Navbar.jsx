@@ -5,11 +5,9 @@ import { ShoppingCart, Menu, Handbag } from "lucide-react";
 import { HiMenuAlt3 } from "react-icons/hi"
 import { TfiClose } from "react-icons/tfi";
 import { SlBag } from "react-icons/sl";
-import { PiBagThin } from "react-icons/pi";
 import { IoSearch } from "react-icons/io5";
 import { FaRegUser } from "react-icons/fa6";
 import { IoIosArrowForward, IoIosArrowRoundForward } from "react-icons/io";
-import { Signup } from "@/components/Signup";
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
 import AvatarMenu from "./AvatarMenu";
