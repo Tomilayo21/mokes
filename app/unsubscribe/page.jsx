@@ -46,7 +46,7 @@ export default function UnsubscribePage() {
       title: "You’ve been unsubscribed",
       message:
         "You will no longer receive emails from MOKÉS. You can resubscribe anytime if you change your mind.",
-      color: "text-green-600",
+      color: "text-black",
       icon: "✓",
     },
     error: {
@@ -72,11 +72,11 @@ export default function UnsubscribePage() {
       <div className="w-full max-w-md bg-white border border-zinc-200 rounded-2xl shadow-sm p-8 text-center">
 
         {/* ICON */}
-        <div className="flex justify-center mb-4">
+        {/* <div className="flex justify-center mb-4">
           <div className="w-14 h-14 flex items-center justify-center rounded-full bg-zinc-100 text-xl font-bold">
             {status === "processing" ? "..." : icon}
           </div>
-        </div>
+        </div> */}
 
         {/* TITLE */}
         <h1 className={`text-xl font-semibold mb-2 ${color}`}>
