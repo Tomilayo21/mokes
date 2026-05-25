@@ -3,6 +3,8 @@ import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/authAdmin";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
+import slugify from "slugify";
+
 
 // ✅ Configure Cloudinary
 cloudinary.config({
@@ -36,6 +38,7 @@ export async function POST(request) {
     const offerPrice = formData.get("offerPrice");
     const stock = formData.get("stock");
     const files = formData.getAll("images");
+    
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -72,11 +75,16 @@ export async function POST(request) {
 
     const imageUrls = uploadResults.map((res) => res.secure_url);
 
+    const baseSlug = slugify(name.trim(), { lower: true, strict: true });
+    const random = Math.floor(Math.random() * 10000);
+    const slug = `${baseSlug}-${random}`;
+
     await connectDB();
 
     const newProduct = await Product.create({
       userId: adminUser.id, // ✅ NextAuth admin ID
       name,
+      slug,
       description,
       category,
       color,

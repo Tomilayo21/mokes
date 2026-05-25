@@ -37,7 +37,7 @@ export default function ProductPage() {
   useEffect(() => {
     if (!id || !products.length) return;
 
-    const product = products.find((p) => p._id === id);
+    const product = products.find((p) => p.slug === id);
     if (product) {
       setProductData(product);
       setLikeCount(product.likes?.length || 0);
