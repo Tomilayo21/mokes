@@ -1,15 +1,20 @@
+
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Outfit } from "next/font/google";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import Navbar from "@/components/Navbar";
+import Providers from "./provider";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  variable: "--font-dm-sans",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +30,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>
+          <AnnouncementBar />
+          <Navbar />
+          <Toaster position="top-right" />
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }
