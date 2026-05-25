@@ -93,55 +93,23 @@ export const AppContextProvider = ({ children }) => {
 
  
 
-    // -------------------- Properties --------------------
-  // const [properties, setProperties] = useState([]);
-
-  // const fetchProperties = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const res = await axios.get("/api/property/list");
-  //     const data = res.data;
-
-  //     // ✅ Handle both array and object responses
-  //     if (Array.isArray(data)) {
-  //       setProperties(data);
-  //     } else if (data.success) {
-  //       setProperties(data.properties || []);
-  //     } else {
-  //       toast.error(data.message || "Failed to fetch properties");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error fetching properties:", err);
-  //     toast.error("Failed to load properties");
-  //   } finally {
-  //     setLoading(false); // ✅ always end loading
-  //   }
-  // };
-  // useEffect(() => {
-  //   const fetchAllProperties = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const res = await axios.get("/api/property/list");
-  //       const data = res.data;
-
-  //       if (Array.isArray(data)) {
-  //         setProperties(data);
-  //       } else if (data.success) {
-  //         setProperties(data.properties || []);
-  //       } else {
-  //         toast.error(data.message || "Failed to fetch properties");
-  //       }
-  //     } catch (err) {
-  //       console.error("Error fetching properties:", err);
-  //       toast.error("Failed to load properties");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchAllProperties();
-  // }, []);
-
+    // -------------------- Products --------------------
+    const [products, setProducts] = useState([]);
+    
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const { data } = await axios.get("/api/product/list");
+          if (data.success) setProducts(data.products);
+          else toast.error(data.message);
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setLoading(false); // ✅ Important: mark loading done
+        }
+      }
+      fetchData();
+    }, []);
 
   const value = {
     currentUser,
@@ -150,9 +118,8 @@ export const AppContextProvider = ({ children }) => {
     logoutUser,
     currency,
     loading,
-    // properties,      
-    // setProperties,
-    // fetchProperties
+    products,
+    setProducts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -94,7 +94,7 @@ export default function Navbar() {
                             </>
                         ) :(
                             <button
-                                onClick={() => router.push("/signup")}
+                                onClick={() => router.push("/authentication")}
                                 className="flex items-center gap-2 hover:text-gray-50 transition"
                             >
                                 <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/>   
@@ -144,7 +144,7 @@ export default function Navbar() {
                         </>
                     ) :(
                         <button
-                            onClick={() => router.push("/signup")}
+                            onClick={() => router.push("/authentication")}
                             className="flex items-center gap-2 hover:text-gray-50 transition"
                         >
                             <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/>   
