@@ -319,7 +319,7 @@ export default function ProductPage() {
   return (
     <>
       <div className="flex flex-col items-center bg-white text-black dark:bg-white dark:text-black min-h-screen">
-        <div className="px-6 py-4 md:px-16 lg:px-32 mt-8 space-y-10">
+        <div className="px-6 py-4 md:px-16 lg:px-32 space-y-10">
           {/* Product Info */}
           <div className="grid md:grid-cols-2 gap-16 mt-8">
             {/* Left: Product Images */}
