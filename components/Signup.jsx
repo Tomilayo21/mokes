@@ -767,6 +767,8 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
             <Image
               src={mode === "login" ? "/Mobile login-pana.png" : "/Forgot password-pana.png"}
               alt="Illustration"
+              width={100}
+              height={100}
               className="w-full max-w-xs md:max-w-md mx-auto rounded-md shadow-lg"
             />
           </div>

@@ -203,12 +203,19 @@ const ProductCard = ({ product }) => {
             {Number(product.offerPrice).toLocaleString()}
         </p>
 
-        {product.stock <= 10 && product.stock > 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-            Only {product.stock} left!
-            </p>
-        )}
-
+        {product.sizes?.length > 0 &&
+          product.sizes.map((item) => (
+            <button
+              key={item.size}
+              disabled={item.stock === 0}
+              className={`px-4 py-2 border rounded-lg ${
+                item.stock === 0 ? "opacity-50 cursor-not-allowed line-through" : ""
+              }`}
+            >
+              {item.size}
+              {item.stock === 0 && " (Sold Out)"}
+            </button>
+        ))}
         {/* ✅ CENTER BUTTON WRAPPER */}
         {/* <div className="flex justify-center w-full mt-4">
             <button

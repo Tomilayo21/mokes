@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const productSchema = new mongoose.Schema(
+const clothingSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
@@ -96,8 +96,8 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-const Product =
-  mongoose.models.product ||
-  mongoose.model("product", productSchema);
+const Clothing =
+  mongoose.models.clothing ||
+  mongoose.model("clothing", clothingSchema);
 
-export default Product;
+export default Clothing;

@@ -28,6 +28,8 @@ export default function ProductPage() {
   const scrollRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const thumbRef = useRef(null);
+  const [showProgress, setShowProgress] = useState(false);
+  
 
   // Load product data and initial like state...
 
@@ -44,10 +46,9 @@ export default function ProductPage() {
     const el = scrollRef.current;
     if (!el) return;
 
-    const scrollLeft = el.scrollLeft;
-    const maxScroll = el.scrollWidth - el.clientWidth;
+    const progress =
+      (el.scrollLeft / (el.scrollWidth - el.clientWidth)) * 100;
 
-    const progress = (scrollLeft / maxScroll) * 100;
     setScrollProgress(progress);
   };
 
@@ -69,14 +70,33 @@ export default function ProductPage() {
     addToCart(productData);
   };
 
+  const checkOverflow = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    setShowProgress(el.scrollWidth > el.clientWidth);
+  };
+
+ const relatedProducts = React.useMemo(() => {
+    if (!productData) return [];
+
+    return products
+      .filter((p) => p.category === productData.category && p._id !== id)
+      .slice(0, 4)
+      .filter((p) => p.visible !== false);
+  }, [products, productData, id]);
+
+  
+  useEffect(() => {
+    checkOverflow();
+
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [relatedProducts]);
+
+  const canScroll = relatedProducts.length > 1 && scrollProgress > 0;
+
   if (!productData) return <Loading />;
-
-
-  const relatedProducts = products
-    .filter((p) => p.category === productData.category && p._id !== id)
-    .slice(0, 4)
-    .filter((p) => p.visible !== false);
-
 
   return (
     <>
@@ -97,62 +117,54 @@ export default function ProductPage() {
                   />
                 </div>
 
-                <div className="relative w-full mt-3">
-                  {productData.image.length > 1 && (
-                    <>
-                      {/* LEFT FADE (Apple/Zara style) */}
-                      <div className="pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-white dark:from-black to-transparent z-10" />
-
-                      {/* RIGHT FADE */}
-                      <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white dark:from-black to-transparent z-10" />
-                    </>
-                  )}
-
-                  {/* LEFT ARROW */}
+                <div className="relative w-full mt-3 flex items-center gap-4">
+                  
+                  {/* LEFT ARROW (OUTSIDE) */}
                   {productData.image.length > 1 && (
                     <button
                       onClick={scrollLeft}
-                      className="absolute left-[-12px] top-1/2 -translate-y-1/2 z-20
-                      text-black dark:text-white
-                      hover:scale-110 transition
-                      bg-transparent"
+                      className="flex-shrink-0 text-black dark:text-black
+                      hover:scale-110 transition bg-transparent px-2"
                     >
                       <IoIosArrowBack size={20} />
                     </button>
                   )}
 
-                  {/* THUMBNAIL STRIP */}
-                  <div
-                    ref={thumbRef}
-                    className={`flex gap-3 overflow-x-auto scroll-smooth scrollbar-hide px-2
-                      ${productData.image.length <= 3 ? "justify-center" : ""}`}
-                  >
-                    {productData.image.map((img, i) => (
-                      <div
-                        key={i}
-                        onClick={() => setMainImage(img)}
-                        className="min-w-[85px] sm:min-w-[95px] md:min-w-[110px]
-                        cursor-pointer transition hover:opacity-80"
-                      >
-                        <Image
-                          src={img}
-                          alt={productData.name}
-                          width={150}
-                          height={150}
-                          className="w-full h-20 sm:h-24 object-cover border border-gray-200 dark:border-gray-700"
-                        />
-                      </div>
-                    ))}
+                  {/* CAROUSEL CENTER */}
+                  <div className="relative flex-1 overflow-hidden">
+                    
+                    {/* THUMBNAILS */}
+                    <div
+                      ref={thumbRef}
+                      className={`flex gap-3 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory px-4 
+                        pl-2 sm:pl-4`}
+                    >
+                      {productData.image.map((img, i) => (
+                        <div
+                          key={i}
+                          onClick={() => setMainImage(img)}
+                          className="min-w-[85px] sm:min-w-[95px] md:min-w-[110px]
+                          cursor-pointer transition hover:opacity-80"
+                        >
+                          <Image
+                            src={img}
+                            alt={productData.name}
+                            width={150}
+                            height={150}
+                            className="w-full h-20 sm:h-24 object-cover border border-gray-200 dark:border-gray-700"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
                   </div>
 
-                  {/* RIGHT ARROW */}
+                  {/* RIGHT ARROW (OUTSIDE) */}
                   {productData.image.length > 1 && (
                     <button
                       onClick={scrollRight}
-                      className="absolute right-[-12px] top-1/2 -translate-y-1/2 z-20
-                      text-black dark:text-white
-                      hover:scale-110 transition
-                      bg-transparent"
+                      className="flex-shrink-0 text-black dark:text-black
+                      hover:scale-110 transition bg-transparent px-2"
                     >
                       <IoIosArrowForward size={20} />
                     </button>
@@ -275,10 +287,14 @@ export default function ProductPage() {
                   </div>
                 </div>
                 <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 relative rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-black dark:bg-white transition-all duration-150"
-                    style={{ width: `${scrollProgress}%` }}
-                  />
+                {canScroll && (
+                  <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 relative rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-black dark:bg-white transition-all duration-150"
+                      style={{ width: `${scrollProgress}%` }}
+                    />
+                  </div>
+                )}
                 </div>
               </section>
             )}

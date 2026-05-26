@@ -1,5 +1,5 @@
 import connectDB from "@/config/db";
-import Product from "@/models/Product";
+import Clothing from "@/models/Clothing";
 import { requireAdmin } from "@/lib/authAdmin";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
@@ -15,15 +15,15 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    // ✅ Verify admin
+    // Verify admin
     const adminUser = await requireAdmin(request);
 
-    // If requireAdmin returned a NextResponse (forbidden/unauthorized)
+    // RequireAdmin
     if (adminUser instanceof NextResponse) {
       return adminUser;
     }
 
-    // If no user found at all
+    // !user found
     if (!adminUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,11 +32,21 @@ export async function POST(request) {
     const name = formData.get("name");
     const description = formData.get("description");
     const category = formData.get("category");
+    let sizes = [];
+    try {
+      sizes = JSON.parse(formData.get("sizes") || "[]");
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, message: "Invalid sizes format" },
+        { status: 400 }
+      );
+    }
+
+    const subcategory = formData.get("subcategory") || "";
     const color = formData.get("color");
     const brand = formData.get("brand");
     const price = formData.get("price");
     const offerPrice = formData.get("offerPrice");
-    const stock = formData.get("stock");
     const files = formData.getAll("images");
     
 
@@ -47,14 +57,14 @@ export async function POST(request) {
       );
     }
 
-    if (!stock || isNaN(Number(stock)) || Number(stock) < 0) {
+    if (!sizes || !Array.isArray(sizes) || sizes.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Invalid stock value" },
+        { success: false, message: "Sizes are required" },
         { status: 400 }
       );
     }
 
-    // ✅ Upload images to Cloudinary
+    // Upload images to Cloudinary
     const uploadResults = await Promise.all(
       files.map(async (file) => {
         const arrayBuffer = await file.arrayBuffer();
@@ -81,17 +91,18 @@ export async function POST(request) {
 
     await connectDB();
 
-    const newProduct = await Product.create({
-      userId: adminUser.id, // ✅ NextAuth admin ID
+    const newProduct = await Clothing.create({
+      userId: adminUser.id, 
       name,
       slug,
       description,
       category,
+      subcategory,
+      sizes,
       color,
       brand,
       price: Number(price),
       offerPrice: Number(offerPrice),
-      stock: Number(stock),
       image: imageUrls,
       date: Date.now(),
     });

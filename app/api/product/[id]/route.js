@@ -1,9 +1,10 @@
 import connectDB from "@/config/db";
-import Product from "@/models/Product";
+import Clothing from "@/models/Clothing";
 import { requireAdmin } from "@/lib/authAdmin";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
+import slugify from "slugify";
 
 // export const config = {
 //   api: { bodyParser: false },
@@ -28,8 +29,17 @@ export async function GET(req) {
   await connectDB();
 
   try {
-    const products = await Product.find({ stock: { $gt: 0 }, visible: true });
-    return NextResponse.json({ success: true, products });
+    const products = await Clothing.find({ visible: true });
+
+    const filtered = products.filter((p) => {
+      const totalStock = (p.sizes || []).reduce(
+        (sum, s) => sum + (s.stock || 0),
+        0
+      );
+
+      return totalStock > 0;
+    });
+    return NextResponse.json({ success: true, products:filtered });
   } catch (err) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
@@ -104,14 +114,21 @@ export async function PUT(request, { params }) {
     // 📦 JSON = stock update
     if (contentType?.includes("application/json")) {
       const body = await request.json();
-      const { stock } = body;
 
-      const updatedProduct = await Product.findByIdAndUpdate(id, { stock }, { new: true });
-      if (!updatedProduct) {
-        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      if (body.sizes) {
+        const updatedProduct = await Product.findByIdAndUpdate(
+          id,
+          { sizes: body.sizes },
+          { new: true }
+        );
+
+        return NextResponse.json({ success: true, product: updatedProduct });
       }
 
-      return NextResponse.json({ success: true, product: updatedProduct });
+      return NextResponse.json(
+        { success: false, message: "Only sizes update is allowed" },
+        { status: 400 }
+      );
     }
 
     // 🖼 multipart/form-data = full product edit
@@ -122,11 +139,35 @@ export async function PUT(request, { params }) {
     const color = formData.get("color");
     const price = Number(formData.get("price"));
     const offerPrice = Number(formData.get("offerPrice"));
-    const stock = Number(formData.get("stock"));
     const visible = formData.get("visible") === "true";
     const description = formData.get("description");
     const existingImages = JSON.parse(formData.get("existingImages") || "[]");
     const newImages = formData.getAll("newImages");
+    const sizes = JSON.parse(
+      formData.get("sizes") || "[]"
+    );
+    const subcategory = formData.get("subcategory");
+
+    const existingProduct = await Product.findById(id);
+
+    if (!existingProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    let slug = existingProduct.slug;
+
+    if (name?.trim() && name.trim() !== existingProduct.name.trim()) {
+      const baseSlug = slugify(name.trim(), {
+        lower: true,
+        strict: true,
+      });
+
+      const random = Math.floor(Math.random() * 10000);
+      slug = `${baseSlug}-${random}`;
+    }
 
     let uploadedImageUrls = [];
 
@@ -154,11 +195,13 @@ export async function PUT(request, { params }) {
       {
         name,
         category,
+        subcategory,
+        sizes,
         brand,
         color,
+        slug,
         price,
         offerPrice,
-        stock,
         visible,
         description,
         image: [...existingImages, ...uploadedImageUrls],

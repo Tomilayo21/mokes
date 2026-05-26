@@ -15,32 +15,33 @@ import slugify from "slugify";
 const AddProduct = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Earphone');
+  const [subcategory, setSubcategory] = useState('');
+  const [sizes, setSizes] = useState([
+    { size: "Small", stock: 0 },
+    { size: "Medium", stock: 0 },
+    { size: "Large", stock: 0 },
+    { size: "Extra Large", stock: 0 },
+  ]);
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [color, setColor] = useState('');
   const [brand, setBrand] = useState('');
-  const [stock, setStock] = useState('');
-
+  const isBlocked =
+    status === "unauthenticated" ||
+    (status === "authenticated" && session?.user?.role !== "admin");
 
   useEffect(() => {
-    if (status === "authenticated") {
-      if (session.user.role === "admin") {
-        setIsAdmin(true);
-      } else {
-        router.replace("/"); // Not admin → redirect
-      }
-    } else if (status === "unauthenticated") {
-      router.replace("/"); // Not logged in → redirect
+    if (isBlocked) {
+      router.replace("/");
     }
-  }, [session, status, router]);
+  }, [isBlocked, router]);
 
   useEffect(() => {
     if (uploadDone) {
@@ -49,15 +50,7 @@ const AddProduct = () => {
     }
   }, [uploadDone]);
 
-  if (status === "loading") {
-    return <p>Loading...</p>;
-  }
-
-  // Redirect if user is not admin
-  if (status === "unauthenticated" || (status === "authenticated" && session.user.role !== "admin")) {
-    router.replace("/");
-    return <p>Redirecting...</p>;
-  }
+  if (isBlocked) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,8 +97,9 @@ const AddProduct = () => {
       formData.append("offerPrice", offerPrice);
       formData.append("color", color);
       formData.append("brand", brand);
-      formData.append("stock", stock);
       formData.append("slug", slug);
+      formData.append("subcategory", subcategory);
+      formData.append("sizes", JSON.stringify(sizes));
 
       for (let i = 0; i < files.length; i++) {
         if (files[i]) formData.append("images", files[i]);
@@ -142,7 +136,8 @@ const AddProduct = () => {
       setBrand("");
       setPrice("");
       setOfferPrice("");
-      setStock("");
+      setSubcategory("");
+      setSizes([]);
       setUploadDone(true);
     } catch (error) {
       toast.custom(
@@ -308,8 +303,26 @@ const AddProduct = () => {
               </select>
             </div>
 
-            {/* Color */}
             <div>
+              <label htmlFor="subcategory" className="text-sm font-medium text-gray-700">Subcategory</label>
+              <select
+                id="subcategory"
+                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
+                onChange={(e) => setSubcategory(e.target.value)}
+                value={subcategory}
+              >
+                <option value="Earphone">Earphone</option>
+                <option value="Headphone">Headphone</option>
+                <option value="Watch">Watch</option>
+                <option value="Smartphone">Smartphone</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Camera">Camera</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
+            {/* Color */}
+            {/* <div>
               <label htmlFor="color" className="text-sm font-medium text-gray-700">Color</label>
               <select
                 id="color"
@@ -330,6 +343,23 @@ const AddProduct = () => {
                 <option value="Gold">Gold</option>
                 <option value="Silver">Silver</option>
               </select>
+            </div> */}
+            <div>
+              <label
+                htmlFor="color"
+                className="text-sm font-medium text-gray-700"
+              >
+                Color
+              </label>
+
+              <input
+                type="text"
+                id="color"
+                placeholder="Enter product color"
+                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
             </div>
 
             {/* Brand */}
@@ -352,6 +382,32 @@ const AddProduct = () => {
                 <option value="Tecno">Tecno</option>
                 <option value="Other">Other</option>
               </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Size Inventory
+              </label>
+
+              <div className="space-y-3 mt-2">
+                {sizes.map((item, index) => (
+                  <div key={item.size} className="flex items-center gap-4">
+                    <span className="w-24">{item.size}</span>
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.stock}
+                      onChange={(e) => {
+                        const updated = [...sizes];
+                        updated[index].stock = Number(e.target.value);
+                        setSizes(updated);
+                      }}
+                      className="border px-3 py-2 rounded-lg w-28"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Prices + Stock */}
@@ -381,18 +437,6 @@ const AddProduct = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="stock" className="text-sm font-medium text-gray-700">Stock</label>
-              <input
-                id="stock"
-                type="number"
-                placeholder="0"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setStock(e.target.value)}
-                value={stock}
-                required
-              />
-            </div>
           </div>
         </div>
 
