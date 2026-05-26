@@ -12,6 +12,7 @@ import { Heart, ShoppingCart, ArrowRight, Star, CheckCircle, XCircle, Tag, Messa
 import { FaStar, FaRegStar, FaThumbsUp, FaTag } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 export default function ProductPage() {
   const { data: session, status } = useSession();
@@ -116,7 +117,7 @@ export default function ProductPage() {
                       hover:scale-110 transition
                       bg-transparent"
                     >
-                      <ArrowLeft size={20} />
+                      <IoIosArrowBack size={20} />
                     </button>
                   )}
 
@@ -124,7 +125,7 @@ export default function ProductPage() {
                   <div
                     ref={thumbRef}
                     className={`flex gap-3 overflow-x-auto scroll-smooth scrollbar-hide px-2
-                      ${productData.image.length <= 2 ? "justify-center" : ""}`}
+                      ${productData.image.length <= 3 ? "justify-center" : ""}`}
                   >
                     {productData.image.map((img, i) => (
                       <div
@@ -153,7 +154,7 @@ export default function ProductPage() {
                       hover:scale-110 transition
                       bg-transparent"
                     >
-                      <ArrowRight size={20} />
+                      <IoIosArrowForward size={20} />
                     </button>
                   )}
                 </div>

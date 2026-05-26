@@ -137,11 +137,11 @@ const ProductCard = ({ product }) => {
       onMouseLeave={handleLongPressEnd}
       onTouchEnd={handleLongPressEnd}
       className="group flex flex-col max-w-none w-full cursor-pointer
-            rounded-md bg-white dark:bg-gray-900
+            bg-white dark:bg-gray-100
             transition-all hover:shadow-lg hover:scale-[1.02] overflow-hidden"
     >
       {/* Image */}
-      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-100 dark:bg-gray-100 flex items-center justify-center overflow-hidden">
         <Image
           src={product.image?.[0] || "/placeholder.jpg"} // fallback image
           alt={product.name || "Product"}
@@ -152,14 +152,14 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Details */}
-      <div className="p-2 flex flex-col flex-1 text-gray-900 dark:text-white">
-        <h3 className="text-xs font-semibold truncate flex items-center gap-1">
+      <div className="p-2 flex flex-col flex-1 text-gray-900 dark:text-gray-900">
+        <h3 className="text-xs font-normal truncate flex items-center gap-1 uppercase text-gray-800 tracking-wide">
           {product.name}
         </h3>
 
         {/* Price & Rating */}
         <div className="mt-1 flex items-center justify-between">
-        <p className="text-sm font-normal text-gray-600">
+          <p className="text-sm font-light text-gray-600">
             {currency}
             {Number(product.offerPrice).toLocaleString()}
           </p>
