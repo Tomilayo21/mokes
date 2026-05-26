@@ -164,11 +164,11 @@ const ProductCard = ({ product }) => {
         onMouseLeave={handleLongPressEnd}
         onTouchEnd={handleLongPressEnd}
         className="group flex flex-col max-w-none w-full cursor-pointer
-            rounded-md bg-gray-50 dark:bg-gray-50
-            transition-all hover:shadow-lg hover:scale-[1.02] overflow-hidden"
+            bg-gray-50 dark:bg-gray-50
+            transition-all  hover:scale-[1.02] overflow-hidden"
         >
         {/* === Image Section === */}
-        <div className="relative h-[420px] md:h-[500px] w-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+        <div className="relative h-[420px] md:h-[500px] w-full bg-gray-50 dark:bg-gray-50 flex items-center justify-center overflow-hidden">
           <Image
             src={product.image[0]}
             alt={product.name}
@@ -180,7 +180,7 @@ const ProductCard = ({ product }) => {
           {/* Favorite Button */}
           <button
             onClick={toggleFavorite}
-            className="absolute top-3 right-3 bg-white/90 dark:bg-gray-700/90 p-2 rounded-full hover:scale-110 transition"
+            className="absolute top-3 right-3 bg-white/90 dark:bg-white/90 p-2 rounded-full border border-black hover:scale-110 transition"
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart
