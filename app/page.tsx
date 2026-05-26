@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import FeaturedProduct from "@/components/FeaturedProduct";
 import Products from "@/components/Products";
 import Footer from "@/components/Footer";
+import AddProductPanel from "@/components/Admin/AddProductPanel";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <HeroSection />
       <FeaturedProduct />
       <Products />
+      <AddProductPanel />
       <Footer />
     </>
   );

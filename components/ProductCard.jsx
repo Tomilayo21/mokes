@@ -133,7 +133,7 @@ const ProductCard = ({ product }) => {
 
   // ------------------ Navigation ------------------
   const handleCardClick = () => {
-    router.push("/collection/" + product._id);
+    router.push(`/collection/${product.slug}`);
     scrollTo(0, 0);
   };
 
