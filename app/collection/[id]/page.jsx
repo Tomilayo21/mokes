@@ -330,7 +330,7 @@ export default function ProductPage() {
                   alt={productData.name}
                   width={1280}
                   height={720}
-                  className="w-full h-[500px] object-cover"
+                  className="w-full h-[400px] object-cover"
                 />
               </div>
               <div className="grid grid-cols-4 gap-3">
@@ -381,7 +381,7 @@ export default function ProductPage() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col gap-4 mt-40 mb-10 w-full">
+              <div className="flex flex-col gap-4 mt-20 mb-10 w-full">
                 <div className="w-full mb-6">
                   <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-700">
                     Select Size
