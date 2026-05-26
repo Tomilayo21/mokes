@@ -13,6 +13,7 @@ import { UAParser } from "ua-parser-js";
 import toast from "react-hot-toast";
 import { XCircle, CheckCircle } from "lucide-react";
 import { FaRegUser } from "react-icons/fa6";
+import Image from "next/image";
 
 
 
@@ -311,7 +312,7 @@ export default function AvatarMenu() {
         }`}
       >
         {user?.image ? (
-          <img
+          <Image
             src={user.image}
             alt={user.name || "User"}
             className="w-9 h-9 rounded-full object-cover"
@@ -327,7 +328,7 @@ export default function AvatarMenu() {
           {/* Profile Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200 dark:border-gray-700">
             {user?.image ? (
-              <img
+              <Image
                 src={user.image}
                 alt={user.name || "User"}
                 className="w-12 h-12 rounded-full object-cover"
@@ -421,7 +422,7 @@ export default function AvatarMenu() {
 
               <div className="flex items-center gap-3 px-5 py-4 border-b">
                 {user?.image ? (
-                  <img
+                  <Image
                     src={user.image}
                     alt={user.name || "User"}
                     className="w-12 h-12 rounded-full object-cover"
@@ -519,7 +520,7 @@ export default function AvatarMenu() {
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="w-20 h-20 border dark:border-white rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                       {imagePreview ? (
-                        <img
+                        <Image
                           src={imagePreview}
                           alt="avatar"
                           className="w-full h-full object-cover"

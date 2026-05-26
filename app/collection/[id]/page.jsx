@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RelatedProducts from "@/components/RelatedProducts";
 import Loading from "@/components/Loading";
@@ -12,6 +11,7 @@ import toast from "react-hot-toast";
 import { Heart, ShoppingCart, ArrowRight, Star, CheckCircle, XCircle, Tag, MessageCircle, ThumbsUp } from "lucide-react";
 import { FaStar, FaRegStar, FaThumbsUp, FaTag } from "react-icons/fa";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function ProductPage() {
   const { data: session, status } = useSession();
@@ -19,7 +19,6 @@ export default function ProductPage() {
   const { id } = useParams();
   const router = useRouter();
   const { products, addToCart, currency } = useAppContext();
-  
   const [productData, setProductData] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -31,6 +30,7 @@ export default function ProductPage() {
   const [likeUsers, setLikeUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const reviewsPerPage = 5;
+  const [selectedSize, setSelectedSize] = useState("M");
 
   // Load product data and initial like state...
 
@@ -318,20 +318,19 @@ export default function ProductPage() {
 
   return (
     <>
-      <Navbar />
-      <div className="flex flex-col items-center mt-8  bg-white text-black dark:bg-black dark:text-white min-h-screen">
+      <div className="flex flex-col items-center bg-white text-black dark:bg-white dark:text-black min-h-screen">
         <div className="px-6 py-4 md:px-16 lg:px-32 mt-8 space-y-10">
           {/* Product Info */}
           <div className="grid md:grid-cols-2 gap-16 mt-8">
             {/* Left: Product Images */}
             <div>
-              <div className="rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
+              <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
                 <Image
                   src={mainImage || productData.image[0]}
                   alt={productData.name}
                   width={1280}
                   height={720}
-                  className="w-full h-[400px] object-cover"
+                  className="w-full h-[500px] object-cover"
                 />
               </div>
               <div className="grid grid-cols-4 gap-3">
@@ -339,7 +338,7 @@ export default function ProductPage() {
                   <div
                     key={i}
                     onClick={() => setMainImage(img)}
-                    className="cursor-pointer rounded-md overflow-hidden border hover:ring-2 hover:ring-orange-500 transition"
+                    className="cursor-pointer overflow-hidden border hover:ring-2 hover:ring-orange-500 transition"
                   >
                     <Image src={img} alt="Product thumbnail" width={200} height={200} className="w-full h-24 object-cover" />
                   </div>
@@ -349,142 +348,85 @@ export default function ProductPage() {
 
             {/* Right: Product Info */}
             <div className="flex flex-col">
-              <h1 className="text-4xl font-normal text-black dark:text-white mb-2">{productData.name}</h1>
-
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    className={
-                      i <
-                      Math.round(
-                        reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length || 0
-                      )
-                        ? "text-orange-500 fill-orange-500"
-                        : "text-gray-300"
-                    }
-                  />
-                ))}
-                <span className="text-sm font-thin text-gray-500">
-                  ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
-                </span>
-              </div>
-
-              {/* Description */}
-              <div
-                className="text-gray-700 font-thin dark:text-gray-300 leading-relaxed mb-4"
-                dangerouslySetInnerHTML={{ __html: productData.description }}
-              />
+              <h1 className="text-3xl font-light text-black dark:text-black mb-2">
+                {productData.category?.toUpperCase()} |{" "}
+                {productData.name} |{" "}
+                {productData.color}
+              </h1>
 
               {/* Price */}
               <div className="flex items-center gap-3 mb-6">
                 {/* === Discounted Price === */}
-                <span className="text-3xl font-normal text-orange-600 flex items-center gap-1">
-                  <Tag size={20} />
+                <span className="text-md font-normal text-gray-600 flex items-center gap-1">
                   {currency}
                   {Number(productData.offerPrice).toLocaleString()}
                 </span>
 
                 {/* === Original Price (Strikethrough) === */}
-                <span className="line-through text-gray-500 dark:text-gray-400">
+                <span className="line-through text-sm text-gray-500 dark:text-gray-400">
                   {currency}
                   {Number(productData.price).toLocaleString()}
                 </span>
 
                 {/* === Percentage Off === */}
-                {productData.price > productData.offerPrice && (
-                  <span className="bg-orange-100 text-orange-700 text-sm font-normal px-2.5 py-1 rounded-md">
+                {/* {productData.price > productData.offerPrice && (
+                  <span className="bg-black text-white text-xs font-medium px-2.5 py-1 rounded-full tracking-wide">
+                    SAVE{" "}
                     {Math.round(
                       ((productData.price - productData.offerPrice) / productData.price) * 100
                     )}
-                    % OFF
+                    %
                   </span>
-                )}
-              </div>
-
-
-              {/* Specs Table */}
-              <div className="overflow-x-auto mb-6">
-                <table className="table-auto border-collapse w-full max-w-sm text-sm">
-                  <tbody>
-                    <tr>
-                      <td className="font-medium py-2 pr-4 text-black dark:text-white">Brand</td>
-                      <td>{productData.brand}</td>
-                    </tr>
-                    <tr>
-                      <td className="font-medium py-2 pr-4 text-black dark:text-white">Color</td>
-                      <td>{productData.color}</td>
-                    </tr>
-                    <tr>
-                      <td className="font-medium py-2 pr-4 text-black dark:text-white">Category</td>
-                      <td>{productData.category}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Like Section */}
-              <div className="flex items-center gap-2 mb-6">
-                <button
-                  onClick={toggleLike}
-                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                    liked
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
-                  }`}
-                >
-                  <FaThumbsUp size={16} className={liked ? "fill-white" : ""} />
-                  {/* {liked ? "Liked" : "Like"} */}
-                </button>
-
-                {likeCount > 0 && (
-                  <span className="text-gray-600 dark:text-gray-300 text-sm">
-                    {likeCount} like{likeCount !== 1 && "s"}
-                  </span>
-                )}
-
-                {likeUsers.length > 0 && (
-                  <span className="text-xs text-gray-500">
-                    {(() => {
-                      const othersCount = likeUsers.length - 1;
-                      const currentUserLiked = likeUsers.some((u) => u.id === session.user.id);
-
-                      if (currentUserLiked) {
-                        if (othersCount === 0) return "You";
-                        if (othersCount === 1) return `You and ${likeUsers.find(u => u.id !== session.user.id).username}`;
-                        return `You, ${likeUsers[1].username} and ${othersCount - 1} others`;
-                      } else {
-                        if (likeUsers.length === 1) return likeUsers[0].username;
-                        if (likeUsers.length === 2) return `${likeUsers[0].username} and ${likeUsers[1].username}`;
-                        return `${likeUsers[0].username}, ${likeUsers[1].username} and ${likeUsers.length - 2} others`;
-                      }
-                    })()}
-                  </span>
-                )}
+                )} */}
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex gap-4 mb-10">
+              <div className="flex flex-col gap-4 mt-40 mb-10 w-full">
+                <div className="w-full mb-6">
+                  <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-700">
+                    Select Size
+                  </p>
+                  <div className="flex gap-2">
+                    {["S", "M", "L", "XL"].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-2 border text-sm transition
+                          ${
+                            selectedSize === size
+                              ? "bg-black text-white border-black"
+                              : "bg-white dark:bg-white text-gray-700 dark:text-gray-700 border-gray-300 hover:border-black"
+                          }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
                   onClick={handleAddToCart}
                   disabled={productData.stock === 0}
-                  className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg shadow hover:bg-orange-700 transition disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sage)] cursor-pointer text-white shadow hover:bg-gray-50 hover:text-gray-700 transition disabled:opacity-50"
                 >
-                  <ShoppingCart size={18} />
                   {productData.stock === 0 ? "Sold Out" : "Add to Cart"}
                 </button>
+
                 {productData.stock > 0 && (
-                  <button
-                    onClick={() => router.push("/cart")}
-                    className="flex items-center gap-2 px-6 py-3 border border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 dark:hover:bg-gray-800 transition"
-                  >
-                    Go to Cart
-                    <ArrowRight size={18} />
-                  </button>
+                <Link
+                  href="/cart"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-600 hover:underline  transition"
+                >
+                  Go to Cart
+                  <ArrowRight size={18} />
+                </Link>
                 )}
               </div>
+
+             {/* Description */}
+              <div
+                className="text-gray-700 font-normal dark:text-gray-700 leading-relaxed mb-4"
+                dangerouslySetInnerHTML={{ __html: productData.description }}
+              />
 
               {/* Submit Review */}
               <div>

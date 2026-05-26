@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ShoppingCart, Package, Tag, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 // Dummy products
 const dummyProducts = [
@@ -100,7 +101,7 @@ const FeaturedProduct = () => {
             className="relative group overflow-hidden shadow-lg bg-white"
             >
             {/* Image */}
-            <img
+            <Image
                 src={product.image[0]}
                 alt={product.name}
                 className="w-full h-[420px] md:h-[500px] object-cover group-hover:scale-105 transition duration-500"

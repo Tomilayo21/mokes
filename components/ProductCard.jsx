@@ -179,7 +179,7 @@ const ProductCard = ({ product }) => {
         >
         {/* === Image Section === */}
         <div className="relative h-[420px] md:h-[500px] w-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-          <img
+          <Image
             src={product.image[0]}
             alt={product.name}
             width={400}
@@ -220,7 +220,7 @@ const ProductCard = ({ product }) => {
         )}
 
         {/* ✅ CENTER BUTTON WRAPPER */}
-        <div className="flex justify-center w-full mt-4">
+        {/* <div className="flex justify-center w-full mt-4">
             <button
             onClick={(e) => {
                 e.stopPropagation();
@@ -236,7 +236,7 @@ const ProductCard = ({ product }) => {
             >
             {product.stock === 0 ? "Sold Out" : "Add to Cart"}
             </button>
-        </div>
+        </div> */}
 
         </div>
     </div>

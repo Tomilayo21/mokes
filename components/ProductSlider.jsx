@@ -149,7 +149,7 @@ export default function ProductSlider() {
           </div>
 
           <div className="flex justify-center md:w-1/2">
-            <img src={property.imgSrc} alt={property.title} className="w-[280px] sm:w-[360px] md:w-[480px] lg:w-[560px] h-auto object-cover rounded-2xl shadow-2xl" />
+            <Image src={property.imgSrc} alt={property.title} className="w-[280px] sm:w-[360px] md:w-[480px] lg:w-[560px] h-auto object-cover rounded-2xl shadow-2xl" />
           </div>
         </div>
       </div>

@@ -21,9 +21,8 @@ import { FiLock } from "react-icons/fi"
 import { IoMailOutline } from "react-icons/io5"
 import { FcGoogle } from "react-icons/fc"
 import { FaRegUser } from "react-icons/fa6";
-
-
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 
 export default function AuthForm({ initialMode = "login", onSuccess }) {
@@ -348,7 +347,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
       {/* Left Image for Signup / Forgot (desktop only) */}
       {["signup", "forgot"].includes(mode) && (
         <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-gray-200 to-gray-100 p-6 md:p-10">
-          <img
+          <Image
             src={mode === "signup" ? "/Fingerprint-pana.png" : "/Forgot password-pana.png"}
             alt="Illustration"
             className="w-full max-w-xs md:max-w-md mx-auto rounded-sm shadow-sm"
@@ -765,7 +764,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
         {/* Right Image for Login / Reset (desktop only) */}
         {["login", "reset"].includes(mode) && (
           <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200 p-6 md:p-10">
-            <img
+            <Image
               src={mode === "login" ? "/Mobile login-pana.png" : "/Forgot password-pana.png"}
               alt="Illustration"
               className="w-full max-w-xs md:max-w-md mx-auto rounded-md shadow-lg"
