@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Footer from "@/components/Footer";
@@ -8,7 +8,7 @@ import RelatedProducts from "@/components/RelatedProducts";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import toast from "react-hot-toast";
-import { Heart, ShoppingCart, ArrowRight, Star, CheckCircle, XCircle, Tag, MessageCircle, ThumbsUp } from "lucide-react";
+import { Heart, ShoppingCart, ArrowRight, Star, CheckCircle, XCircle, Tag, MessageCircle, ThumbsUp, ArrowLeft } from "lucide-react";
 import { FaStar, FaRegStar, FaThumbsUp, FaTag } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -21,16 +21,12 @@ export default function ProductPage() {
   const { products, addToCart, currency } = useAppContext();
   const [productData, setProductData] = useState(null);
   const [mainImage, setMainImage] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
   const [page, setPage] = useState(1);
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [likeUsers, setLikeUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const reviewsPerPage = 5;
   const [selectedSize, setSelectedSize] = useState("M");
+  const scrollRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const thumbRef = useRef(null);
 
   // Load product data and initial like state...
 
@@ -40,72 +36,29 @@ export default function ProductPage() {
     const product = products.find((p) => p.slug === id);
     if (product) {
       setProductData(product);
-      setLikeCount(product.likes?.length || 0);
-
-      if (status === "authenticated" && session?.user?.id) {
-        setLiked(product.likes?.includes(session.user.id));
-      } else {
-        setLiked(false);
-      }
     }
-  }, [id, products, session, status]);
+  }, [id, products]);
 
-  // Load like users
-  useEffect(() => {
-    if (productData?.likes?.length > 0) {
-      fetch("/api/likes/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userIds: productData.likes }),
-      })
-        .then((res) => res.json())
-        .then((data) => setLikeUsers(data.users || []));
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const scrollLeft = el.scrollLeft;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+
+    const progress = (scrollLeft / maxScroll) * 100;
+    setScrollProgress(progress);
+  };
+
+  const scrollLeft = () => {
+    if (thumbRef.current) {
+      thumbRef.current.scrollBy({ left: -200, behavior: "smooth" });
     }
-  }, [productData]);
+  };
 
-  // Load reviews
-  useEffect(() => {
-    if (!id) return;
-    fetch(`/api/reviews?productId=${id}`)
-      .then((res) => res.json())
-      .then((data) => setReviews(Array.isArray(data) ? data : []))
-      .catch(() => setReviews([]));
-  }, [id]);
-
-  const toggleLike = async () => {
-    if (status !== "authenticated") return router.push("/signup");
-
-    try {
-      const res = await fetch("/api/likes", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: id, userId: session.user.id }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Failed to update like");
-        return;
-      }
-
-      setLiked(data.liked);
-
-      setLikeUsers((prevUsers) => {
-        const currentUserObj = { id: session.user.id, username: session.user.name || "You" };
-
-        if (data.liked) {
-          const alreadyLiked = prevUsers.some((u) => u.id === session.user.id);
-          return alreadyLiked ? prevUsers : [currentUserObj, ...prevUsers];
-        } else {
-          return prevUsers.filter((u) => u.id !== session.user.id);
-        }
-      });
-
-      // Update like count after updating users
-      setLikeCount((prev) => (data.liked ? prev + 1 : prev - 1));
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      toast.error("Something went wrong while updating the like.");
+  const scrollRight = () => {
+    if (thumbRef.current) {
+      thumbRef.current.scrollBy({ left: 200, behavior: "smooth" });
     }
   };
 
@@ -115,194 +68,7 @@ export default function ProductPage() {
     addToCart(productData);
   };
 
-  // Submit Review
-  const handleSubmitReview = async () => {
-    if (status !== "authenticated") {
-      return toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-red-100 dark:bg-red-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <MessageCircle className="text-red-500" size={20} />
-            <p className="text-sm font-medium text-red-900 dark:text-red-100">
-              Please log in to submit a review.
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
-    }
-
-    const reviewsArray = Array.isArray(reviews) ? reviews : [];
-
-    const alreadyReviewed = reviewsArray.some(
-      (r) => r.userId === session.user.id
-    );
-    if (alreadyReviewed) {
-      return toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-yellow-100 dark:bg-yellow-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <MessageCircle className="text-yellow-500" size={20} />
-            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-              You have already reviewed this product.
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
-    }
-
-    if (!id || rating == null || !comment?.trim()) {
-      return toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-red-100 dark:bg-red-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <MessageCircle className="text-red-500" size={20} />
-            <p className="text-sm font-medium text-red-900 dark:text-red-100">
-              Please fill all fields before submitting.
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: id,
-          rating: Number(rating),
-          comment: comment.trim(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return toast.custom(
-          (t) => (
-            <div
-              className={`max-w-md w-full bg-red-100 dark:bg-red-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-                t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-              }`}
-            >
-              <MessageCircle className="text-red-500" size={20} />
-              <p className="text-sm font-medium text-red-900 dark:text-red-100">
-                {data.message || "Failed to submit review."}
-              </p>
-            </div>
-          ),
-          { duration: 3000, position: "top-right" }
-        );
-      }
-
-      // Success toast
-      toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-green-100 dark:bg-green-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <Star className="text-green-500" size={20} />
-            <p className="text-sm font-medium text-green-900 dark:text-green-100">
-              Review submitted successfully!
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
-
-      setRating(5);
-      setComment("");
-      setPage(1);
-
-      const refreshed = await fetch(`/api/reviews?productId=${id}`).then((r) =>
-        r.json()
-      );
-      setReviews(Array.isArray(refreshed) ? refreshed : []);
-    } catch (err) {
-      console.error(err);
-      toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-red-100 dark:bg-red-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <MessageCircle className="text-red-500" size={20} />
-            <p className="text-sm font-medium text-red-900 dark:text-red-100">
-              Something went wrong.
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleHelpfulClick = async (reviewId) => {
-    if (status !== "authenticated" || !userId) {
-      toast.error("Please log in to mark helpful.");
-      return;
-    }
-
-    try {
-      // Optimistic UI update
-      setReviews((prevReviews) =>
-        prevReviews.map((r) => {
-          if (r._id === reviewId) {
-            const alreadyMarked = r.helpful?.includes(userId);
-            const newHelpful = alreadyMarked
-              ? r.helpful.filter((id) => id !== userId)
-              : [...(r.helpful || []), userId];
-            return { ...r, helpful: newHelpful };
-          }
-          return r;
-        })
-      );
-
-      // Persist change to backend
-      const res = await fetch("/api/reviews/helpful", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Failed to update helpful");
-        // Optionally rollback optimistic UI here
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong.");
-    }
-  };
-
   if (!productData) return <Loading />;
-
-
-  const safeReviews = Array.isArray(reviews) ? reviews : [];
-  const totalPages = Math.ceil(safeReviews.length / reviewsPerPage);
-  const start = (page - 1) * reviewsPerPage;
-  const currentReviews = safeReviews.slice(start, start + reviewsPerPage);
 
 
   const relatedProducts = products
@@ -310,152 +76,213 @@ export default function ProductPage() {
     .slice(0, 4)
     .filter((p) => p.visible !== false);
 
-  const renderStars = (rating) => (
-    <div className="flex text-yellow-500">
-      {[...Array(5)].map((_, i) => (i < rating ? <FaStar key={i} /> : <FaRegStar key={i} />))}
-    </div>
-  );
 
   return (
     <>
-      <div className="flex flex-col items-center bg-white text-black dark:bg-white dark:text-black min-h-screen">
-        <div className="px-6 py-4 md:px-16 lg:px-32 space-y-10">
-          {/* Product Info */}
-          <div className="grid md:grid-cols-2 gap-16 mt-8 mb-8">
-            {/* Left: Product Images */}
-            <div>
-              <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
-                <Image
-                  src={mainImage || productData.image[0]}
-                  alt={productData.name}
-                  width={1280}
-                  height={720}
-                  className="w-full h-[400px] object-cover"
-                />
-              </div>
-              <div className="grid grid-cols-4 gap-3">
-                {productData.image.map((img, i) => (
+      <div className="flex flex-col bg-white text-black dark:bg-white dark:text-black min-h-screen text-black dark:bg-white dark:text-black min-h-screen">
+        {/* <div className="w-full max-w-7xl mx-auto px-4 md:px-16 lg:px-32"> */}
+          <div className="px-4 md:px-16 lg:px-32 space-y-8">
+            {/* Product Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mt-6 md:mt-8 mb-8">
+              {/* Left: Product Images */}
+              <div>
+                <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
+                  <Image
+                    src={mainImage || productData.image[0]}
+                    alt={productData.name}
+                    width={1280}
+                    height={720}
+                    className="w-full h-[280px] sm:h-[350px] md:h-[400px] object-cover"
+                  />
+                </div>
+
+                <div className="relative w-full mt-3">
+                  {productData.image.length > 1 && (
+                    <>
+                      {/* LEFT FADE (Apple/Zara style) */}
+                      <div className="pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-white dark:from-black to-transparent z-10" />
+
+                      {/* RIGHT FADE */}
+                      <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white dark:from-black to-transparent z-10" />
+                    </>
+                  )}
+
+                  {/* LEFT ARROW */}
+                  {productData.image.length > 1 && (
+                    <button
+                      onClick={scrollLeft}
+                      className="absolute left-[-12px] top-1/2 -translate-y-1/2 z-20
+                      text-black dark:text-white
+                      hover:scale-110 transition
+                      bg-transparent"
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                  )}
+
+                  {/* THUMBNAIL STRIP */}
                   <div
-                    key={i}
-                    onClick={() => setMainImage(img)}
-                    className="cursor-pointer overflow-hidden border hover:ring-2 hover:ring-orange-500 transition"
+                    ref={thumbRef}
+                    className={`flex gap-3 overflow-x-auto scroll-smooth scrollbar-hide px-2
+                      ${productData.image.length <= 2 ? "justify-center" : ""}`}
                   >
-                    <Image src={img} alt="Product thumbnail" width={150} height={150} className="w-full h-24 object-cover" />
+                    {productData.image.map((img, i) => (
+                      <div
+                        key={i}
+                        onClick={() => setMainImage(img)}
+                        className="min-w-[85px] sm:min-w-[95px] md:min-w-[110px]
+                        cursor-pointer transition hover:opacity-80"
+                      >
+                        <Image
+                          src={img}
+                          alt={productData.name}
+                          width={150}
+                          height={150}
+                          className="w-full h-20 sm:h-24 object-cover border border-gray-200 dark:border-gray-700"
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
+
+                  {/* RIGHT ARROW */}
+                  {productData.image.length > 1 && (
+                    <button
+                      onClick={scrollRight}
+                      className="absolute right-[-12px] top-1/2 -translate-y-1/2 z-20
+                      text-black dark:text-white
+                      hover:scale-110 transition
+                      bg-transparent"
+                    >
+                      <ArrowRight size={20} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Product Info */}
+              <div className="flex flex-col">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-light leading-snug text-black dark:text-black mb-2">
+                  {productData.category?.toUpperCase()} |{" "}
+                  {productData.name} |{" "}
+                  {productData.color}
+                </h1>
+
+                {/* Price */}
+                <div className="flex items-center gap-3 mb-6">
+                  {/* === Discounted Price === */}
+                  <span className="text-md font-normal text-gray-600 flex items-center gap-1">
+                    {currency}
+                    {Number(productData.offerPrice).toLocaleString()}
+                  </span>
+
+                  {/* === Original Price (Strikethrough) === */}
+                  <span className="line-through text-sm text-gray-500 dark:text-gray-400">
+                    {currency}
+                    {Number(productData.price).toLocaleString()}
+                  </span>
+
+                  {/* === Percentage Off === */}
+                  {/* {productData.price > productData.offerPrice && (
+                    <span className="bg-black text-white text-xs font-medium px-2.5 py-1 rounded-full tracking-wide">
+                      SAVE{" "}
+                      {Math.round(
+                        ((productData.price - productData.offerPrice) / productData.price) * 100
+                      )}
+                      %
+                    </span>
+                  )} */}
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="flex flex-col gap-3 mt-6 md:mt-16 mb-6 w-full">
+                  <div className="w-full mb-4">
+                    <p className="text-sm font-medium mb-2 text-gray-700">
+                      Select Size
+                    </p>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {["S", "M", "L", "XL"].map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          className={`py-3 border text-sm transition rounded-md
+                            ${
+                              selectedSize === size
+                                ? "bg-black text-white border-black"
+                                : "bg-white text-gray-700 border-gray-300"
+                            }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={productData.stock === 0}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sage)] cursor-pointer text-white shadow hover:bg-gray-50 hover:text-gray-700 transition disabled:opacity-50"
+                  >
+                    {productData.stock === 0 ? "Sold Out" : "Add to Cart"}
+                  </button>
+
+                  {productData.stock > 0 && (
+                  <Link
+                    href="/cart"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-500 text-sm hover:text-black  transition"
+                  >
+                    Go to Cart
+                    <ArrowRight size={18} />
+                  </Link>
+                  )}
+                </div>
+
+              {/* Description */}
+                <div
+                  className="text-gray-700 font-normal dark:text-gray-700 leading-relaxed mb-4"
+                  dangerouslySetInnerHTML={{ __html: productData.description }}
+                />
+
               </div>
             </div>
 
-            {/* Right: Product Info */}
-            <div className="flex flex-col">
-              <h1 className="text-3xl font-light text-black dark:text-black mb-2">
-                {productData.category?.toUpperCase()} |{" "}
-                {productData.name} |{" "}
-                {productData.color}
-              </h1>
+            {/* Related Products */}
+            {relatedProducts.length > 0 && (
+              <section className="mt-8 md:mt-12">
+                
+                {/* Centered title */}
+                <div className="mb-6 text-center">
+                  <h2 className="text-xl uppercase md:text-2xl font-normal text-gray-900 dark:text-gray-900">
+                    you may like
+                  </h2>
+                </div>
 
-              {/* Price */}
-              <div className="flex items-center gap-3 mb-6">
-                {/* === Discounted Price === */}
-                <span className="text-md font-normal text-gray-600 flex items-center gap-1">
-                  {currency}
-                  {Number(productData.offerPrice).toLocaleString()}
-                </span>
-
-                {/* === Original Price (Strikethrough) === */}
-                <span className="line-through text-sm text-gray-500 dark:text-gray-400">
-                  {currency}
-                  {Number(productData.price).toLocaleString()}
-                </span>
-
-                {/* === Percentage Off === */}
-                {/* {productData.price > productData.offerPrice && (
-                  <span className="bg-black text-white text-xs font-medium px-2.5 py-1 rounded-full tracking-wide">
-                    SAVE{" "}
-                    {Math.round(
-                      ((productData.price - productData.offerPrice) / productData.price) * 100
-                    )}
-                    %
-                  </span>
-                )} */}
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col gap-4 mt-20 mb-10 w-full">
-                <div className="w-full mb-6">
-                  <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-700">
-                    Select Size
-                  </p>
-                  <div className="flex gap-2">
-                    {["S", "M", "L", "XL"].map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border text-sm transition
-                          ${
-                            selectedSize === size
-                              ? "bg-black text-white border-black"
-                              : "bg-white dark:bg-white text-gray-700 dark:text-gray-700 border-gray-300 hover:border-black"
-                          }`}
+                {/* Carousel */}
+                <div className="px-4 md:px-0 overflow-hidden">
+                  <div
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                    className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory pb-4"
+                  >
+                    {relatedProducts.map((p) => (
+                      <div
+                        key={p._id}
+                        className="min-w-[150px] sm:min-w-[200px] md:min-w-[240px] snap-start transition-transform hover:scale-[1.03]"
                       >
-                        {size}
-                      </button>
+                        <RelatedProducts product={p} />
+                      </div>
                     ))}
                   </div>
                 </div>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={productData.stock === 0}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sage)] cursor-pointer text-white shadow hover:bg-gray-50 hover:text-gray-700 transition disabled:opacity-50"
-                >
-                  {productData.stock === 0 ? "Sold Out" : "Add to Cart"}
-                </button>
-
-                {productData.stock > 0 && (
-                <Link
-                  href="/cart"
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-600 hover:underline  transition"
-                >
-                  Go to Cart
-                  <ArrowRight size={18} />
-                </Link>
-                )}
-              </div>
-
-             {/* Description */}
-              <div
-                className="text-gray-700 font-normal dark:text-gray-700 leading-relaxed mb-4"
-                dangerouslySetInnerHTML={{ __html: productData.description }}
-              />
-
-            </div>
-          </div>
-
-          {/* Related Products */}
-          {relatedProducts.length > 0 && (
-            <section className="mt-10">
-              
-              {/* Centered title */}
-              <div className="mb-6 text-center">
-                <h2 className="text-xl uppercase md:text-2xl font-normal text-gray-900 dark:text-gray-900">
-                  you may like
-                </h2>
-              </div>
-
-              {/* Carousel */}
-              <div className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2">
-                {relatedProducts.map((p) => (
+                <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 relative rounded-full overflow-hidden">
                   <div
-                    key={p._id}
-                    className="min-w-[180px] sm:min-w-[220px] md:min-w-[240px] snap-start transition-transform hover:scale-[1.03]"
-                  >
-                    <RelatedProducts product={p} />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+                    className="h-full bg-black dark:bg-white transition-all duration-150"
+                    style={{ width: `${scrollProgress}%` }}
+                  />
+                </div>
+              </section>
+            )}
+          </div>
+        {/* </div> */}
       </div>
       <Footer />
     </>

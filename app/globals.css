@@ -26,6 +26,20 @@ body {
   font-family: var(--font-sans);
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-heading);
+}
+
+/* Hide horizontal scrollbar everywhere */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
