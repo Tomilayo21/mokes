@@ -115,7 +115,7 @@ const ProductCard = ({ product }) => {
       : 0;
 
   const handleCardClick = () => {
-    router.push("/product/" + product._id);
+    router.push(`/collection/${product.slug}`);
     scrollTo(0, 0);
   };
 
@@ -136,10 +136,12 @@ const ProductCard = ({ product }) => {
       onMouseUp={handleLongPressEnd}
       onMouseLeave={handleLongPressEnd}
       onTouchEnd={handleLongPressEnd}
-      className="group flex flex-col w-[160px] cursor-pointer rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-md hover:scale-[1.02] transition-all overflow-hidden"
+      className="group flex flex-col max-w-none w-full cursor-pointer
+            rounded-md bg-white dark:bg-gray-900
+            transition-all hover:shadow-lg hover:scale-[1.02] overflow-hidden"
     >
       {/* Image */}
-      <div className="relative h-28 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
         <Image
           src={product.image?.[0] || "/placeholder.jpg"} // fallback image
           alt={product.name || "Product"}
@@ -161,34 +163,8 @@ const ProductCard = ({ product }) => {
             {currency}
             {Number(product.offerPrice).toLocaleString()}
           </p>
-          <div className="flex items-center gap-0.5 text-[10px] text-grey-500">
-            <Star className="w-3 h-3 fill-grey-500" />
-            {avgRating.toFixed(1)}
-          </div>
         </div>
 
-        {/* Cart Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddToCart();
-          }}
-          disabled={product.stock === 0}
-          className={`mt-2 flex items-center justify-center gap-1 py-1 rounded-md border text-xs font-normal transition-colors ${
-            product.stock === 0
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-grey-600 hover:bg-gray-50 text-black"
-          }`}
-          aria-label={product.stock === 0 ? "Sold Out" : "Add to Cart"}
-        >
-          {product.stock === 0 ? (
-            "Sold Out"
-          ) : (
-            <>
-              <ShoppingCart size={12} /> Add to Cart
-            </>
-          )}
-        </button>
       </div>
     </div>
   );

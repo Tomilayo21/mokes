@@ -321,7 +321,7 @@ export default function ProductPage() {
       <div className="flex flex-col items-center bg-white text-black dark:bg-white dark:text-black min-h-screen">
         <div className="px-6 py-4 md:px-16 lg:px-32 space-y-10">
           {/* Product Info */}
-          <div className="grid md:grid-cols-2 gap-16 mt-8">
+          <div className="grid md:grid-cols-2 gap-16 mt-8 mb-8">
             {/* Left: Product Images */}
             <div>
               <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
@@ -340,7 +340,7 @@ export default function ProductPage() {
                     onClick={() => setMainImage(img)}
                     className="cursor-pointer overflow-hidden border hover:ring-2 hover:ring-orange-500 transition"
                   >
-                    <Image src={img} alt="Product thumbnail" width={200} height={200} className="w-full h-24 object-cover" />
+                    <Image src={img} alt="Product thumbnail" width={150} height={150} className="w-full h-24 object-cover" />
                   </div>
                 ))}
               </div>
@@ -428,206 +428,27 @@ export default function ProductPage() {
                 dangerouslySetInnerHTML={{ __html: productData.description }}
               />
 
-              {/* Submit Review */}
-              <div>
-                {session?.user ? (
-                  <>
-                    <h2 className="font-normal mb-2 text-lg text-gray-900 dark:text-white">
-                      Leave a Review
-                    </h2>
-
-                    <label
-                      className="flex items-center gap-2 mb-2 text-sm text-gray-700 dark:text-gray-300"
-                      htmlFor="rating-select"
-                    >
-                      Rating:
-                      <select
-                        id="rating-select"
-                        value={rating}
-                        onChange={(e) => setRating(+e.target.value)}
-                        className="border rounded px-2 py-1 text-black dark:text-white bg-white dark:bg-black"
-                      >
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <textarea
-                      rows={3}
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      className="w-full border rounded-lg p-2 mb-3 text-black dark:text-white bg-white dark:bg-black"
-                      placeholder="Your comment..."
-                    />
-
-                    <button
-                      onClick={handleSubmitReview}
-                      disabled={loading}
-                      className="flex items-center gap-2 px-4 py-2 bg-black border dark:border-white text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
-                    >
-                      {loading ? (
-                        <>
-                          <XCircle size={16} /> Submitting...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={16} /> Submit Review
-                        </>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-red-600 text-sm">Please sign in to leave a review.</p>
-                )}
-              </div>
             </div>
-          </div>
-
-          {/* Reviews List & Pagination */}
-          <div className="w-full md:w-1/2 mt-10">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="text-orange-600">Customer Reviews</span>
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                See what others are saying about this product
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {reviews.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 text-sm py-8 border rounded-xl bg-gray-50 dark:bg-black">
-                  No reviews yet. Be the first to review this product!
-                </p>
-              ) : (
-                <>
-                  {currentReviews
-                    .sort((a, b) => b.rating - a.rating)
-                    .map((r) => {
-                      const foundHelpful = r.helpful?.includes(userId);
-                      return (
-                        <div
-                          key={r._id}
-                          className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm bg-white dark:bg-black transition hover:shadow-md"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="font-normal text-gray-900 dark:text-white">{r.username}</p>
-                            <span className="text-xs text-gray-500">
-                              {new Date(r.createdAt).toLocaleDateString("en-GB")}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1 mb-2">{renderStars(r.rating)}</div>
-
-                          <p className="text-gray-700 dark:text-gray-300 font-thin">{r.comment}</p>
-
-                          <div className="flex items-center gap-3 mt-3">
-                            <button
-                              onClick={() => handleHelpfulClick(r._id)}
-                              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                                foundHelpful
-                                  ? "bg-orange-500 text-white shadow-sm"
-                                  : "bg-gray-100 dark:bg-black border border-white text-gray-700 dark:text-gray-300 hover:bg-orange-50"
-                              }`}
-                            >
-                              <FaThumbsUp size={16} />
-                              {foundHelpful ? "Helpful" : "Mark as Helpful"}
-                            </button>
-                            <span className="text-sm text-gray-500">
-                              {r.helpful?.length === 1
-                                ? "1 person found this helpful"
-                                : `${r.helpful?.length || 0} people found this helpful`}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                  {totalPages > 1 && (
-                    <div className="flex justify-center mt-8">
-                      <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white dark:bg-gray-800 shadow border">
-                        <button
-                          onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                          disabled={currentPage === 1}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition ${
-                            currentPage === 1
-                              ? "bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                              : "bg-white dark:bg-gray-900 text-gray-800 dark:text-white hover:bg-orange-50"
-                          }`}
-                        >
-                          Prev
-                        </button>
-
-                        {[...Array(totalPages)].map((_, index) => {
-                          const pageNum = index + 1;
-                          const isActive = currentPage === pageNum;
-
-                          const shouldShow =
-                            totalPages <= 7 ||
-                            pageNum === 1 ||
-                            pageNum === totalPages ||
-                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
-
-                          if (!shouldShow && totalPages > 7) {
-                            if ((pageNum === 2 && currentPage > 4) || (pageNum === totalPages - 1 && currentPage < totalPages - 3)) {
-                              return (
-                                <span key={pageNum} className="px-2 text-gray-400 dark:text-gray-500">
-                                  ...
-                                </span>
-                              );
-                            }
-                            return null;
-                          }
-
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => setPage(pageNum)}
-                              className={`px-3 py-1 rounded-md text-sm font-medium transition ${
-                                isActive
-                                  ? "bg-orange-600 text-white shadow"
-                                  : "bg-white dark:bg-gray-900 text-gray-800 dark:text-white hover:bg-orange-50"
-                              }`}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-
-                        <button
-                          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                          disabled={currentPage === totalPages}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition ${
-                            currentPage === totalPages
-                              ? "bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                              : "bg-white dark:bg-gray-900 text-gray-800 dark:text-white hover:bg-orange-50"
-                          }`}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>            
           </div>
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <section className="mt-10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl md:text-2xl font-normal text-gray-900 dark:text-gray-100">
-                  Related Products
+              
+              {/* Centered title */}
+              <div className="mb-6 text-center">
+                <h2 className="text-xl uppercase md:text-2xl font-normal text-gray-900 dark:text-gray-900">
+                  you may like
                 </h2>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {/* Carousel */}
+              <div className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2">
                 {relatedProducts.map((p) => (
-                  <div key={p._id} className="transition-transform hover:scale-[1.02] duration-200">
+                  <div
+                    key={p._id}
+                    className="min-w-[180px] sm:min-w-[220px] md:min-w-[240px] snap-start transition-transform hover:scale-[1.03]"
+                  >
                     <RelatedProducts product={p} />
                   </div>
                 ))}
