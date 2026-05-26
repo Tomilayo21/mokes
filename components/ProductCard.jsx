@@ -121,16 +121,6 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  // ------------------ Reviews ------------------
-  const { data: reviews = [] } = useSWR(
-    `/api/reviews?productId=${product._id}`,
-    fetcher
-  );
-  const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
-
   // ------------------ Navigation ------------------
   const handleCardClick = () => {
     router.push(`/collection/${product.slug}`);
@@ -174,7 +164,7 @@ const ProductCard = ({ product }) => {
         onMouseLeave={handleLongPressEnd}
         onTouchEnd={handleLongPressEnd}
         className="group flex flex-col max-w-none w-full cursor-pointer
-            rounded-md bg-white dark:bg-gray-900
+            rounded-md bg-gray-50 dark:bg-gray-50
             transition-all hover:shadow-lg hover:scale-[1.02] overflow-hidden"
         >
         {/* === Image Section === */}

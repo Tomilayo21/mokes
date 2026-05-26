@@ -137,11 +137,11 @@ const ProductCard = ({ product }) => {
       onMouseLeave={handleLongPressEnd}
       onTouchEnd={handleLongPressEnd}
       className="group flex flex-col max-w-none w-full cursor-pointer
-            bg-white dark:bg-gray-100
+            bg-gray-50 dark:bg-gray-50
             transition-all hover:shadow-lg hover:scale-[1.02] overflow-hidden"
     >
       {/* Image */}
-      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-100 dark:bg-gray-100 flex items-center justify-center overflow-hidden">
+      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-50 dark:bg-gray-50 flex items-center justify-center overflow-hidden">
         <Image
           src={product.image?.[0] || "/placeholder.jpg"} // fallback image
           alt={product.name || "Product"}

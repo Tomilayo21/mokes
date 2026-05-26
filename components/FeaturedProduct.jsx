@@ -104,6 +104,8 @@ const FeaturedProduct = () => {
             <Image
                 src={product.image[0]}
                 alt={product.name}
+                width={600}
+                height={800}
                 className="w-full h-[420px] md:h-[500px] object-cover group-hover:scale-105 transition duration-500"
             />
 
