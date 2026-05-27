@@ -67,35 +67,64 @@ export async function DELETE(request, { params }) {
 }
 
 // ✅ PATCH (toggle visibility)
-export async function PATCH(request, { params }) {
-  await connectDB();
-
-  const adminUser = await requireAdmin(request);
-  if (adminUser instanceof NextResponse) return adminUser;
-
-  const { id } = params;
-  const body = await request.json();
-
+export async function PATCH(request, context) {
   try {
-    if (body.toggleVisibility) {
-      const product = await Product.findById(id);
-      if (!product) {
-        return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
-      }
+    await connectDB();
 
+    const adminUser = await requireAdmin(request);
+    if (adminUser instanceof NextResponse) return adminUser;
+
+    const { params } = context;
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Missing product id" },
+        { status: 400 }
+      );
+    }
+
+    let body = {};
+    try {
+      body = await request.json();
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    const product = await Clothing.findById(id);
+
+    if (!product) {
+      return NextResponse.json(
+        { success: false, message: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    if (body.toggleVisibility) {
       product.visible = !product.visible;
       await product.save();
 
       return NextResponse.json({
         success: true,
-        message: "Product visibility toggled",
         visible: product.visible,
       });
     }
 
-    return NextResponse.json({ success: false, message: "Missing toggleVisibility flag" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, message: "No valid action provided" },
+      { status: 400 }
+    );
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    console.error("PATCH ERROR:", error); // 🔥 IMPORTANT
+    return NextResponse.json(
+      { success: false,
+        message: error.message || "Server error"
+      },
+      { status: 500 }
+    );
   }
 }
 

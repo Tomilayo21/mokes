@@ -195,61 +195,64 @@ const ProductListPanel = () => {
 
   const toggleVisibility = async (id) => {
     try {
-      const token = await getToken();
+      const token = session?.accessToken;
+
       const { data } = await axios.patch(
         `/api/product/${id}`,
         { toggleVisibility: true },
         {
-          headers: { Authorization: `Bearer ${token}`, userid: user.id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            userid: session?.user?.id,
+          },
         }
       );
-
       if (data.success) {
-        toast.success("Visibility updated");
+        toast.custom(
+          (t) => (
+            <div
+              className={`${
+                t.visible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-10 opacity-0"
+              } max-w-md w-full bg-gray-50 dark:bg-gray-800 shadow-sm rounded-sm pointer-events-auto flex items-center gap-3 p-4 transition-all`}
+            >
+              <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-100">
+                Visibility updated successfully
+              </p>
+            </div>
+          ),
+          { duration: 3000, position: "top-right" }
+        );
+
         setProducts((prev) =>
           prev.map((p) =>
             p._id === id ? { ...p, visible: data.visible } : p
           )
         );
       } else {
-        toast.error(data.message);
+        toast.custom(
+          (t) => (
+            <div
+              className={`${
+                t.visible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-10 opacity-0"
+              } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4 transition-all`}
+            >
+              <p className="text-sm font-medium text-red-600 dark:text-red-300">
+                {data.message || "Something went wrong"}
+              </p>
+            </div>
+          ),
+          { duration: 3000, position: "top-right" }
+        );
       }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
     }
   };
 
-  const handleStockUpdate = async (productId, newStock) => {
-    try {
-      const token = await getToken();
-      const res = await fetch(`/api/product/${productId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          userid: user.id,
-        },
-        body: JSON.stringify({ stock: newStock }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update stock");
-
-      toast.success("Stock updated");
-
-      setProducts((prev) =>
-        prev.map((product) =>
-          product._id === productId ? { ...product, stock: newStock } : product
-        )
-      );
-      setFilteredProducts((prev) =>
-        prev.map((product) =>
-          product._id === productId ? { ...product, stock: newStock } : product
-        )
-      );
-    } catch (err) {
-      toast.error("Error updating stock");
-    }
-  };  
 
   const handleProductUpdate = async (product) => {
     try {
@@ -463,7 +466,7 @@ const ProductListPanel = () => {
                         <Image
                           src={product.image[0]}
                           alt="product image"
-                          className="w-14 h-14 object-cover rounded-md border shadow-sm"
+                          className="w-14 h-14 object-cover rounded-sm border shadow-sm"
                           width={56}
                           height={56}
                         />
@@ -508,7 +511,7 @@ const ProductListPanel = () => {
                       <button
                         onClick={() => toggleVisibility(product._id)}
                         className={`px-3 py-1.5 rounded-md text-white text-xs font-medium transition ${
-                          product.visible ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 hover:bg-gray-500"
+                          product.visible ? "bg-[var(--sage)] hover:bg-zinc-500" : "bg-gray-400 hover:bg-gray-500"
                         }`}
                       >
                         {product.visible ? "Visible" : "Hidden"}
@@ -547,14 +550,14 @@ const ProductListPanel = () => {
             {paginatedProducts.map((product) => (
               <div
                 key={product._id}
-                className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex gap-4 hover:shadow-md transition"
+                className="bg-white border border-gray-200 rounded-sm p-4 flex gap-4 hover:shadow-md transition"
               >
                 <Image
                   src={product.image[0]}
                   alt="product image"
                   width={80}
                   height={80}
-                  className="w-20 h-20 object-cover rounded-md border"
+                  className="w-20 h-20 object-cover rounded-sm border"
                 />
 
                 <div className="flex-1 space-y-1">
@@ -614,7 +617,7 @@ const ProductListPanel = () => {
                     <button
                       onClick={() => toggleVisibility(product._id)}
                       className={`px-3 py-1.5 text-xs rounded-md text-white transition ${
-                        product.visible ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 hover:bg-gray-500"
+                        product.visible ? "bg-[var(--sage)] hover:bg-zinc-500" : "bg-gray-400 hover:bg-gray-500"
                       }`}
                     >
                       {product.visible ? "Visible" : "Hidden"}
@@ -769,18 +772,18 @@ const ProductListPanel = () => {
         {/* Modal Pop-Up */}
         {openProduct && editableProduct && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl space-y-6 text-sm max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-sm p-6 max-w-2xl w-full relative space-y-6 text-sm max-h-[90vh] overflow-y-auto">
 
               {/* Close Button */}
               <button
                 onClick={() => setOpenProduct(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer transition"
               >
                 ✖
               </button>
 
               {/* Title */}
-              <h2 className="text-xl font-bold text-gray-900 border-b pb-3">
+              <h2 className="text-xl tracking-wide uppercase font-normal text-gray-900 border-b pb-3">
                 Edit Product
               </h2>
 
@@ -794,7 +797,7 @@ const ProductListPanel = () => {
                     onChange={(e) =>
                       setEditableProduct({ ...editableProduct, name: e.target.value })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                   />
                 </div>
 
@@ -807,7 +810,7 @@ const ProductListPanel = () => {
                       onChange={(e) =>
                         setEditableProduct({ ...editableProduct, category: e.target.value })
                       }
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
                       <option value="Earphone">Earphone</option>
                       <option value="Headphone">Headphone</option>
@@ -827,7 +830,7 @@ const ProductListPanel = () => {
                       onChange={(e) =>
                         setEditableProduct({ ...editableProduct, subcategory: e.target.value })
                       }
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
                       <option value="Earphone">Earphone</option>
                       <option value="Headphone">Headphone</option>
@@ -846,7 +849,7 @@ const ProductListPanel = () => {
                       onChange={(e) =>
                         setEditableProduct({ ...editableProduct, brand: e.target.value })
                       }
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
                       <option value="Apple">Apple</option>
                       <option value="Samsung">Samsung</option>
@@ -869,7 +872,7 @@ const ProductListPanel = () => {
                     onChange={(e) =>
                       setEditableProduct({ ...editableProduct, color: e.target.value })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                   >
                     <option value="Black">Black</option>
                     <option value="White">White</option>
@@ -883,7 +886,7 @@ const ProductListPanel = () => {
               </div>
 
               {/* Pricing Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-gray-300 pt-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ({currency})</label>
                   <input
@@ -895,7 +898,7 @@ const ProductListPanel = () => {
                         price: Number(e.target.value),
                       })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                   />
                 </div>
                 <div>
@@ -909,7 +912,7 @@ const ProductListPanel = () => {
                         offerPrice: Number(e.target.value),
                       })
                     }
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                   />
                 </div>
               </div>
@@ -926,7 +929,7 @@ const ProductListPanel = () => {
                       key={item.size}
                       className="flex items-center gap-4"
                     >
-                      <span className="w-24">{item.size}</span>
+                      <span className="w-24 text-black">{item.size}</span>
 
                       <input
                         type="number"
@@ -945,7 +948,7 @@ const ProductListPanel = () => {
                             sizes: updatedSizes,
                           });
                         }}
-                        className="border px-3 py-2 rounded-lg w-28"
+                        className="border text-black px-3 py-2 rounded-sm w-28"
                       />
                     </div>
                   ))}
@@ -974,7 +977,7 @@ const ProductListPanel = () => {
                       visible: e.target.value === "visible",
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                  className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                 >
                   <option value="visible">Visible</option>
                   <option value="hidden">Hidden</option>
@@ -991,8 +994,8 @@ const ProductListPanel = () => {
               )}
 
               {/* Images */}
-              <div className="border-t pt-4">
-                <p className="text-base font-semibold mb-2">Product Images</p>
+              <div className="border-t border-gray-300 pt-4">
+                <p className="text-base font-medium text-gray-700 mb-1">Product Images</p>
                 <div className="flex flex-wrap items-start gap-3">
                   {[...(editableProduct.image || []), ...(editableProduct.newImagesPreview || [])].map((img, index) => {
                     const totalExisting = editableProduct.image?.length || 0;
@@ -1001,7 +1004,7 @@ const ProductListPanel = () => {
 
                     return (
                       <div key={index} className="relative w-24 h-24 flex-shrink-0 group">
-                        <div className="w-24 h-24 border border-gray-300 rounded-lg overflow-hidden relative shadow-sm">
+                        <div className="w-24 h-24 border border-gray-300 rounded-sm overflow-hidden relative shadow-sm">
                           <Image
                             src={typeof img === "string" ? img : URL.createObjectURL(img)}
                             alt={`image-${index}`}
@@ -1068,7 +1071,7 @@ const ProductListPanel = () => {
 
                   {/* Add Image Input */}
                   {((editableProduct.image?.length || 0) + (editableProduct.newImagesPreview?.length || 0)) < 6 && (
-                    <label className="w-24 h-24 border border-dashed border-gray-400 rounded-lg cursor-pointer flex items-center justify-center hover:border-orange-500 hover:text-orange-500 transition">
+                    <label className="w-24 h-24 border border-dashed border-gray-400 rounded-sm cursor-pointer flex items-center justify-center hover:border-[var(--sage)] hover:text-[var(--sage)] transition">
                       <input
                         type="file"
                         hidden
@@ -1091,7 +1094,10 @@ const ProductListPanel = () => {
 
               {/* Submit */}
               <button
-                className="mt-4 w-full bg-orange-600 text-white py-2.5 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-50 transition"
+                className="mt-4 w-full bg-[var(--sage)] text-white 
+                  hover:bg-zinc-500 py-2.5 
+                  rounded-sm cursor-pointer uppercase font-medium disabled:opacity-50  disabled:cursor-not-allowed
+                  transition"
                 onClick={() => handleProductUpdate(editableProduct)}
                 disabled={isUpdating}
               >
@@ -1104,23 +1110,24 @@ const ProductListPanel = () => {
 
         {viewProduct && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-            <div className="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-2xl space-y-5 text-sm max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-sm p-6 max-w-lg w-full relative space-y-5 text-sm max-h-[90vh] overflow-y-auto">
               
               {/* Close Button */}
               <button
                 onClick={() => setViewProduct(null)}
-                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
+                className="absolute top-3 right-3 text-gray-400 cursor-pointer hover:text-red-500 transition"
               >
                 ✖
               </button>
 
               {/* Title */}
-              <h2 className="text-xl font-bold text-gray-900 border-b pb-2">
+              <h2 className="text-xl font-medium text-gray-800 mb-3 uppercase border-b pb-2">
                 {viewProduct.name}
               </h2>
 
               {/* Product Info */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-gray-700 text-sm">
+                <p><span className="font-medium text-gray-900">Category:</span> {viewProduct.category}</p>
                 <p><span className="font-medium text-gray-900">SubCategory:</span> {viewProduct.subcategory}</p>
                 <p><span className="font-medium text-gray-900">Brand:</span> {viewProduct.brand}</p>
                 <p><span className="font-medium text-gray-900">Color:</span> {viewProduct.color}</p>
@@ -1132,13 +1139,43 @@ const ProductListPanel = () => {
                   <span className="font-medium text-gray-900">Offer Price:</span>{" "}
                   <span className="text-orange-600 font-semibold">{currency}{viewProduct.offerPrice}</span>
                 </p>
-                <p><span className="font-medium text-gray-900">Stock:</span> {viewProduct.stock}</p>
-                <p>
-                  <span className="font-medium text-gray-900">Status:</span>{" "}
-                  <span className={viewProduct.stock > 0 ? "text-orange-600 font-semibold" : "text-red-500 font-semibold"}>
-                    {viewProduct.stock > 0 ? "In Stock" : "Sold Out"}
-                  </span>
-                </p>
+                {/* Stock Breakdown */}
+                <div className="col-span-2">
+                  <p className="font-medium text-gray-900 mb-2">Stock (By Size):</p>
+
+                  <div className="space-y-2">
+                    {viewProduct.sizes?.map((size, i) => {
+                      const stock = Number(size.stock || 0);
+
+                      return (
+                        <div key={i} className="flex justify-between items-center text-sm">
+                          <span className="font-light text-gray-500">{size.size}</span>
+
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-xs font-normal ${
+                              stock === 0
+                                ? "bg-red-100 text-red-600"
+                                : stock <= 3
+                                ? "bg-gray-100 text-gray-700"
+                                : "bg-[var(--sage)] text-white"
+                            }`}
+                          >
+                            {stock}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-2 text-xs text-gray-500 border-t pt-2">
+                    Total:{" "}
+                    {viewProduct.sizes?.reduce(
+                      (sum, s) => sum + Number(s.stock || 0),
+                      0
+                    )}{" "}
+                    units
+                  </div>
+                </div>
                 <p>
                   <span className="font-medium text-gray-900">Visibility:</span>{" "}
                   {viewProduct.visible ? "Visible" : "Hidden"}
@@ -1147,9 +1184,9 @@ const ProductListPanel = () => {
 
               {/* Description */}
               <div>
-                <h3 className="text-base font-semibold text-gray-900 mb-1">Description</h3>
+                <h3 className="text-base font-medium text-gray-800 mb-3 uppercase">Description</h3>
                 <div
-                  className="text-gray-600 text-sm leading-relaxed border rounded-lg p-3 bg-gray-50"
+                  className="text-gray-600 text-sm leading-relaxed border rounded-sm p-3 bg-gray-50"
                   dangerouslySetInnerHTML={{ __html: viewProduct.description }}
                 />
               </div>
@@ -1157,7 +1194,7 @@ const ProductListPanel = () => {
               {/* Images */}
               {viewProduct.image?.length > 0 && (
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-2">Gallery</h3>
+                  <h3 className="text-base font-medium text-gray-800 mb-3 uppercase">Gallery</h3>
                   <div className="flex gap-2 flex-wrap">
                     {viewProduct.image.map((img, index) => (
                       <Image
@@ -1166,7 +1203,7 @@ const ProductListPanel = () => {
                         alt={`image-${index}`}
                         width={96}
                         height={96}
-                        className="w-24 h-24 object-cover rounded-lg shadow-sm hover:scale-105 transition"
+                        className="w-24 h-24 object-cover rounded-sm hover:scale-105 transition"
                       />
                     ))}
                   </div>

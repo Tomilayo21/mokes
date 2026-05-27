@@ -24,7 +24,9 @@ const ProductCard = ({ product }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const pressTimer = useRef(null);
-
+  const availableSizes = (product.sizes || []).filter(
+    (item) => Number(item.stock) > 0
+  );
 
   // ------------------ Long Press Modal ------------------
   const handleLongPressStart = () => {
@@ -203,19 +205,18 @@ const ProductCard = ({ product }) => {
             {Number(product.offerPrice).toLocaleString()}
         </p>
 
-        {product.sizes?.length > 0 &&
-          product.sizes.map((item) => (
-            <button
-              key={item.size}
-              disabled={item.stock === 0}
-              className={`px-4 py-2 border rounded-lg ${
-                item.stock === 0 ? "opacity-50 cursor-not-allowed line-through" : ""
-              }`}
-            >
-              {item.size}
-              {item.stock === 0 && " (Sold Out)"}
-            </button>
-        ))}
+        {availableSizes.length > 0 ? (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {availableSizes.map((item) => (
+              <button
+                key={item.size}
+                className="px-3 py-1 border rounded-lg text-sm"
+              >
+                {item.size}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {/* ✅ CENTER BUTTON WRAPPER */}
         {/* <div className="flex justify-center w-full mt-4">
             <button
