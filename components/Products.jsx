@@ -38,12 +38,10 @@ const Products = () => {
       </div>
 
       {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10 px-6 md:px-12 lg:px-20 mt-12 w-full max-w-7xl">
-
-        {visibleProducts.map((product, index) => (
-            <ProductCard key={index} product={product} />
-        ))}
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-4 gap-x-4 sm:gap-6 lg:gap-8 px-4 sm:px-6 md:px-12 lg:px-20 mt-12 w-full max-w-7xl">
+          {visibleProducts.map((product, index) => (
+              <ProductCard key={index} product={product} />
+          ))}
         </div>
 
         {visibleCount < products.length ? (

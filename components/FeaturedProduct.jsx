@@ -93,7 +93,7 @@ const FeaturedProduct = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 px-4">
 
-        {dummyProducts
+            {dummyProducts
             .filter((p) => p._id !== id)
             .map((product) => (
             <div

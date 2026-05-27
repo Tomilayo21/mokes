@@ -168,7 +168,7 @@ const ProductCard = ({ product }) => {
             transition-all  hover:scale-[1.02] overflow-hidden"
         >
         {/* === Image Section === */}
-        <div className="relative h-[420px] md:h-[500px] w-full bg-gray-50 dark:bg-gray-50 flex items-center justify-center overflow-hidden">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-gray-50 flex items-center justify-center overflow-hidden">
           <Image
             src={product.image[0]}
             alt={product.name}
@@ -192,7 +192,7 @@ const ProductCard = ({ product }) => {
       </div>
 
         {/* === Details Section === */}
-        <div className="mt-5 flex flex-col gap-2 px-1 pb-4 text-gray-900 dark:text-white w-full">
+        <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
 
         <h3 className="text-lg md:text-xl font-medium uppercase text-gray-800 tracking-wide">
             {product.name}

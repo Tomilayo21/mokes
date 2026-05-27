@@ -412,10 +412,21 @@ const AddProduct = () => {
                 <label htmlFor="product-price" className="text-sm font-medium text-gray-700">Original Price</label>
                 <input
                   id="product-price"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   placeholder="0"
                   className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/,/g, "");
+
+                    if (/^\d*$/.test(rawValue)) {
+                      setPrice(
+                        rawValue === ""
+                          ? ""
+                          : Number(rawValue).toLocaleString()
+                      );
+                    }
+                  }}
                   value={price}
                   required
                 />
@@ -425,10 +436,21 @@ const AddProduct = () => {
                 <label htmlFor="offer-price" className="text-sm font-medium text-gray-700">Discount Price</label>
                 <input
                   id="offer-price"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   placeholder="0"
                   className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                  onChange={(e) => setOfferPrice(e.target.value)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/,/g, "");
+
+                    if (/^\d*$/.test(rawValue)) {
+                      setOfferPrice(
+                        rawValue === ""
+                          ? ""
+                          : Number(rawValue).toLocaleString()
+                      );
+                    }
+                  }}
                   value={offerPrice}
                   required
                 />

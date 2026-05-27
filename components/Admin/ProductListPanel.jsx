@@ -34,6 +34,8 @@ const ProductListPanel = () => {
   const [editableProduct, setEditableProduct] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
+  const [expandedStockId, setExpandedStockId] = useState(null);
+  const [stockPreview, setStockPreview] = useState(null);
   
   const isAdmin = session?.user?.role === 'admin';
   
@@ -355,10 +357,12 @@ const ProductListPanel = () => {
       <div className="w-full md:p-10 p-4 max-w-7xl mx-auto space-y-6">
         {/* Title */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-normal text-gray-800">All Products</h2>
+          <h1 className="text-xl md:text-2xl tracking-wide uppercase font-normal text-gray-900">
+            All Products
+          </h1>
           <button
             onClick={handleExportCSV}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm shadow-sm transition"
+            className="bg-[var(--sage)] hover:bg-gray-600 text-white px-4 py-2 rounded-sm cursor-pointer flex items-center gap-2 text-sm shadow-sm transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -374,7 +378,7 @@ const ProductListPanel = () => {
         </div>
 
         {/* Filters Section */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex flex-wrap gap-4 items-center">
+        <div className="bg-white border border-gray-200 p-4 flex flex-wrap gap-4 items-center">
           {/* Search */}
           <div className="relative w-full sm:w-48">
             {/* Search Icon */}
@@ -386,7 +390,7 @@ const ProductListPanel = () => {
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 border px-3 py-2 rounded-lg text-sm w-full focus:ring-2 focus:ring-orange-400 outline-none"
+              className="pl-9 border px-3 text-black py-2 text-sm w-full border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
             />
           </div>
 
@@ -394,7 +398,7 @@ const ProductListPanel = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+            className="border px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -408,7 +412,7 @@ const ProductListPanel = () => {
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+            className="px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
           >
             <option value="none">Sort</option>
             <option value="price-asc">Price Low → High</option>
@@ -422,7 +426,7 @@ const ProductListPanel = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+            className="px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
           />
 
           {/* End Date */}
@@ -430,174 +434,263 @@ const ProductListPanel = () => {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none"
+            className="px-3 py-2 rounded-sm text-sm text-black border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
           />
-        </div>
+          {/* Desktop Table */}
+          <div className="hidden md:block bg-white overflow-x-auto">
+            <table className="table-fixed w-full border-collapse">
+              <thead className="bg-gray-50 text-gray-800 text-sm sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 font-medium text-left">Product</th>
+                  <th className="px-4 py-3 font-medium text-left">Category</th>
+                  <th className="px-4 py-3 font-medium text-left">Price</th>
+                  <th className="px-4 py-3 font-medium text-left">Stock</th>
+                  <th className="px-4 py-3 font-medium text-left">Visibility</th>
+                  <th className="px-4 py-3 font-medium text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm text-gray-700">
+                {paginatedProducts.map((product, index) => (
+                  <tr
+                    key={product._id}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-zinc-50"
+                    } border-t border-gray-200 hover:bg-gray-50 transition cursor-pointer`}
+                  >
+                    {/* Product */}
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col items-center space-y-2">
+                        <Image
+                          src={product.image[0]}
+                          alt="product image"
+                          className="w-14 h-14 object-cover rounded-md border shadow-sm"
+                          width={56}
+                          height={56}
+                        />
+                        <span className="font-medium text-center text-sm break-words">
+                          {product.name}
+                        </span>
+                        {/* <span className="truncate font-medium text-center text-sm w-full">
+                          {product.name}
+                        </span> */}
+                      </div>
+                    </td>
 
-        {/* Desktop Table */}
-        <div className="hidden md:block bg-white border border-gray-200 rounded-lg shadow-md overflow-x-auto">
-          <table className="table-fixed w-full border-collapse">
-            <thead className="bg-gray-50 text-gray-800 text-sm sticky top-0">
-              <tr>
-                <th className="px-4 py-3 font-medium text-left">Product</th>
-                <th className="px-4 py-3 font-medium text-left">Category</th>
-                <th className="px-4 py-3 font-medium text-left">Price</th>
-                <th className="px-4 py-3 font-medium text-left">Stock</th>
-                <th className="px-4 py-3 font-medium text-left">Status</th>
-                <th className="px-4 py-3 font-medium text-left">Visibility</th>
-                <th className="px-4 py-3 font-medium text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-gray-700">
-              {paginatedProducts.map((product, index) => (
-                <tr
-                  key={product._id}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } border-t border-gray-200 hover:bg-orange-50 transition`}
-                >
-                  {/* Product */}
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col items-center space-y-2">
-                      <Image
-                        src={product.image[0]}
-                        alt="product image"
-                        className="w-14 h-14 object-cover rounded-md border shadow-sm"
-                        width={56}
-                        height={56}
-                      />
-                      <span className="font-medium text-center text-sm break-words">
-                        {product.name}
-                      </span>
-                      {/* <span className="truncate font-medium text-center text-sm w-full">
-                        {product.name}
-                      </span> */}
-                    </div>
-                  </td>
+                    {/* Category */}
+                    <td className="px-4 py-3">{product.category}</td>
+                    <td className="px-4 py-3 font-normal text-gray-800">
+                      {currency}
+                      {Number(product.offerPrice).toLocaleString()}
+                    </td>
 
-                  <td className="px-4 py-3">{product.category}</td>
-                  <td className="px-4 py-3 font-normal text-gray-800">
+                    {/*Sizes & Stock*/}
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() =>
+                          setStockPreview(
+                            stockPreview?._id === product._id ? null : product
+                          )
+                        }
+                        className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium bg-gray-100 rounded-md hover:bg-gray-200 transition"
+                      >
+                        <span>
+                          {product.sizes?.reduce(
+                            (sum, size) => sum + Number(size.stock || 0),
+                            0
+                          )}
+                        </span>
+                        <span className="text-xs text-gray-500">units</span>
+                      </button>
+                    </td>
+
+                    {/* Visibility */}
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => toggleVisibility(product._id)}
+                        className={`px-3 py-1.5 rounded-md text-white text-xs font-medium transition ${
+                          product.visible ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 hover:bg-gray-500"
+                        }`}
+                      >
+                        {product.visible ? "Visible" : "Hidden"}
+                      </button>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3 flex flex-col gap-2">
+                      <button
+                        onClick={() => setOpenProduct(product)}
+                        className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                      >
+                        <Pencil className="w-4 h-4" /> Edit
+                      </button>
+                      <button
+                        onClick={() => setViewProduct(product)}
+                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="block md:hidden space-y-4">
+            {paginatedProducts.map((product) => (
+              <div
+                key={product._id}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex gap-4 hover:shadow-md transition"
+              >
+                <Image
+                  src={product.image[0]}
+                  alt="product image"
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-cover rounded-md border"
+                />
+
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-semibold text-base truncate text-gray-800">{product.name}</h3>
+                  <p className="text-xs text-gray-500">{product.category}</p>
+                  <p className="text-sm font-normal text-gray-800">              
                     {currency}
                     {Number(product.offerPrice).toLocaleString()}
-                  </td>
+                  </p>
 
-                  <td className="px-4 py-3 text-center">
-                    <span className="inline-block px-2 py-1 text-sm font-medium bg-gray-100 rounded-md">
-                      {stockInputs[product._id] ?? product.stock}
-                    </span>
-                  </td>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={() => setStockPreview(product)}
+                      className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                    >
+                      <span className="text-xs font-semibold text-gray-700">
+                        Stock
+                      </span>
 
-                  <td className="px-4 py-3 text-center">
-                    <span className="inline-block px-2 py-1 text-sm font-medium bg-gray-100 rounded-md">
-                      {product.sizes?.reduce(
-                        (sum, size) => sum + Number(size.stock || 0),
-                        0
-                      )}
-                    </span>
-                  </td>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          product.sizes?.reduce(
+                            (sum, size) => sum + Number(size.stock || 0),
+                            0
+                          ) <= 3
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
+                      >
+                        {product.sizes?.reduce(
+                          (sum, size) => sum + Number(size.stock || 0),
+                          0
+                        )}
+                      </span>
+                    </button>
+                  </div>
 
-                  {/* Visibility */}
-                  <td className="px-4 py-3">
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setOpenProduct(product)}
+                      className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                    >
+                      <Pencil className="w-4 h-4" /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                    <button
+                      onClick={() => setViewProduct(product)}
+                      className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                    >
+                      View
+                    </button>
                     <button
                       onClick={() => toggleVisibility(product._id)}
-                      className={`px-3 py-1.5 rounded-md text-white text-xs font-medium transition ${
+                      className={`px-3 py-1.5 text-xs rounded-md text-white transition ${
                         product.visible ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 hover:bg-gray-500"
                       }`}
                     >
                       {product.visible ? "Visible" : "Hidden"}
                     </button>
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-4 py-3 flex flex-col gap-2">
-                    <button
-                      onClick={() => setOpenProduct(product)}
-                      className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                    >
-                      <Pencil className="w-4 h-4" /> Edit
-                    </button>
-                    <button
-                      onClick={() => setViewProduct(product)}
-                      className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                    >
-                      <Trash2 className="w-4 h-4" /> Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="block md:hidden space-y-4">
-          {paginatedProducts.map((product) => (
-            <div
-              key={product._id}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex gap-4 hover:shadow-md transition"
-            >
-              <Image
-                src={product.image[0]}
-                alt="product image"
-                width={80}
-                height={80}
-                className="w-20 h-20 object-cover rounded-md border"
-              />
-
-              <div className="flex-1 space-y-1">
-                <h3 className="font-semibold text-base truncate text-gray-800">{product.name}</h3>
-                <p className="text-xs text-gray-500">{product.category}</p>
-                <p className="text-sm font-normal text-gray-800">              
-                  {currency}
-                  {Number(product.offerPrice).toLocaleString()}
-                </p>
-
-                <div className="mt-1 flex items-center gap-2">
-                  {product.sizes?.reduce(
-                    (sum, size) => sum + Number(size.stock || 0),
-                    0
-                  )}
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setOpenProduct(product)}
-                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                  >
-                    <Pencil className="w-4 h-4" /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                  >
-                    <Trash2 className="w-4 h-4" /> Delete
-                  </button>
-                  <button
-                    onClick={() => setViewProduct(product)}
-                    className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => toggleVisibility(product._id)}
-                    className={`px-3 py-1.5 text-xs rounded-md text-white transition ${
-                      product.visible ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 hover:bg-gray-500"
-                    }`}
-                  >
-                    {product.visible ? "Visible" : "Hidden"}
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>  
+          {stockPreview && (
+            <>
+              {/* backdrop */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setStockPreview(null)}
+              />
 
+              {/* popup */}
+              <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 bg-white border shadow-xl rounded-lg p-4">
+                
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-normal text-gray-700">
+                    {stockPreview.name}
+                  </h3>
+
+                  <button
+                    onClick={() => setStockPreview(null)}
+                    className="text-gray-400 hover:text-red-500 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <p className="text-xs text-gray-900 mb-2">
+                  SIZE BREAKDOWN
+                </p>
+
+                <div className="space-y-2">
+                  {stockPreview.sizes?.map((size, i) => {
+                    const stock = Number(size.stock || 0);
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="font-light text-gray-500">{size.size}</span>
+
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-xs font-normal ${
+                            stock === 0
+                              ? "bg-red-100 text-red-600"
+                              : stock <= 3
+                              ? "bg-gray-100 text-gray-700"
+                              : "bg-[var(--sage)] text-white"
+                          }`}
+                        >
+                          {stock}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-3 text-[11px] text-gray-500 border-t pt-2">
+                  Total:{" "}
+                  {stockPreview.sizes?.reduce(
+                    (sum, s) => sum + Number(s.stock || 0),
+                    0
+                  )}{" "}
+                  units
+                </div>
+              </div>
+            </>
+          )}
+        </div>
 
 
         {/* Pagination Controls */}
