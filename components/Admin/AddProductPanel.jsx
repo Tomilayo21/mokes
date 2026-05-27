@@ -18,7 +18,7 @@ const AddProduct = () => {
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Earphone');
+  const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [sizes, setSizes] = useState([
     { size: "Small", stock: 0 },
@@ -88,11 +88,13 @@ const AddProduct = () => {
       const random = Math.floor(Math.random() * 10000);
       const slug = `${baseSlug}-${random}`;
       const formData = new FormData();
+      const cleanPrice = price.toString().replace(/,/g, "");
+      const cleanOfferPrice = offerPrice.toString().replace(/,/g, "");
       formData.append("name", name);
       formData.append("description", description);
       formData.append("category", category);
-      formData.append("price", price);
-      formData.append("offerPrice", offerPrice);
+      formData.append("price", cleanPrice);
+      formData.append("offerPrice", cleanOfferPrice);
       formData.append("color", color);
       formData.append("brand", brand);
       formData.append("slug", slug);
@@ -142,7 +144,7 @@ const AddProduct = () => {
           <div
             className={`${
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4 transition-all`}
+            } max-w-md w-full bg-white dark:bg-gray-800 shadow-sm rounded-sm pointer-events-auto flex items-center gap-3 p-4 transition-all`}
           >
             <p className="text-sm font-medium text-red-700 dark:text-red-300">
               {error.response?.data?.message || error.message || "Upload failed"}
@@ -310,8 +312,9 @@ const AddProduct = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   value={category}
                 >
-                  <option value="Earphone">Earphone</option>
-                  <option value="Headphone">Headphone</option>
+                  <option value="" disabled>Select Category</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
                 </select>
               </div>
 
@@ -324,12 +327,14 @@ const AddProduct = () => {
                   onChange={(e) => setSubcategory(e.target.value)}
                   value={subcategory}
                 >
-                  <option value="Earphone">Earphone</option>
-                  <option value="Headphone">Headphone</option>
+                  <option value="" disabled>Select Subcategory</option>
+                  <option value="Linen">Linen</option>
+                  <option value="Cotton">Cotton</option>
                   <option value="Watch">Watch</option>
-                  <option value="Smartphone">Smartphone</option>
-                  <option value="Laptop">Laptop</option>
-                  <option value="Camera">Camera</option>
+                  <option value="Tees">Tees</option>
+                  <option value="Sweaters">Sweaters</option>
+                  <option value="Jackets">Jackets</option>
+                  <option value="Pants">Pants</option>
                   <option value="Accessories">Accessories</option>
                 </select>
               </div>
@@ -363,15 +368,22 @@ const AddProduct = () => {
                   value={brand}
                   required
                 >
-                  <option value="Apple">Apple</option>
-                  <option value="Samsung">Samsung</option>
-                  <option value="Sony">Sony</option>
-                  <option value="Huawei">Huawei</option>
-                  <option value="Bose">Bose</option>
-                  <option value="Infinix">Infinix</option>
-                  <option value="Xiaomi">Xiaomi</option>
-                  <option value="Tecno">Tecno</option>
-                  <option value="Other">Other</option>
+                  <option value="" disabled>Select Brand</option>
+                  <option value="Nike">Nike</option>
+                  <option value="Adidas">Adidas</option>
+                  <option value="Reebok">Reebok</option>
+                  <option value="Puma">Puma</option>
+                  <option value="Converse">Converse</option>
+                  <option value="Reebok">Reebok</option>
+                  <option value="Uniqlo">Uniqlo</option>
+                  <option value="H&M">H&M</option>
+                  <option value="Zara">Zara</option>
+                  <option value="Supreme">Supreme</option>
+                  <option value="Carhartt-WIP">Carhartt WIP</option>
+                  <option value="The-North-Face">The North Face</option>
+                  <option value="Vans">Vans</option>
+                  <option value="New-Balance">New Balance</option>
+                  <option value="Under-Armour">Under Armour</option>
                 </select>
               </div>
 

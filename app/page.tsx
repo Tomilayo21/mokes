@@ -13,8 +13,8 @@ export default function Home() {
       <HeroSection />
       <FeaturedProduct />
       <Products />
-      <AddProductPanel />
-      <ProductListPanel />
+      {/* <AddProductPanel />
+      <ProductListPanel /> */}
       <Footer />
     </>
   );

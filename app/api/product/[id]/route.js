@@ -129,13 +129,14 @@ export async function PATCH(request, context) {
 }
 
 // ✅ PUT (Admin edit)
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   await connectDB();
 
   const adminUser = await requireAdmin(request);
   if (adminUser instanceof NextResponse) return adminUser;
 
-  const { id } = params;
+  const { id } = await context.params;
+
 
   try {
     const contentType = request.headers.get("content-type");
@@ -145,7 +146,7 @@ export async function PUT(request, { params }) {
       const body = await request.json();
 
       if (body.sizes) {
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const updatedProduct = await Clothing.findByIdAndUpdate(
           id,
           { sizes: body.sizes },
           { new: true }
@@ -177,7 +178,7 @@ export async function PUT(request, { params }) {
     );
     const subcategory = formData.get("subcategory");
 
-    const existingProduct = await Product.findById(id);
+    const existingProduct = await Clothing.findById(id);
 
     if (!existingProduct) {
       return NextResponse.json(
@@ -219,7 +220,7 @@ export async function PUT(request, { params }) {
       uploadedImageUrls.push(uploadResult.secure_url);
     }
 
-    const updated = await Product.findByIdAndUpdate(
+    const updated = await Clothing.findByIdAndUpdate(
       id,
       {
         name,

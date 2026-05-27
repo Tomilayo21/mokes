@@ -253,7 +253,6 @@ const ProductListPanel = () => {
     }
   };
 
-
   const handleProductUpdate = async (product) => {
     try {
       setIsUpdating(true);
@@ -285,7 +284,11 @@ const ProductListPanel = () => {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Update failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.err || data.message || "Update failed");
+      }
 
       // 🎉 Confetti burst for premium effect
       confetti({
@@ -299,13 +302,12 @@ const ProductListPanel = () => {
         (t) => (
           <div
             className={`
-              max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4
+              max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm pointer-events-auto flex items-center gap-3 p-4
               transform transition-all duration-300 ease-in-out
               ${t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"}
             `}
           >
-            <CheckCircle className="text-green-500" size={22} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
               Product updated successfully!
             </p>
           </div>
@@ -332,8 +334,7 @@ const ProductListPanel = () => {
               ${t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"}
             `}
           >
-            <AlertCircle className="text-red-500" size={22} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-sm font-medium text-red-700 dark:text-red-300">
               Update failed. Please try again.
             </p>
           </div>
@@ -424,21 +425,29 @@ const ProductListPanel = () => {
             <option value="stock-desc">Stock High → Low</option>
           </select>
 
-          {/* Start Date */}
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+            />
+          </div>
 
-          {/* End Date */}
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="px-3 py-2 rounded-sm text-sm text-black border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 rounded-sm text-black text-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+            />
+          </div>
           {/* Desktop Table */}
           <div className="hidden md:block bg-white overflow-x-auto">
             <table className="table-fixed w-full border-collapse">
@@ -480,14 +489,14 @@ const ProductListPanel = () => {
                     </td>
 
                     {/* Category */}
-                    <td className="px-4 py-3">{product.category}</td>
+                    <td className="px-4 py-3 ">{product.category}</td>
                     <td className="px-4 py-3 font-normal text-gray-800">
                       {currency}
                       {Number(product.offerPrice).toLocaleString()}
                     </td>
 
                     {/*Sizes & Stock*/}
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3 ">
                       <button
                         onClick={() =>
                           setStockPreview(
@@ -812,13 +821,9 @@ const ProductListPanel = () => {
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
-                      <option value="Earphone">Earphone</option>
-                      <option value="Headphone">Headphone</option>
-                      <option value="Watch">Watch</option>
-                      <option value="Smartphone">Smartphone</option>
-                      <option value="Laptop">Laptop</option>
-                      <option value="Camera">Camera</option>
-                      <option value="Accessories">Accessories</option>
+                      <option value="" disabled>Select Category</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
                     </select>
                   </div>
 
@@ -832,12 +837,14 @@ const ProductListPanel = () => {
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
-                      <option value="Earphone">Earphone</option>
-                      <option value="Headphone">Headphone</option>
+                      <option value="" disabled>Select Subcategory</option>
+                      <option value="Linen">Linen</option>
+                      <option value="Cotton">Cotton</option>
                       <option value="Watch">Watch</option>
-                      <option value="Smartphone">Smartphone</option>
-                      <option value="Laptop">Laptop</option>
-                      <option value="Camera">Camera</option>
+                      <option value="Tees">Tees</option>
+                      <option value="Sweaters">Sweaters</option>
+                      <option value="Jackets">Jackets</option>
+                      <option value="Pants">Pants</option>
                       <option value="Accessories">Accessories</option>
                     </select>
                   </div>
@@ -851,37 +858,44 @@ const ProductListPanel = () => {
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
-                      <option value="Apple">Apple</option>
-                      <option value="Samsung">Samsung</option>
-                      <option value="Sony">Sony</option>
-                      <option value="Huawei">Huawei</option>
-                      <option value="Bose">Bose</option>
-                      <option value="Infinix">Infinix</option>
-                      <option value="Xiaomi">Xiaomi</option>
-                      <option value="Tecno">Tecno</option>
-                      <option value="Other">Other</option>
+                      <option value="" disabled>Select Brand</option>
+                      <option value="Nike">Nike</option>
+                      <option value="Adidas">Adidas</option>
+                      <option value="Reebok">Reebok</option>
+                      <option value="Puma">Puma</option>
+                      <option value="Converse">Converse</option>
+                      <option value="Reebok">Reebok</option>
+                      <option value="Uniqlo">Uniqlo</option>
+                      <option value="H&M">H&M</option>
+                      <option value="Zara">Zara</option>
+                      <option value="Supreme">Supreme</option>
+                      <option value="Carhartt-WIP">Carhartt WIP</option>
+                      <option value="The-North-Face">The North Face</option>
+                      <option value="Vans">Vans</option>
+                      <option value="New-Balance">New Balance</option>
+                      <option value="Under-Armour">Under Armour</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Color */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                  <select
-                    value={editableProduct.color}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Color
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Enter product color"
+                    value={editableProduct.color || ""}
                     onChange={(e) =>
-                      setEditableProduct({ ...editableProduct, color: e.target.value })
+                      setEditableProduct({
+                        ...editableProduct,
+                        color: e.target.value,
+                      })
                     }
                     className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                  >
-                    <option value="Black">Black</option>
-                    <option value="White">White</option>
-                    <option value="Silver">Silver</option>
-                    <option value="Blue">Blue</option>
-                    <option value="Red">Red</option>
-                    <option value="Gold">Gold</option>
-                    <option value="Green">Green</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -890,29 +904,52 @@ const ProductListPanel = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ({currency})</label>
                   <input
-                    type="number"
-                    value={editableProduct.price}
-                    onChange={(e) =>
-                      setEditableProduct({
-                        ...editableProduct,
-                        price: Number(e.target.value),
-                      })
+                    id="product-price"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0"
+                    className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                    value={
+                      editableProduct.price
+                        ? Number(editableProduct.price).toLocaleString()
+                        : ""
                     }
-                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, "");
+
+                      if (/^\d*$/.test(rawValue)) {
+                        setEditableProduct({
+                          ...editableProduct,
+                          price: rawValue === "" ? "" : rawValue, // store raw number string
+                        });
+                      }
+                    }}
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Offer Price ({currency})</label>
                   <input
-                    type="number"
-                    value={editableProduct.offerPrice}
-                    onChange={(e) =>
-                      setEditableProduct({
-                        ...editableProduct,
-                        offerPrice: Number(e.target.value),
-                      })
+                    id="product-offer-price"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0"
+                    className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                    value={
+                      editableProduct.offerPrice
+                        ? Number(editableProduct.offerPrice).toLocaleString()
+                        : ""
                     }
-                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, "");
+
+                      if (/^\d*$/.test(rawValue)) {
+                        setEditableProduct({
+                          ...editableProduct,
+                          offerPrice: rawValue === "" ? "" : rawValue,
+                        });
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -1137,7 +1174,7 @@ const ProductListPanel = () => {
                 </p>
                 <p>
                   <span className="font-medium text-gray-900">Offer Price:</span>{" "}
-                  <span className="text-orange-600 font-semibold">{currency}{viewProduct.offerPrice}</span>
+                  <span className="text-gray-700 font-medium">{currency}{viewProduct.offerPrice}</span>
                 </p>
                 {/* Stock Breakdown */}
                 <div className="col-span-2">

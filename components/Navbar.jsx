@@ -11,6 +11,7 @@ import { IoIosArrowForward, IoIosArrowRoundForward } from "react-icons/io";
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
 import AvatarMenu from "./AvatarMenu";
+import Link from "next/link";
 
 
 export default function Navbar() {
@@ -41,7 +42,7 @@ export default function Navbar() {
   }, [showSignup, handleEsc]);
 
   return (
-    <header className="w-full border-b bg-white backdrop-blur-md sticky top-0 z-50">
+    <header className="w-full border-b bg-white backdrop-blur-md fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16">
 
             {/* Mobile Layout */}
@@ -75,11 +76,11 @@ export default function Navbar() {
 
             {/* Center - Logo */}
             <div className="flex justify-center group cursor-pointer">
-            <div className="text-xl font-light tracking-tight uppercase">
-                <span className="text-[var(--sage)] tracking-[0.35em] group-hover:text-zinc-700 transition">
-                MOKÉS
+            <Link href="/" className="text-xl font-light tracking-tight uppercase">
+                <span className="text-[var(--sage)] tracking-[0.35em] hover:text-zinc-700 transition">
+                    MOKÉS
                 </span>
-            </div>
+            </Link>
             </div>
 
             {/* Right - Cart */}
@@ -110,11 +111,11 @@ export default function Navbar() {
             <div className="hidden md:flex items-center justify-between h-full">
 
             {/* Logo */}
-            <div className="text-xl font-light tracking-tight uppercase">
+            <Link href="/" className="text-xl font-light tracking-tight uppercase">
                 <span className="text-[var(--sage)] tracking-[0.35em] group-hover:text-zinc-700 transition">
                 MOKÉS
                 </span>
-            </div>
+            </Link>
 
             {/* Desktop Links */}
             <nav className="flex items-center gap-8 text-sm font-normal tracking-widest font-medium uppercase">

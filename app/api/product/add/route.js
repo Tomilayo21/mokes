@@ -101,8 +101,8 @@ export async function POST(request) {
       sizes,
       color,
       brand,
-      price: Number(price),
-      offerPrice: Number(offerPrice),
+      price: Number(price || 0),
+      offerPrice: Number(offerPrice || 0),
       image: imageUrls,
       date: Date.now(),
     });

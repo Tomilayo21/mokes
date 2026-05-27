@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
+
 export default function ProductPage() {
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
@@ -77,15 +78,39 @@ export default function ProductPage() {
     setShowProgress(el.scrollWidth > el.clientWidth);
   };
 
- const relatedProducts = React.useMemo(() => {
+  const relatedProducts = React.useMemo(() => {
     if (!productData) return [];
 
     return products
-      .filter((p) => p.category === productData.category && p._id !== id)
-      .slice(0, 4)
-      .filter((p) => p.visible !== false);
-  }, [products, productData, id]);
+      .filter((p) => p._id !== id && p.visible !== false)
+      .map((p) => {
+        let score = 0;
 
+        // category match (strongest)
+        if (p.category === productData.category) score += 3;
+
+        // subcategory match
+        if (p.subcategory === productData.subcategory) score += 2;
+
+        // brand match
+        if (p.brand === productData.brand) score += 1;
+
+        // price similarity 
+        const price = Number(String(p.price).replace(/,/g, ""));
+        const basePrice = Number(String(productData.price).replace(/,/g, ""));
+
+        if (!isNaN(price) && !isNaN(basePrice) && basePrice > 0) {
+          if (Math.abs(price - basePrice) / basePrice < 0.2) {
+            score += 1;
+          }
+        }
+
+        return { ...p, score };
+      })
+      .filter((p) => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+  }, [products, productData, id]);
   
   useEffect(() => {
     checkOverflow();
@@ -100,7 +125,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <div className="flex flex-col bg-white text-black dark:bg-white dark:text-black min-h-screen text-black dark:bg-white dark:text-black min-h-screen">
+      <div className="flex flex-col bg-white mt-8 text-black dark:bg-white dark:text-black min-h-screen text-black dark:bg-white dark:text-black min-h-screen">
         {/* <div className="w-full max-w-7xl mx-auto px-4 md:px-16 lg:px-32"> */}
           <div className="px-4 md:px-16 lg:px-32 space-y-8">
             {/* Product Info */}
@@ -120,7 +145,7 @@ export default function ProductPage() {
                 <div className="relative w-full mt-3 flex items-center gap-4">
                   
                   {/* LEFT ARROW (OUTSIDE) */}
-                  {productData.image.length > 1 && (
+                  {productData.image.length > 4 && (
                     <button
                       onClick={scrollLeft}
                       className="flex-shrink-0 text-black dark:text-black
@@ -160,7 +185,7 @@ export default function ProductPage() {
                   </div>
 
                   {/* RIGHT ARROW (OUTSIDE) */}
-                  {productData.image.length > 1 && (
+                  {productData.image.length > 4 && (
                     <button
                       onClick={scrollRight}
                       className="flex-shrink-0 text-black dark:text-black
@@ -175,7 +200,7 @@ export default function ProductPage() {
               {/* Right: Product Info */}
               <div className="flex flex-col">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-light leading-snug text-black dark:text-black mb-2">
-                  {productData.category?.toUpperCase()} |{" "}
+                  {productData.brand?.toUpperCase()} |{" "}
                   {productData.name} |{" "}
                   {productData.color}
                 </h1>
@@ -214,20 +239,38 @@ export default function ProductPage() {
                     </p>
 
                     <div className="grid grid-cols-4 gap-2">
-                      {["S", "M", "L", "XL"].map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedSize(size)}
-                          className={`py-3 border text-sm transition rounded-md
-                            ${
-                              selectedSize === size
-                                ? "bg-black text-white border-black"
-                                : "bg-white text-gray-700 border-gray-300"
-                            }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
+                      {productData.sizes?.map((item) => {
+                        const isOutOfStock = item.stock === 0;
+
+                        return (
+                          <div key={item.size} className="relative group">
+                            <button
+                              type="button"
+                              disabled={isOutOfStock}
+                              onClick={() => {
+                                if (!isOutOfStock) setSelectedSize(item.size);
+                              }}
+                              className={`w-full py-3 border text-sm transition rounded-md
+                                ${
+                                  selectedSize === item.size
+                                    ? "bg-black text-white border-black"
+                                    : "bg-white text-gray-700 border-gray-300"
+                                }
+                                ${isOutOfStock ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                              `}
+                            >
+                              {item.size}
+                            </button>
+
+                            {/* Tooltip */}
+                            {isOutOfStock && (
+                              <div className="absolute left-1/2 -translate-x-1/2 -top-8 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
+                                Out of stock
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   <button
@@ -257,6 +300,7 @@ export default function ProductPage() {
 
               </div>
             </div>
+
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (

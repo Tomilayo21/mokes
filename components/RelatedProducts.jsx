@@ -7,6 +7,7 @@ import useSWR from "swr";
 import toast from "react-hot-toast";
 import { Heart, Star, XCircle, ShoppingCart, Tag, Package } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -15,7 +16,8 @@ const ProductCard = ({ product }) => {
   const user = session?.user;
   if (product.visible === false) return null;
   
-  const { currency, router, addToCart } = useAppContext();
+  const { currency, addToCart } = useAppContext();
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [likes, setLikes] = useState(product.likes || []);
   const [loading, setLoading] = useState(false);
