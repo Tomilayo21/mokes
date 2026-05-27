@@ -299,7 +299,7 @@ const AddProduct = () => {
           
           {/* Options Grid */}
           <div className="mt-8 space-y-6">
-            <h2 className="text-lg font-medium text-gray-800 mb-4 uppercase">Specifications</h2>
+            <h2 className="text-lg font-medium text-gray-800 mb-3 uppercase">Specifications</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Category */}
               <div>
