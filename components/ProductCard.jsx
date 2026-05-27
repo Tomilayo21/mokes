@@ -156,6 +156,14 @@ const ProductCard = ({ product }) => {
     addToCart(product);
   };
 
+  const toTitleCase = (str = "") => {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return (
     <div className="w-full">
       <div
@@ -196,8 +204,10 @@ const ProductCard = ({ product }) => {
         {/* === Details Section === */}
         <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
 
-        <h3 className="text-lg md:text-xl font-medium uppercase text-gray-800 tracking-wide">
-            {product.name}
+        <h3 className="text-lg md:text-xl font-light text-gray-800 tracking-wide">
+          {product.brand?.toUpperCase()} |{" "}
+          {toTitleCase(product.name)} |{" "}
+          {toTitleCase(product.color)}
         </h3>
 
         <p className="text-base text-gray-600">
