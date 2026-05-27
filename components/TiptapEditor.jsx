@@ -9,28 +9,46 @@ import Paragraph from '@tiptap/extension-paragraph';
 import Placeholder from '@tiptap/extension-placeholder';
 
 const TiptapEditor = ({ description, setDescription }) => {
+
+  const [isFocused, setIsFocused] = React.useState(false);
+
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ paragraph: false }),
-      Paragraph,
+      StarterKit,
       Underline,
       TextStyle,
+      Paragraph,
       Placeholder.configure({
-        placeholder: 'Type your message here...', // ✅ Your placeholder text
+        placeholder: "Describe your product here",
       }),
     ],
-    content: description || '',
+    content: description || "",
     onUpdate: ({ editor }) => {
-      if (typeof setDescription === 'function') {
-        setDescription(editor.getHTML());
-      }
+      setDescription?.(editor.getHTML());
     },
   });
 
   useEffect(() => {
-    if (editor && description) {
+    if (!editor) return;
+
+    if (description) {
       editor.commands.setContent(description);
     }
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleFocus = () => setIsFocused(true);
+    const handleBlur = () => setIsFocused(false);
+
+    editor.on("focus", handleFocus);
+    editor.on("blur", handleBlur);
+
+    return () => {
+      editor.off("focus", handleFocus);
+      editor.off("blur", handleBlur);
+    };
   }, [editor]);
 
   if (!editor) return null;
@@ -38,7 +56,7 @@ const TiptapEditor = ({ description, setDescription }) => {
   return (
     <div>
       {/* Toolbar */}
-      <div className="mb-2 flex flex-wrap gap-2">
+      <div className="mb-2 flex flex-wrap gap-2 text-black">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -63,8 +81,19 @@ const TiptapEditor = ({ description, setDescription }) => {
       </div>
 
       {/* Editor Content */}
-      <div className="border border-gray-300 p-2 min-h-[100px] rounded">
-        <EditorContent editor={editor} />
+      <div
+        className={`border text-black border-gray-300 min-h-[100px] rounded transition
+            ${isFocused ? "ring-2 ring-[var(--sage)] border-transparent" : ""}`}
+        >
+        <EditorContent editor={editor}
+          className="
+            tiptap
+            [&_.ProseMirror]:p-2
+            [&_.ProseMirror]:min-h-[120px]
+            [&_.ProseMirror]:outline-none
+            [&_.ProseMirror]:text-black
+          "
+        />
       </div>
     </div>
   );

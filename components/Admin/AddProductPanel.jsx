@@ -7,7 +7,6 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import TiptapEditor from "@/components/TiptapEditor";
-import { CheckCircle, XCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import slugify from "slugify";
 
@@ -66,7 +65,6 @@ const AddProduct = () => {
                 t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
               } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4 transition-all`}
             >
-              <XCircle className="text-red-500" size={22} />
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 You must be logged in
               </p>
@@ -117,15 +115,14 @@ const AddProduct = () => {
           <div
             className={`${
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4 transition-all`}
+            } max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm pointer-events-auto flex items-center gap-3 p-4 transition-all`}
           >
-            <CheckCircle className="text-orange-500" size={22} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
               Product added successfully!
             </p>
           </div>
         ),
-        { duration: 3500, position: "top-right" }
+        { duration: 3000, position: "top-right" }
       );
 
       setFiles([]);
@@ -147,8 +144,7 @@ const AddProduct = () => {
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
             } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-3 p-4 transition-all`}
           >
-            <XCircle className="text-red-500" size={22} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-sm font-medium text-red-700 dark:text-red-300">
               {error.response?.data?.message || error.message || "Upload failed"}
             </p>
           </div>
@@ -167,23 +163,24 @@ const AddProduct = () => {
         onSubmit={handleSubmit}
         className="p-6 md:p-10 max-w-4xl mx-auto space-y-8"
       >
-        <h1 className="text-2xl md:text-3xl font-normal text-gray-900">
+        <h1 className="text-xl md:text-2xl tracking-wide uppercase font-normal text-gray-900">
           Add New Product
         </h1>
 
         {/* Product Images */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            Product Images
+        <div className="bg-white shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-medium text-gray-800 mb-3 uppercase">
+            Product Gallery
           </h2>
           <p className="text-sm text-gray-500 mb-4">
             Upload up to 10 images. The first image will be the primary.
           </p>
+            {/* Image Upload */}
           <div className="flex flex-wrap items-start gap-4">
             {files.map((file, index) => (
               <div
                 key={index}
-                className="relative w-28 h-28 rounded-lg overflow-hidden shadow-sm group"
+                className="relative w-28 h-28 overflow-hidden shadow-sm group"
               >
                 <Image
                   src={URL.createObjectURL(file)}
@@ -194,7 +191,7 @@ const AddProduct = () => {
                 />
 
                 {/* Primary Badge */}
-                <span className={`absolute top-1 left-1 px-2 py-0.5 text-xs rounded-full 
+                <span className={`absolute top-1 left-1 px-2 py-0.5 text-xs 
                   ${index === 0 ? "bg-green-600 text-white" : "bg-gray-700 text-white opacity-70"}`}>
                   {index === 0 ? "Primary" : "Secondary"}
                 </span>
@@ -228,14 +225,32 @@ const AddProduct = () => {
 
             {/* Upload New */}
             {files.length < 10 && (
-              <label className="w-28 h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:border-orange-500 hover:text-orange-500 transition">
+              <label className="w-28 h-28 border-2 border-dashed border-gray-300  flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:border-[var(--sage)] hover:text-[var(--sage)] transition">
                 <input
                   type="file"
                   hidden
                   accept="image/*"
+                  multiple
                   onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) setFiles([...files, file]);
+                    const selectedFiles = Array.from(e.target.files);
+
+                    setFiles((prev) => {
+                      const combined = [...prev, ...selectedFiles];
+
+                      // optional: prevent duplicates
+                      return combined.filter(
+                        (file, index, self) =>
+                          index ===
+                          self.findIndex(
+                            (f) =>
+                              f.name === file.name &&
+                              f.size === file.size &&
+                              f.lastModified === file.lastModified
+                          )
+                      );
+                    });
+
+                    e.target.value = "";
                   }}
                 />
                 <svg
@@ -251,208 +266,194 @@ const AddProduct = () => {
               </label>
             )}
           </div>
-        </div>
 
-        {/* Product Info */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-gray-800">Product Details</h2>
+          {/* Product Info */}
+          <div className="mt-8 space-y-6">
 
-          {/* Name */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="product-name" className="text-sm font-medium text-gray-700">
-              Product Name
-            </label>
-            <input
-              id="product-name"
-              type="text"
-              placeholder="Type here"
-              className="outline-none py-2.5 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Product Description</label>
-            <TiptapEditor description={description} setDescription={setDescription} />
-          </div>
-        </div>
-
-        {/* Options Grid */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Options</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Category */}
-            <div>
-              <label htmlFor="category" className="text-sm font-medium text-gray-700">Category</label>
-              <select
-                id="category"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setCategory(e.target.value)}
-                value={category}
-              >
-                <option value="Earphone">Earphone</option>
-                <option value="Headphone">Headphone</option>
-                <option value="Watch">Watch</option>
-                <option value="Smartphone">Smartphone</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Camera">Camera</option>
-                <option value="Accessories">Accessories</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="subcategory" className="text-sm font-medium text-gray-700">Subcategory</label>
-              <select
-                id="subcategory"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setSubcategory(e.target.value)}
-                value={subcategory}
-              >
-                <option value="Earphone">Earphone</option>
-                <option value="Headphone">Headphone</option>
-                <option value="Watch">Watch</option>
-                <option value="Smartphone">Smartphone</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Camera">Camera</option>
-                <option value="Accessories">Accessories</option>
-              </select>
-            </div>
-
-            {/* Color */}
-            {/* <div>
-              <label htmlFor="color" className="text-sm font-medium text-gray-700">Color</label>
-              <select
-                id="color"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setColor(e.target.value)}
-                value={color}
-              >
-                <option value="">Select</option>
-                <option value="Red">Red</option>
-                <option value="Black">Black</option>
-                <option value="Blue">Blue</option>
-                <option value="White">White</option>
-                <option value="Gray">Gray</option>
-                <option value="Green">Green</option>
-                <option value="Yellow">Yellow</option>
-                <option value="Purple">Purple</option>
-                <option value="Pink">Pink</option>
-                <option value="Gold">Gold</option>
-                <option value="Silver">Silver</option>
-              </select>
-            </div> */}
-            <div>
-              <label
-                htmlFor="color"
-                className="text-sm font-medium text-gray-700"
-              >
-                Color
+            {/* Name */}
+            <div className="flex flex-col gap-1">
+              <label htmlFor="product-name" className="text-lg font-medium text-gray-800 mb-3 uppercase">
+                Name
               </label>
-
               <input
+                id="product-name"
                 type="text"
-                id="color"
-                placeholder="Enter product color"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
+                placeholder="Type product name"
+                className="outline-none py-2.5 px-3 text-gray-800
+                  rounded-sm 
+                  border border-gray-300 focus:ring-2 
+                  focus:ring-[var(--sage)]
+                "
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                required
               />
             </div>
 
-            {/* Brand */}
-            <div>
-              <label htmlFor="brand" className="text-sm font-medium text-gray-700">Brand</label>
-              <select
-                id="brand"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setBrand(e.target.value)}
-                value={brand}
-                required
-              >
-                <option value="Apple">Apple</option>
-                <option value="Samsung">Samsung</option>
-                <option value="Sony">Sony</option>
-                <option value="Huawei">Huawei</option>
-                <option value="Bose">Bose</option>
-                <option value="Infinix">Infinix</option>
-                <option value="Xiaomi">Xiaomi</option>
-                <option value="Tecno">Tecno</option>
-                <option value="Other">Other</option>
-              </select>
+            {/* Description */}
+            <div className="flex flex-col gap-1">
+              <label className="text-lg font-medium text-gray-800 mb-3 uppercase">Product Story</label>
+              <TiptapEditor description={description} setDescription={setDescription} />
             </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Size Inventory
-              </label>
-
-              <div className="space-y-3 mt-2">
-                {sizes.map((item, index) => (
-                  <div key={item.size} className="flex items-center gap-4">
-                    <span className="w-24">{item.size}</span>
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.stock}
-                      onChange={(e) => {
-                        const updated = [...sizes];
-                        updated[index].stock = Number(e.target.value);
-                        setSizes(updated);
-                      }}
-                      className="border px-3 py-2 rounded-lg w-28"
-                    />
-                  </div>
-                ))}
+          </div>
+          
+          {/* Options Grid */}
+          <div className="mt-8 space-y-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4 uppercase">Specifications</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Category */}
+              <div>
+                <label htmlFor="category" className="text-sm font-medium text-gray-700">Category</label>
+                <select
+                  id="category"
+                  className="w-full text-black mt-1 py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  onChange={(e) => setCategory(e.target.value)}
+                  value={category}
+                >
+                  <option value="Earphone">Earphone</option>
+                  <option value="Headphone">Headphone</option>
+                </select>
               </div>
-            </div>
 
-            {/* Prices + Stock */}
-            <div>
-              <label htmlFor="product-price" className="text-sm font-medium text-gray-700">Original Price</label>
-              <input
-                id="product-price"
-                type="number"
-                placeholder="0"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setPrice(e.target.value)}
-                value={price}
-                required
-              />
-            </div>
+                {/* SubCategory */}
+              <div>
+                <label htmlFor="subcategory" className="text-sm font-medium text-gray-700">Subcategory</label>
+                <select
+                  id="subcategory"
+                  className="w-full mt-1 py-2.5 px-3 text-black rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  onChange={(e) => setSubcategory(e.target.value)}
+                  value={subcategory}
+                >
+                  <option value="Earphone">Earphone</option>
+                  <option value="Headphone">Headphone</option>
+                  <option value="Watch">Watch</option>
+                  <option value="Smartphone">Smartphone</option>
+                  <option value="Laptop">Laptop</option>
+                  <option value="Camera">Camera</option>
+                  <option value="Accessories">Accessories</option>
+                </select>
+              </div>
 
-            <div>
-              <label htmlFor="offer-price" className="text-sm font-medium text-gray-700">Discount Price</label>
-              <input
-                id="offer-price"
-                type="number"
-                placeholder="0"
-                className="w-full mt-1 py-2.5 px-3 rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setOfferPrice(e.target.value)}
-                value={offerPrice}
-                required
-              />
-            </div>
+              {/* Color */}
+              <div>
+                <label
+                  htmlFor="color"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Color
+                </label>
 
+                <input
+                  type="text"
+                  id="color"
+                  placeholder="Enter product color"
+                  className="w-full text-black mt-1 py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                />
+              </div>
+
+              {/* Brand */}
+              <div>
+                <label htmlFor="brand" className="text-sm font-medium text-gray-700">Brand</label>
+                <select
+                  id="brand"
+                  className="w-full text-black mt-1 py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  onChange={(e) => setBrand(e.target.value)}
+                  value={brand}
+                  required
+                >
+                  <option value="Apple">Apple</option>
+                  <option value="Samsung">Samsung</option>
+                  <option value="Sony">Sony</option>
+                  <option value="Huawei">Huawei</option>
+                  <option value="Bose">Bose</option>
+                  <option value="Infinix">Infinix</option>
+                  <option value="Xiaomi">Xiaomi</option>
+                  <option value="Tecno">Tecno</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {/* Size Inventory */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Size Inventory
+                </label>
+
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {sizes.map((item, index) => (
+                    <div
+                      key={item.size}
+                      className="flex items-center gap-2 px-3 py-2 border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)] rounded-sm bg-white"
+                    >
+                      <span className="text-sm font-medium text-black">
+                        {item.size}
+                      </span>
+
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.stock}
+                        onChange={(e) => {
+                          const updated = [...sizes];
+                          updated[index].stock = Number(e.target.value);
+                          setSizes(updated);
+                        }}
+                        className="w-14 text-center text-sm outline-none text-gray-800"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prices */}
+              <div>
+                <label htmlFor="product-price" className="text-sm font-medium text-gray-700">Original Price</label>
+                <input
+                  id="product-price"
+                  type="number"
+                  placeholder="0"
+                  className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  onChange={(e) => setPrice(e.target.value)}
+                  value={price}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="offer-price" className="text-sm font-medium text-gray-700">Discount Price</label>
+                <input
+                  id="offer-price"
+                  type="number"
+                  placeholder="0"
+                  className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                  onChange={(e) => setOfferPrice(e.target.value)}
+                  value={offerPrice}
+                  required
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="mt-8 space-y-6">
+            <button
+              type="submit"
+              className="px-8 py-3 text-sm border-t border-zinc-300 cursor-pointer bg-[var(--sage)] text-white hover:bg-zinc-500 transition uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={uploading}
+            >
+              {uploading ? "Uploading..." : "Add Product"}
+            </button>
+            {/* {uploadDone && !uploading && (
+              <p className="text-orange-600 font-semibold"> <CheckCircle className="text-orange-500" size={22}/> Product uploaded successfully!</p>
+            )} */}
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={uploading}
-          >
-            {uploading ? "Uploading..." : "Add Product"}
-          </button>
-          {/* {uploadDone && !uploading && (
-            <p className="text-orange-600 font-semibold"> <CheckCircle className="text-orange-500" size={22}/> Product uploaded successfully!</p>
-          )} */}
-        </div>
+
+
       </form>
     </div>
   );

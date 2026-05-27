@@ -281,7 +281,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
               </p>
             </div>
           ), {
-            duration: 2000,
+            duration: 3000,
             position: "top-right",
           });
 
@@ -327,7 +327,6 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
             }`}
           >
-            <XCircle className="text-red-500" size={20} />
             <p className="text-sm font-medium text-red-700 dark:text-red-300">
               {err.message}
             </p>

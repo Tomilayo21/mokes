@@ -90,7 +90,12 @@ export default function NewsLetter() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-5 py-3 text-sm border-t border-zinc-300 cursor-pointer bg-[var(--sage)] text-white hover:bg-zinc-500 transition uppercase"
+            className="
+              w-full px-5 py-3 text-sm border-t border-zinc-300 
+              cursor-pointer bg-[var(--sage)] text-white 
+              hover:bg-zinc-500 transition uppercase
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
           >
             {loading ? "Subscribing..." : "Subscribe"}
           </button>
