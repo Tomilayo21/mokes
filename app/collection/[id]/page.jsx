@@ -30,7 +30,8 @@ export default function ProductPage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [canScroll, setCanScroll] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false); 
-  
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const scrollLeft = () => {
     const el = thumbRef.current;
     if (!el) return;
@@ -72,34 +73,33 @@ export default function ProductPage() {
     if (!productData) return [];
 
     return products
-    // .filter( 
-    // // (p) => 
-    // // p._id !== productData._id && 
-    // // p.slug !== productData.slug && 
-    // // p.visible !== false 
-    // // )
-      .filter((p) => p._id !== id && p.visible !== false)
-      .map((p) => {
-        let score = 0;
+    .filter( 
+      (p) => 
+      p._id !== productData._id && 
+      p.slug !== productData.slug && 
+      p.visible !== false 
+      )
+    .map((p) => {
+      let score = 0;
 
-        if (p.category === productData.category) score += 3;
-        if (p.subcategory === productData.subcategory) score += 2;
-        if (p.brand === productData.brand) score += 1;
+      if (p.category === productData.category) score += 3;
+      if (p.subcategory === productData.subcategory) score += 2;
+      if (p.brand === productData.brand) score += 1;
 
-        const price = Number(String(p.price).replace(/,/g, ""));
-        const basePrice = Number(String(productData.price).replace(/,/g, ""));
+      const price = Number(String(p.price).replace(/,/g, ""));
+      const basePrice = Number(String(productData.price).replace(/,/g, ""));
 
-        if (!isNaN(price) && !isNaN(basePrice)) {
-          if (Math.abs(price - basePrice) / basePrice < 0.2) {
-            score += 1;
-          }
+      if (!isNaN(price) && !isNaN(basePrice)) {
+        if (Math.abs(price - basePrice) / basePrice < 0.2) {
+          score += 1;
         }
+      }
 
-        return { ...p, score };
-      })
-      .filter((p) => p.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8);
+      return { ...p, score };
+    })
+    .filter((p) => p.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8);
   }, [products, productData]);
 
   useEffect(() => {
@@ -213,8 +213,13 @@ export default function ProductPage() {
                       {productData.image.map((img, i) => (
                         <div
                           key={i}
-                          onClick={() => setMainImage(img)}
-                          className="flex-shrink-0 w-[85px] sm:w-[95px] md:w-[110px] cursor-pointer transition hover:opacity-80"
+                          onClick={() => {
+                            setMainImage(img);
+                            setActiveIndex(i);
+                          }}
+                          className={`flex-shrink-0 w-[85px] sm:w-[95px] md:w-[110px] cursor-pointer transition
+                            ${activeIndex === i ? "ring-2 ring-black dark:ring-white scale-105" : "opacity-70"}
+                          `}
                         >
                           <Image
                             src={img}
