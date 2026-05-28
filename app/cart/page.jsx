@@ -27,7 +27,6 @@ const Cart = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [canScroll, setCanScroll] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false); 
-  const [productData, setProductData] = useState(null); 
   
 
   useEffect(() => {
@@ -48,55 +47,70 @@ const Cart = () => {
       .join(" ");
   };
 
-  const relatedProducts = React.useMemo(() => {
-      if (!productData) return [];
-  
+    const relatedProducts = React.useMemo(() => {
+      if (!products?.length) return [];
+
+      // Products currently in cart
+      const cartProductIds = Object.keys(cartItems);
+
+      const cartProducts = products.filter((p) =>
+        cartProductIds.includes(p._id)
+      );
+
+      // Empty cart → show latest visible products
+      if (cartProducts.length === 0) {
+        return products
+          .filter((p) => p.visible !== false)
+          .slice(0, 8);
+      }
+
       return products
-      .filter( 
-        (p) => 
-        p._id !== productData._id && 
-        p.slug !== productData.slug && 
-        p.visible !== false 
+        .filter(
+          (p) =>
+            !cartProductIds.includes(p._id) &&
+            p.visible !== false
         )
-      .map((p) => {
-        let score = 0;
-  
-        if (p.category === productData.category) score += 3;
-        if (p.subcategory === productData.subcategory) score += 2;
-        if (p.brand === productData.brand) score += 1;
-  
-        const price = Number(String(p.price).replace(/,/g, ""));
-        const basePrice = Number(String(productData.price).replace(/,/g, ""));
-  
-        if (!isNaN(price) && !isNaN(basePrice)) {
-          if (Math.abs(price - basePrice) / basePrice < 0.2) {
-            score += 1;
-          }
-        }
-  
-        return { ...p, score };
-      })
-      .filter((p) => p.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8);
-    }, [products, productData]);
-  
-    useEffect(() => {
-      const el = scrollRef.current;
-      if (!el || !productData) return;
-  
-      const check = () => {
-        const overflow = el.scrollWidth > el.clientWidth;
-  
-        // only enable scroll when items actually overflow
-        setCanScroll(overflow && relatedProducts.length > 2);
-      };
-  
-      check();
-  
-      window.addEventListener("resize", check);
-      return () => window.removeEventListener("resize", check);
-    }, [relatedProducts, productData]);
+        .map((p) => {
+          let score = 0;
+
+          cartProducts.forEach((cartProduct) => {
+            if (p.category === cartProduct.category) score += 3;
+            if (p.subcategory === cartProduct.subcategory) score += 2;
+            if (p.brand === cartProduct.brand) score += 1;
+
+            const price = Number(
+              String(p.offerPrice || p.price).replace(/,/g, "")
+            );
+
+            const cartPrice = Number(
+              String(cartProduct.offerPrice || cartProduct.price).replace(
+                /,/g,
+                ""
+              )
+            );
+
+            if (
+              !isNaN(price) &&
+              !isNaN(cartPrice) &&
+              cartPrice > 0
+            ) {
+              if (
+                Math.abs(price - cartPrice) / cartPrice <
+                0.2
+              ) {
+                score += 1;
+              }
+            }
+          });
+
+          return {
+            ...p,
+            score,
+          };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+    }, [products, cartItems]);
   
     const checkOverflow = () => {
       const el = scrollRef.current;
