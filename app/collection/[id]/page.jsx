@@ -17,89 +17,79 @@ import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 export default function ProductPage() {
   const { data: session, status } = useSession();
-  const userId = session?.user?.id;
   const { id } = useParams();
   const router = useRouter();
   const { products, addToCart, currency } = useAppContext();
-  const [productData, setProductData] = useState(null);
-  const [mainImage, setMainImage] = useState(null);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [productData, setProductData] = useState(null); 
+  const [mainImage, setMainImage] = useState(null); 
+  const [page, setPage] = useState(1); 
+  const [loading, setLoading] = useState(false); 
   const [selectedSize, setSelectedSize] = useState("M");
   const scrollRef = useRef(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const thumbRef = useRef(null);
-  const [showProgress, setShowProgress] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [canScroll, setCanScroll] = useState(false); 
+  const [hasOverflow, setHasOverflow] = useState(false); 
   
-
-  // Load product data and initial like state...
-
-  useEffect(() => {
-    if (!id || !products.length) return;
-
-    const product = products.find((p) => p.slug === id);
-    if (product) {
-      setProductData(product);
-    }
-  }, [id, products]);
-
-  const handleScroll = () => {
-    const el = scrollRef.current;
+  const scrollLeft = () => {
+    const el = thumbRef.current;
     if (!el) return;
 
-    const progress =
-      (el.scrollLeft / (el.scrollWidth - el.clientWidth)) * 100;
-
-    setScrollProgress(progress);
-  };
-
-  const scrollLeft = () => {
-    if (thumbRef.current) {
-      thumbRef.current.scrollBy({ left: -200, behavior: "smooth" });
-    }
+    el.scrollBy({
+      left: -200,
+      behavior: "smooth",
+    });
   };
 
   const scrollRight = () => {
-    if (thumbRef.current) {
-      thumbRef.current.scrollBy({ left: 200, behavior: "smooth" });
-    }
-  };
-
-  // Add to Cart
-  const handleAddToCart = () => {
-    if (status !== "authenticated") return router.push("/signup");
-    addToCart(productData);
-  };
-
-  const checkOverflow = () => {
-    const el = scrollRef.current;
+    const el = thumbRef.current;
     if (!el) return;
 
-    setShowProgress(el.scrollWidth > el.clientWidth);
+    el.scrollBy({
+      left: 200,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => 
+    { if (!id) return; 
+      if (!products || products.length === 0) 
+        return; 
+      const product = products.find( (p) => p.slug?.toLowerCase() === id?.toLowerCase() ); 
+      console.log("FOUND PRODUCT:", product); 
+      if (product) { setProductData(product); } 
+    },[id, products]
+  );
+
+  // Add to Cart 
+  const handleAddToCart = () => 
+    { if (status !== "authenticated") 
+      return router.push("/signup"); 
+      addToCart(productData); 
   };
 
   const relatedProducts = React.useMemo(() => {
     if (!productData) return [];
 
     return products
+    // .filter( 
+    // // (p) => 
+    // // p._id !== productData._id && 
+    // // p.slug !== productData.slug && 
+    // // p.visible !== false 
+    // // )
       .filter((p) => p._id !== id && p.visible !== false)
       .map((p) => {
         let score = 0;
 
-        // category match (strongest)
         if (p.category === productData.category) score += 3;
-
-        // subcategory match
         if (p.subcategory === productData.subcategory) score += 2;
-
-        // brand match
         if (p.brand === productData.brand) score += 1;
 
-        // price similarity 
         const price = Number(String(p.price).replace(/,/g, ""));
         const basePrice = Number(String(productData.price).replace(/,/g, ""));
 
-        if (!isNaN(price) && !isNaN(basePrice) && basePrice > 0) {
+        if (!isNaN(price) && !isNaN(basePrice)) {
           if (Math.abs(price - basePrice) / basePrice < 0.2) {
             score += 1;
           }
@@ -110,17 +100,76 @@ export default function ProductPage() {
       .filter((p) => p.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8);
-  }, [products, productData, id]);
-  
+  }, [products, productData]);
+
   useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !productData) return;
+
+    const check = () => {
+      const overflow = el.scrollWidth > el.clientWidth;
+
+      // only enable scroll when items actually overflow
+      setCanScroll(overflow && relatedProducts.length > 2);
+    };
+
+    check();
+
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [relatedProducts, productData]);
+
+  const checkOverflow = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const hasOverflow = el.scrollWidth > el.clientWidth;
+
+    setHasOverflow(hasOverflow);
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+
+    const progress =
+      maxScroll > 0
+        ? (el.scrollLeft / maxScroll) * 100
+        : 0;
+
+    setScrollProgress(progress);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const update = () => checkOverflow();
+
+    update(); // initial run
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+
+    window.addEventListener("resize", update);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [relatedProducts]);  
+
+  const updateScroll = () => {
     checkOverflow();
+  };
 
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
-  }, [relatedProducts]);
-
-  const canScroll = relatedProducts.length > 1 && scrollProgress > 0;
-
+  if (!id) return null; 
+  if (!productData && products.length > 0) { 
+    return 
+    ( 
+    <div className="flex items-center justify-center min-h-screen"> 
+      Product not found 
+    </div> 
+    ); 
+  } 
+  
   if (!productData) return <Loading />;
 
   return (
@@ -142,58 +191,53 @@ export default function ProductPage() {
                   />
                 </div>
 
-                <div className="relative w-full mt-3 flex items-center gap-4">
-                  
-                  {/* LEFT ARROW (OUTSIDE) */}
+                <div className="relative w-full mt-3 flex items-center gap-4 sm:gap-0">
+
+                  {/* LEFT ARROW */}
                   {productData.image.length > 4 && (
                     <button
                       onClick={scrollLeft}
-                      className="flex-shrink-0 text-black dark:text-black
-                      hover:scale-110 transition bg-transparent px-2"
+                      className="sm:hidden flex-shrink-0 text-black dark:text-black hover:scale-110 transition px-2"
                     >
                       <IoIosArrowBack size={20} />
                     </button>
                   )}
 
-                  {/* CAROUSEL CENTER */}
+                  {/* THUMBNAILS */}
                   <div className="relative flex-1 overflow-hidden">
-                    
-                    {/* THUMBNAILS */}
                     <div
                       ref={thumbRef}
-                      className={`flex gap-3 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory px-4 
-                        pl-2 sm:pl-4`}
+                      className={`flex gap-3 overflow-x-auto sm:overflow-visible sm:flex-wrap scroll-smooth scrollbar-hide snap-x snap-mandatory
+                      ${productData.image.length > 4 ? "px-2 sm:px-0" : "px-0"}`}
                     >
                       {productData.image.map((img, i) => (
                         <div
                           key={i}
                           onClick={() => setMainImage(img)}
-                          className="min-w-[85px] sm:min-w-[95px] md:min-w-[110px]
-                          cursor-pointer transition hover:opacity-80"
+                          className="flex-shrink-0 w-[85px] sm:w-[95px] md:w-[110px] cursor-pointer transition hover:opacity-80"
                         >
                           <Image
                             src={img}
                             alt={productData.name}
                             width={150}
                             height={150}
-                            className="w-full h-20 sm:h-24 object-cover border border-gray-200 dark:border-gray-700"
+                            className="w-full h-20 sm:h-24 object-cover"
                           />
                         </div>
                       ))}
                     </div>
-
                   </div>
 
-                  {/* RIGHT ARROW (OUTSIDE) */}
+                  {/* RIGHT ARROW */}
                   {productData.image.length > 4 && (
                     <button
                       onClick={scrollRight}
-                      className="flex-shrink-0 text-black dark:text-black
-                      hover:scale-110 transition bg-transparent px-2"
+                      className="sm:hidden flex-shrink-0 text-black dark:text-black hover:scale-110 transition px-2"
                     >
                       <IoIosArrowForward size={20} />
                     </button>
                   )}
+
                 </div>
               </div>
 
@@ -305,41 +349,43 @@ export default function ProductPage() {
             {/* Related Products */}
             {relatedProducts.length > 0 && (
               <section className="mt-8 md:mt-12">
-                
-                {/* Centered title */}
+
+                {/* Title */}
                 <div className="mb-6 text-center">
                   <h2 className="text-xl uppercase md:text-2xl font-normal text-gray-900 dark:text-gray-900">
                     you may like
                   </h2>
                 </div>
 
-                {/* Carousel */}
+                {/* SCROLL CONTAINER (ALWAYS FLEX — NO GRID EVER) */}
                 <div className="px-4 md:px-0 overflow-hidden">
+
                   <div
                     ref={scrollRef}
-                    onScroll={handleScroll}
-                    className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory pb-4"
+                    onScroll={updateScroll}
+                    className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory pb-4"
                   >
                     {relatedProducts.map((p) => (
                       <div
                         key={p._id}
-                        className="min-w-[150px] sm:min-w-[200px] md:min-w-[240px] snap-start transition-transform hover:scale-[1.03]"
+                        className="flex-none w-[150px] sm:w-[200px] md:w-[240px] snap-start"
                       >
                         <RelatedProducts product={p} />
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 relative rounded-full overflow-hidden">
-                {canScroll && (
-                  <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 relative rounded-full overflow-hidden">
+
+                {/* PROGRESS BAR (ONLY IF OVERFLOW EXISTS) */}
+                {hasOverflow && (
+                  <div className="w-full h-[2px] bg-gray-200 dark:bg-gray-800 mt-2 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-black dark:bg-white transition-all duration-150"
+                      className="h-full bg-black transition-all duration-150"
                       style={{ width: `${scrollProgress}%` }}
                     />
                   </div>
                 )}
-                </div>
+
               </section>
             )}
           </div>
