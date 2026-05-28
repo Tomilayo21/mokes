@@ -27,7 +27,15 @@ const Cart = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [canScroll, setCanScroll] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false); 
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
   
+  useEffect(() => {
+    const viewed = JSON.parse(
+      localStorage.getItem("recentlyViewed") || "[]"
+    );
+
+    setRecentlyViewedIds(viewed);
+  }, []);
 
   useEffect(() => {
     // small delay to wait for context to hydrate
@@ -47,111 +55,117 @@ const Cart = () => {
       .join(" ");
   };
 
-    const relatedProducts = React.useMemo(() => {
-      if (!products?.length) return [];
+  const relatedProducts = React.useMemo(() => {
+    if (!products?.length) return [];
 
-      // Products currently in cart
-      const cartProductIds = Object.keys(cartItems);
+    const cartProductIds = Object.keys(cartItems);
 
-      const cartProducts = products.filter((p) =>
-        cartProductIds.includes(p._id)
-      );
+    const viewedProducts = recentlyViewedIds
+      .map((id) => products.find((p) => p._id === id))
+      .filter(Boolean);
 
-      // Empty cart → show latest visible products
-      if (cartProducts.length === 0) {
-        return products
-          .filter((p) => p.visible !== false)
-          .slice(0, 8);
-      }
+    // Build recommendations first
+    const recommendations = products
+      .filter(
+        (p) =>
+          !cartProductIds.includes(p._id) &&
+          !recentlyViewedIds.includes(p._id) &&
+          p.visible !== false
+      )
+      .map((p) => {
+        let score = 0;
 
+        viewedProducts.forEach((viewed) => {
+          if (p.category === viewed.category) score += 3;
+          if (p.subcategory === viewed.subcategory) score += 2;
+          if (p.brand === viewed.brand) score += 1;
+
+          const price = Number(
+            String(p.offerPrice || p.price).replace(/,/g, "")
+          );
+
+          const viewedPrice = Number(
+            String(viewed.offerPrice || viewed.price).replace(/,/g, "")
+          );
+
+          if (
+            !isNaN(price) &&
+            !isNaN(viewedPrice) &&
+            viewedPrice > 0
+          ) {
+            if (
+              Math.abs(price - viewedPrice) / viewedPrice < 0.2
+            ) {
+              score += 1;
+            }
+          }
+        });
+
+        return { ...p, score };
+      })
+      .filter((p) => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+
+    // Fallback: newest products if no good matches
+    if (recommendations.length === 0) {
       return products
         .filter(
           (p) =>
             !cartProductIds.includes(p._id) &&
             p.visible !== false
         )
-        .map((p) => {
-          let score = 0;
-
-          cartProducts.forEach((cartProduct) => {
-            if (p.category === cartProduct.category) score += 3;
-            if (p.subcategory === cartProduct.subcategory) score += 2;
-            if (p.brand === cartProduct.brand) score += 1;
-
-            const price = Number(
-              String(p.offerPrice || p.price).replace(/,/g, "")
-            );
-
-            const cartPrice = Number(
-              String(cartProduct.offerPrice || cartProduct.price).replace(
-                /,/g,
-                ""
-              )
-            );
-
-            if (
-              !isNaN(price) &&
-              !isNaN(cartPrice) &&
-              cartPrice > 0
-            ) {
-              if (
-                Math.abs(price - cartPrice) / cartPrice <
-                0.2
-              ) {
-                score += 1;
-              }
-            }
-          });
-
-          return {
-            ...p,
-            score,
-          };
-        })
-        .sort((a, b) => b.score - a.score)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        )
         .slice(0, 8);
-    }, [products, cartItems]);
-  
-    const checkOverflow = () => {
-      const el = scrollRef.current;
-      if (!el) return;
-  
-      const hasOverflow = el.scrollWidth > el.clientWidth;
-  
-      setHasOverflow(hasOverflow);
-  
-      const maxScroll = el.scrollWidth - el.clientWidth;
-  
-      const progress =
-        maxScroll > 0
-          ? (el.scrollLeft / maxScroll) * 100
-          : 0;
-  
-      setScrollProgress(progress);
+    }
+
+    return recommendations;
+  }, [products, cartItems, recentlyViewedIds]);
+
+  const checkOverflow = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const hasOverflow = el.scrollWidth > el.clientWidth;
+
+    setHasOverflow(hasOverflow);
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+
+    const progress =
+      maxScroll > 0
+        ? (el.scrollLeft / maxScroll) * 100
+        : 0;
+
+    setScrollProgress(progress);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const update = () => checkOverflow();
+
+    update(); // initial run
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+
+    window.addEventListener("resize", update);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
     };
-  
-    useEffect(() => {
-      const el = scrollRef.current;
-      if (!el) return;
-  
-      const update = () => checkOverflow();
-  
-      update(); // initial run
-  
-      const observer = new ResizeObserver(update);
-      observer.observe(el);
-  
-      window.addEventListener("resize", update);
-  
-      return () => {
-        observer.disconnect();
-        window.removeEventListener("resize", update);
-      };
-    }, [relatedProducts]);  
-  
-    const updateScroll = () => {
-      checkOverflow();
-    };
+  }, [relatedProducts]);  
+
+  const updateScroll = () => {
+    checkOverflow();
+  };
+
 
 
   return (

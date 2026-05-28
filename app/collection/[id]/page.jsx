@@ -180,6 +180,27 @@ export default function ProductPage() {
     checkOverflow();
   };
 
+  useEffect(() => {
+    if (!productData?._id) return;
+
+    const existing = JSON.parse(
+      localStorage.getItem("recentlyViewed") || "[]"
+    );
+
+    // Remove duplicates
+    const filtered = existing.filter(
+      (id) => id !== productData._id
+    );
+
+    // Add current product to the front
+    const updated = [productData._id, ...filtered].slice(0, 20);
+
+    localStorage.setItem(
+      "recentlyViewed",
+      JSON.stringify(updated)
+    );
+  }, [productData]);
+  
   if (!id) return null; 
   if (!productData && products.length > 0) { 
     return 
@@ -189,7 +210,7 @@ export default function ProductPage() {
     </div> 
     ); 
   } 
-  
+
   if (!productData) return <Loading />;
 
   return (
