@@ -302,12 +302,12 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
         toast.custom(
           (t) => (
             <div
-              className={`max-w-md w-full bg-yellow-50 dark:bg-yellow-900 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
                 t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
               }`}
             >
               <CheckCircle className="text-yellow-600" size={20} />
-              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              <p className="text-sm font-medium text-[var(--sage)] dark:text-[var(--sage">
                 Reset link sent! Check your email.
               </p>
             </div>
@@ -323,7 +323,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
       toast.custom(
         (t) => (
           <div
-            className={`max-w-md w-full bg-red-50 dark:bg-red-900 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
+            className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
             }`}
           >

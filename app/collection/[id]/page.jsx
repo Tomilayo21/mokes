@@ -24,7 +24,7 @@ export default function ProductPage() {
   const [mainImage, setMainImage] = useState(null); 
   const [page, setPage] = useState(1); 
   const [loading, setLoading] = useState(false); 
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedSize, setSelectedSize] = useState("");
   const scrollRef = useRef(null);
   const thumbRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -63,10 +63,30 @@ export default function ProductPage() {
   );
 
   // Add to Cart 
-  const handleAddToCart = () => 
-    { if (status !== "authenticated") 
-      return router.push("/signup"); 
-      addToCart(productData); 
+  const handleAddToCart = () => {
+    if (status !== "authenticated") {
+      return router.push("/signup");
+    }
+
+    if (!selectedSize) {
+      toast.custom(
+        (t) => (
+          <div
+            className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            }`}
+          >
+            <p className="text-sm font-medium text-red-700 dark:text-red-300">
+              Please select a size
+            </p>
+          </div>
+        ),
+        { duration: 4000, position: "top-right" }
+      );
+      return;
+    }
+
+    addToCart(productData, selectedSize);
   };
 
   const relatedProducts = React.useMemo(() => {
@@ -331,13 +351,13 @@ export default function ProductPage() {
                   </button>
 
                   {productData.stock > 0 && (
-                  <Link
-                    href="/cart"
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-500 text-sm hover:text-black  transition"
-                  >
-                    Go to Cart
-                    <ArrowRight size={18} />
-                  </Link>
+                    <Link
+                      href="/cart"
+                      className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-500 text-sm hover:text-black  transition"
+                    >
+                      Go to Cart
+                      <ArrowRight size={18} />
+                    </Link>
                   )}
                 </div>
 

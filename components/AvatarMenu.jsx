@@ -8,7 +8,6 @@ import { useSession, signOut } from "next-auth/react";
 import DeleteAccountModal from "./DeleteAccountModal";
 import ActiveDevices from "./ActiveDevices";
 import Link from "next/link";
-import { useAppContext } from "@/context/AppContext";
 import { UAParser } from "ua-parser-js";
 import toast from "react-hot-toast";
 import { XCircle, CheckCircle } from "lucide-react";
@@ -21,11 +20,10 @@ export default function AvatarMenu() {
   const { data: session, status } = useSession();
   const isLoading = status === "loading";
   const isGoogleUser = session?.user?.authProvider === "google";
-
+  
 
   const router = useRouter();
   const user = session?.user;
-  // const { getCartCount } = useAppContext();
 
   const menuRef = useRef(null);
 
@@ -348,6 +346,25 @@ export default function AvatarMenu() {
 
           {/* Actions */}
           <div className="flex flex-col py-2">
+
+            {mounted && user ? (
+              <>
+                <Link
+                  href="/my-orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
+                >
+                  My Orders
+                </Link>
+                <Link
+                  href="/favorites"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
+                >
+                  Favorites
+                </Link>
+              </>
+            ) : null }
 
             <button
               onClick={() => {

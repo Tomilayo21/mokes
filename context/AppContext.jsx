@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { ShoppingCart } from "lucide-react";
 
 export const AppContext = createContext();
 export const useAppContext = () => useContext(AppContext);
@@ -16,6 +15,7 @@ export const AppContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const currency = process.env.NEXT_PUBLIC_CURRENCY || "₦";
   const [rememberMe, setRememberMe] = useState(false);
+
   // -------------------- Auth --------------------
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -90,9 +90,6 @@ export const AppContextProvider = ({ children }) => {
     }
   }, []);
 
-
- 
-
     // -------------------- Products --------------------
     const [products, setProducts] = useState([]);
     
@@ -111,6 +108,151 @@ export const AppContextProvider = ({ children }) => {
       fetchData();
     }, []);
 
+     // -------------------- Products & Cart --------------------
+    const [cartItems, setCartItems] = useState({});
+
+    
+    useEffect(() => {
+      const savedCart = localStorage.getItem("cartItems");
+      if (savedCart) setCartItems(JSON.parse(savedCart));
+    }, []);
+    
+    useEffect(() => {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+      // If user is logged in, update MongoDB
+      if (status === "authenticated") {
+        const updateDBCart = async () => {
+          try {
+            await axios.post(
+              "/api/cart/update",
+              { cartData: cartItems },
+              { headers: { Authorization: `Bearer ${session.user.id}` } }
+            );
+          } catch (err) {
+            console.error("Failed to update cart in DB:", err);
+          }
+        };
+
+        updateDBCart();
+      }
+    }, [cartItems, status, session]);
+
+    // const addToCart = async (product) => {
+    //   const itemId = product._id;
+    //   let cartData = structuredClone(cartItems);
+    //   cartData[itemId] = (cartData[itemId] || 0) + 1;
+    //   setCartItems(cartData);
+
+    //   toast.custom(
+    //     (t) => (
+    //       <div
+    //         className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+    //           t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+    //         }`}
+    //       >
+    //         <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">Item added to cart</p>
+    //       </div>
+    //     ),
+    //     { duration: 3000, position: "top-right" }
+    //   );
+    // };
+
+    const addToCart = async (product, size) => {
+      const itemId = product._id;
+
+      let cartData = structuredClone(cartItems);
+
+      if (!cartData[itemId]) {
+        cartData[itemId] = {};
+      }
+
+      cartData[itemId][size] =
+        (cartData[itemId][size] || 0) + 1;
+
+      setCartItems(cartData);
+      toast.custom(
+        (t) => (
+          <div
+            className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            }`}
+          >
+            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800"> Added size {size} to cart</p>
+          </div>
+        ),
+        { duration: 3000, position: "top-right" }
+      );
+    };
+
+
+    // const updateCartQuantity = (productId, quantity) => {
+    //   const updated = { ...cartItems };
+    //   if (quantity <= 0) delete updated[productId];
+    //   else updated[productId] = quantity;
+    //   setCartItems(updated);
+    // };
+
+    const updateCartQuantity = (
+      productId,
+      size,
+      quantity
+    ) => {
+      const updated = structuredClone(cartItems);
+
+      if (!updated[productId]) return;
+
+      if (quantity <= 0) {
+        delete updated[productId][size];
+
+        if (Object.keys(updated[productId]).length === 0) {
+          delete updated[productId];
+        }
+      } else {
+        updated[productId][size] = quantity;
+      }
+
+      setCartItems(updated);
+    };
+
+    // const getCartCount = () => Object.values(cartItems).reduce((a, b) => a + b, 0);
+    const getCartCount = () => {
+      let total = 0;
+
+      Object.values(cartItems).forEach((sizes) => {
+        Object.values(sizes).forEach((qty) => {
+          total += qty;
+        });
+      });
+
+      return total;
+    };
+
+    const getCartAmount = () => {
+      let total = 0;
+      // for (const itemId in cartItems) {
+      //   const product = products.find((p) => p._id === itemId);
+      //   if (product) total += (product.offerPrice || 0) * cartItems[itemId];
+      // }
+      for (const itemId in cartItems) {
+        const product = products.find(
+          (p) => p._id === itemId
+        );
+
+        if (!product) continue;
+
+        const sizes = cartItems[itemId];
+
+        for (const size in sizes) {
+          total +=
+            (product.offerPrice || 0) *
+            sizes[size];
+        }
+      }
+      return Math.round(total * 100) / 100;
+    };
+
+
   const value = {
     currentUser,
     loginUser,
@@ -120,6 +262,12 @@ export const AppContextProvider = ({ children }) => {
     loading,
     products,
     setProducts,
+    cartItems,
+    setCartItems,
+    addToCart,
+    updateCartQuantity,
+    getCartCount,
+    getCartAmount,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -45,10 +45,10 @@ export default function Navbar() {
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button className="group flex items-center cursor-pointer uppercase gap-2">
-                    <IoIosArrowRoundForward className="w-6 h-6 text-gray-300 origin-left transition-all duration-300 group-hover:scale-x-125 group-hover:translate-x-1" />
-                    Explore Collections
-                </button>
+                    <button className="group flex items-center cursor-pointer uppercase gap-2">
+                        <IoIosArrowRoundForward className="w-6 h-6 text-gray-300 origin-left transition-all duration-300 group-hover:scale-x-125 group-hover:translate-x-1" />
+                        Explore Collections
+                    </button>
                 </div>
 
             </div>

@@ -12,12 +12,15 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
 import AvatarMenu from "./AvatarMenu";
 import Link from "next/link";
+import { useAppContext } from "@/context/AppContext";
+import { HiOutlineShoppingBag } from "react-icons/hi2"
 
 
 export default function Navbar() {
   const { data: session, status } = useSession(); 
   const user = session?.user
   const router = useRouter();
+ const { getCartCount } = useAppContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCollections, setOpenCollections] = useState(false);
@@ -91,7 +94,6 @@ export default function Navbar() {
                         (user ? (
                             <>
                                 <AvatarMenu/>
-                                {/* <p>Hi</p> */}
                             </>
                         ) :(
                             <button
@@ -102,8 +104,27 @@ export default function Navbar() {
                             </button>
                         ))
                     }
-                    <SlBag className="w-4 h-4 relative text-sm hover:text-black text-black transition"
-                    />
+                    <Link href="/cart" className="relative inline-flex">
+                        <HiOutlineShoppingBag className="w-4 h-4 text-black hover:text-black/60 transition" />
+
+                        {getCartCount() > 0 && (
+                            <span
+                            className="
+                                absolute -top-2 -right-2
+                                min-w-[16px] h-4
+                                px-1
+                                flex items-center justify-center
+                                rounded-full
+                                bg-black text-white
+                                text-[10px] font-medium
+                                leading-none
+                            "
+                            >
+                            {getCartCount()}
+                            </span>
+                        )}
+                    </Link>
+                    
                 </div>
             </div>
 
@@ -153,9 +174,28 @@ export default function Navbar() {
                     ))
                 }
                 {/* <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/> */}
-                <SlBag className="w-4 h-4 text-black hover:text-black/60 transition"
+                <Link href="/cart" className="relative inline-flex">
+                    <HiOutlineShoppingBag className="w-4 h-4 text-black hover:text-black/60 transition" />
 
-                />
+                    {getCartCount() > 0 && (
+                        <span
+                        className="
+                            absolute -top-2 -right-2
+                            min-w-[16px] h-4
+                            px-1
+                            flex items-center justify-center
+                            rounded-full
+                            bg-black text-white
+                            text-[10px] font-medium
+                            leading-none
+                        "
+                        >
+                        {getCartCount()}
+                        </span>
+                    )}
+                </Link>
+
+
             </div>
             </div>
         </div>
