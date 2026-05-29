@@ -67,6 +67,8 @@ export default function FilterBar({ displayCount, totalCount }: FilterBarProps) 
     return chips;
   }, [searchParams]);
 
+  
+
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       {/* === Summary Chips (Now Above Filters) === */}
@@ -305,7 +307,6 @@ export default function FilterBar({ displayCount, totalCount }: FilterBarProps) 
             items
           </p>
         </div>
-
 
       </div>
     </div>

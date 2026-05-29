@@ -35,6 +35,7 @@ const AllProducts = () => {
   const maxRaw = searchParams.get("max");
   const type = searchParams.get("type") || "";
   const category = searchParams.get("category") || "";
+  const subcategory = searchParams.get("subcategory") || "";
   const brand = searchParams.get("brand") || "";
   const color = searchParams.get("color") || "";
   const searchQuery = searchParams.get("search") || "";
@@ -49,10 +50,25 @@ const AllProducts = () => {
     let filtered = [...products];
 
     if (type) filtered = filtered.filter((p) => p.type === type);
-    if (category) filtered = filtered.filter((p) => p.category === category);
     if (brand) filtered = filtered.filter((p) => p.brand?.toLowerCase() === brand.toLowerCase());
-    if (color) filtered = filtered.filter((p) => p.color?.toLowerCase() === color.toLowerCase());
+    if (category) {
+      filtered = filtered.filter(
+        (p) => p.category?.toLowerCase() === category.toLowerCase()
+      );
+    }
 
+    if (subcategory) {
+      filtered = filtered.filter(
+        (p) => p.subcategory?.toLowerCase() === subcategory.toLowerCase()
+      );
+    }
+
+    if (color) {
+      filtered = filtered.filter(
+        (p) => p.color?.toLowerCase() === color.toLowerCase()
+      );
+    }
+    
     filtered = filtered.filter((p) => {
       const offerPrice = typeof p.offerPrice === "string" ? parseFloat(p.offerPrice) : p.offerPrice;
       return !isNaN(offerPrice) && offerPrice >= min && offerPrice <= max;
@@ -77,7 +93,19 @@ const AllProducts = () => {
     }
 
     return filtered;
-  }, [products, type, category, brand, color, min, max, searchQuery, sort]);
+  }, 
+  [
+    products, 
+    type, 
+    category, 
+    subcategory, 
+    brand, 
+    color, 
+    min, 
+    max, 
+    searchQuery, 
+    sort
+  ]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
