@@ -34,13 +34,15 @@ const AllProducts = () => {
   const minRaw = searchParams.get("min");
   const maxRaw = searchParams.get("max");
   const type = searchParams.get("type") || "";
-  const category = searchParams.get("category") || "";
-  const subcategory = searchParams.get("subcategory") || "";
+  // const category = searchParams.get("category") || "";
+  // const subcategory = searchParams.get("subcategory") || "";
   const brand = searchParams.get("brand") || "";
   const color = searchParams.get("color") || "";
   const searchQuery = searchParams.get("search") || "";
   const sort = searchParams.get("sort") || "";
   const pageRaw = searchParams.get("page");
+  const category = searchParams.get("category") || "";
+  const subcategory = searchParams.get("subcategory") || "";
 
   const min = minRaw !== null && !isNaN(parseFloat(minRaw)) ? parseFloat(minRaw) : 0;
   const max = maxRaw !== null && !isNaN(parseFloat(maxRaw)) ? parseFloat(maxRaw) : Infinity;
@@ -50,7 +52,12 @@ const AllProducts = () => {
     let filtered = [...products];
 
     if (type) filtered = filtered.filter((p) => p.type === type);
-    if (brand) filtered = filtered.filter((p) => p.brand?.toLowerCase() === brand.toLowerCase());
+    if (brand)
+      filtered = filtered.filter(
+        (p) => p.brand?.toLowerCase() === brand.toLowerCase()
+      );
+
+    // ✅ unified filter (category + subcategory + color + name)
     if (category) {
       filtered = filtered.filter(
         (p) => p.category?.toLowerCase() === category.toLowerCase()
@@ -59,7 +66,9 @@ const AllProducts = () => {
 
     if (subcategory) {
       filtered = filtered.filter(
-        (p) => p.subcategory?.toLowerCase() === subcategory.toLowerCase()
+        (p) =>
+          (p.subCategory || p.subcategory)?.toLowerCase() ===
+          subcategory.toLowerCase()
       );
     }
 
@@ -68,19 +77,31 @@ const AllProducts = () => {
         (p) => p.color?.toLowerCase() === color.toLowerCase()
       );
     }
-    
     filtered = filtered.filter((p) => {
-      const offerPrice = typeof p.offerPrice === "string" ? parseFloat(p.offerPrice) : p.offerPrice;
+      const offerPrice =
+        typeof p.offerPrice === "string"
+          ? parseFloat(p.offerPrice)
+          : p.offerPrice;
+
       return !isNaN(offerPrice) && offerPrice >= min && offerPrice <= max;
     });
 
-    if (sort === "asc price") {
+    if (sort === "asc alpha") {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } 
+    else if (sort === "desc alpha") {
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+    } 
+    else if (sort === "asc price") {
       filtered.sort((a, b) => parseFloat(a.offerPrice) - parseFloat(b.offerPrice));
-    } else if (sort === "desc price") {
+    } 
+    else if (sort === "desc price") {
       filtered.sort((a, b) => parseFloat(b.offerPrice) - parseFloat(a.offerPrice));
-    } else if (sort === "asc date") {
+    } 
+    else if (sort === "asc date") {
       filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } else if (sort === "desc date") {
+    } 
+    else if (sort === "desc date") {
       filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
 
@@ -93,18 +114,17 @@ const AllProducts = () => {
     }
 
     return filtered;
-  }, 
-  [
-    products, 
-    type, 
-    category, 
-    subcategory, 
-    brand, 
-    color, 
-    min, 
-    max, 
-    searchQuery, 
-    sort
+  }, [
+    products,
+    type,
+    brand,
+    category,
+    subcategory,
+    color,
+    min,
+    max,
+    searchQuery,
+    sort,
   ]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
@@ -150,12 +170,12 @@ const AllProducts = () => {
 
         {/* Filters */}
         <div className="mt-6 w-full bg-white p-4">
-          <Filter 
-            searchQuery={searchQuery} 
-            brand={brand} 
-            color={color} 
+          <Filter
+            products={products}
+            searchQuery={searchQuery}
+            brand={brand}
             displayCount={filteredProducts.length}
-            totalCount={products.length} 
+            totalCount={products.length}
           />
         </div>
         
