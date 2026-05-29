@@ -18,7 +18,7 @@ export default function Footer() {
   return (
     <footer className="w-full border-t border-zinc-200 mt-24 bg-gray-50 text-black">
       
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-16">
+      <div className="max-w-7xl mx-auto px-8 md:px-8 lg:px-8 py-16">
 
         {/* TOP SECTION */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">

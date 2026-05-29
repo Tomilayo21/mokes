@@ -92,23 +92,6 @@ const AllProducts = () => {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // const fontSizeClass = {
-  //   small: "text-sm",
-  //   medium: "text-base",
-  //   large: "text-lg",
-  // }[fontSize] || "text-base";
-  const fontSizeClass =
-  fontSize === 'small'
-    ? 'font-size-small'
-    : fontSize === 'large'
-    ? 'font-size-large'
-    : 'font-size-medium';
-
-  const productLayoutClass =
-    effectiveLayout === "list"
-      ? "flex flex-col gap-6"
-      : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4";
-
   if (loading) {
     return (
       <>
@@ -126,27 +109,26 @@ const AllProducts = () => {
     <>
       {/* <Navbar /> */}
       {/* <ProductSlider /> */}
-      <div className="flex flex-col items-start px-6 md:px-16 mt-10 lg:px-32 pt-8">
+      <div className="flex flex-col items-start px-4 md:px-8 mt-10 lg:px-8 pt-8">
         {/* Header */}
-        <div className="w-full flex items-center justify-between border-b pb-6">
-          <div>
-            <h2
-              className={`font-semibold text-2xl md:text-3xl ${fontSizeClass} flex items-center gap-2`}
-              style={{ color: secondaryColor }}
-            >
-              {/* <PackageSearch className="w-6 h-6 text-orange-600" /> */}
-              All Products
-            </h2>
-            {/* <div
-              className="w-20 h-1 rounded-full mt-2"
-              style={{ backgroundColor: themeColor }}
-            ></div> */}
+        <div className="w-full flex items-center justify-center border-b pb-6">
+          {/* HEADER */}
+          <div className="text-center">
+            <p className="text-sm md:text-lg text-black uppercase tracking-[0.25em]">
+              products
+            </p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="mt-6 w-full bg-white shadow-sm border rounded-xl p-4">
-          {/* <Filter searchQuery={searchQuery} brand={brand} color={color} /> */}
+        <div className="mt-6 w-full bg-white p-4">
+          <Filter 
+            searchQuery={searchQuery} 
+            brand={brand} 
+            color={color} 
+            displayCount={filteredProducts.length}
+            totalCount={products.length} 
+          />
         </div>
         
         {/* Products / Empty State */}
@@ -161,7 +143,13 @@ const AllProducts = () => {
             </p>
           </div>
         ) : (
-          <div className={`${productLayoutClass} mt-12 pb-14 w-full gap-6`}>
+          <div 
+            className="
+                mt-12 pb-14 w-full grid grid-cols-2 
+                sm:grid-cols-3 lg:grid-cols-4 gap-y-4 gap-x-4 sm:gap-6 
+                lg:gap-8 w-full max-w-7xl
+              "
+            >
             {paginatedProducts.map((product, index) => (
               <ProductCard key={index} product={product} />
             ))}

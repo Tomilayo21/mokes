@@ -204,7 +204,7 @@ const ProductCard = ({ product }) => {
         {/* === Details Section === */}
         <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
 
-        <h3 className="text-lg md:text-xl font-light text-gray-800 tracking-wide">
+        <h3 className="text-lg md:text-xl font-light text-black tracking-wide">
           {product.brand?.toUpperCase()} |{" "}
           {toTitleCase(product.name)} |{" "}
           {toTitleCase(product.color)}
