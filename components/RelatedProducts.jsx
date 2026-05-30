@@ -124,7 +124,7 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = () => {
     if (!user) {
       toast.error("Please log in to add items to your cart.");
-      router.push("/signup");
+      router.push("/authentication");
       return;
     }
     addToCart(product);

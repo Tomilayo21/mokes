@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   User,
   Mail,
@@ -26,7 +26,9 @@ import Image from "next/image";
 
 
 export default function AuthForm({ initialMode = "login", onSuccess }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [mode, setMode] = useState(initialMode); // signup | login | forgot | reset
 
   const [form, setForm] = useState({
@@ -212,7 +214,10 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
             email: form.email,
             password: form.password,
           });
-
+          if (!res.error) {
+            router.push(callbackUrl); 
+            return;
+          }
           if (res.error) {
             let message = "Login failed";
 
@@ -285,9 +290,11 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
             position: "top-right",
           });
 
-          if (onSuccess) onSuccess();
-          window.location.href = "/";
-
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+            router.push(callbackUrl); // 🔥 redirect back to page user came from
+          }, 500);
       } else if (mode === "forgot") {
         // Forgot password mode
         const res = await fetch("/api/auth/forgot-password", {
@@ -391,7 +398,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
             <>
               <button
                 type="button"
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => signIn("google", { callbackUrl, })}
                 className="w-full py-3 border text-gray-900 border-gray-300 rounded-sm flex items-center justify-center gap-3 hover:bg-gray-50 transition mb-4"
               >
                 <FcGoogle alt="Google" className="w-5 h-5" />

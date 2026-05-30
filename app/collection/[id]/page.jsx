@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 import RelatedProducts from "@/components/RelatedProducts";
@@ -19,6 +19,8 @@ export default function ProductPage() {
   const { data: session, status } = useSession();
   const { id } = useParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { products, addToCart, currency } = useAppContext();
   const [productData, setProductData] = useState(null); 
   const [mainImage, setMainImage] = useState(null); 
@@ -65,7 +67,15 @@ export default function ProductPage() {
   // Add to Cart 
   const handleAddToCart = () => {
     if (status !== "authenticated") {
-      return router.push("/signup");
+      const currentUrl =
+        pathname +
+        (searchParams.toString()
+          ? `?${searchParams.toString()}`
+          : "");
+
+      return router.push(
+        `/authentication?callbackUrl=${encodeURIComponent(currentUrl)}`
+      );
     }
 
     if (!selectedSize) {
@@ -76,7 +86,7 @@ export default function ProductPage() {
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="text-sm font-medium text-red-700 dark:text-red-300">
+            <p className="text-sm font-medium text-red-800 dark:text-red-800">
               Please select a size
             </p>
           </div>

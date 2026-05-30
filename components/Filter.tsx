@@ -237,27 +237,9 @@ export default function FilterBar({
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6">
         {/* Left section: Filters */}
         <div className="w-full md:w-auto">
-          {/* Mobile Toggle */}
-          <button
-            className="flex items-center justify-between w-full md:hidden bg-white py-3"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-black" />
-              <span className="text-sm font-normal text-black">Filters</span>
-            </div>
-            <span className="text-xs text-gray-500 cursor-pointer">
-              {showFilters ? "Hide" : "Show"}
-            </span>
-          </button>
-
           {/* Accordion Body */}
-          <div
-            className={`transition-all duration-300 ${
-              showFilters ? "max-h-screen mt-3" : "max-h-0 overflow-hidden"
-            } md:max-h-none md:mt-0`}
-          >
-            <div className="flex flex-col sm:flex-row flex-wrap items-start gap-4 bg-white px-4 py-3">
+          <div>
+            <div className="flex flex-col sm:flex-row flex-wrap items-start gap-4 bg-white py-3">
               <div className="flex flex-col w-full sm:w-auto">
                 <label className="text-xs font-medium text-gray-500 mb-1 block">
                   Filter by

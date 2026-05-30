@@ -51,7 +51,7 @@ function renderPage(title, message, isSuccess = false) {
           <div class="card">
             <h1>${title}</h1>
             <p>${message}</p>
-            <a href="/signup">Go to Signup Page</a>
+            <a href="/authentication">Go to Signup Page</a>
           </div>
         </body>
       </html>

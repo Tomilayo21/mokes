@@ -50,7 +50,7 @@ export const AppContextProvider = ({ children }) => {
 
   const signupUser = async (formData) => {
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/authentication", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -137,8 +137,6 @@ export const AppContextProvider = ({ children }) => {
         updateDBCart();
       }
     }, [cartItems, status, session]);
-
-    // const addToCart = async (product) => {
     //   const itemId = product._id;
     //   let cartData = structuredClone(cartItems);
     //   cartData[itemId] = (cartData[itemId] || 0) + 1;
@@ -178,15 +176,15 @@ export const AppContextProvider = ({ children }) => {
               t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800"> Added size {size} to cart</p>
+            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
+              Added <span className="lowercase">{size}</span> size to cart
+            </p>
           </div>
         ),
         { duration: 3000, position: "top-right" }
       );
     };
 
-
-    // const updateCartQuantity = (productId, quantity) => {
     //   const updated = { ...cartItems };
     //   if (quantity <= 0) delete updated[productId];
     //   else updated[productId] = quantity;
@@ -215,7 +213,6 @@ export const AppContextProvider = ({ children }) => {
       setCartItems(updated);
     };
 
-    // const getCartCount = () => Object.values(cartItems).reduce((a, b) => a + b, 0);
     const getCartCount = () => {
       let total = 0;
 
@@ -230,10 +227,6 @@ export const AppContextProvider = ({ children }) => {
 
     const getCartAmount = () => {
       let total = 0;
-      // for (const itemId in cartItems) {
-      //   const product = products.find((p) => p._id === itemId);
-      //   if (product) total += (product.offerPrice || 0) * cartItems[itemId];
-      // }
       for (const itemId in cartItems) {
         const product = products.find(
           (p) => p._id === itemId
