@@ -7,6 +7,7 @@ import {
   useRouter,
 } from "next/navigation";
 
+
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";

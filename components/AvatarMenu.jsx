@@ -357,11 +357,11 @@ export default function AvatarMenu() {
                   My Orders
                 </Link>
                 <Link
-                  href="/favorites"
+                  href="/wishlist"
                   onClick={() => setMobileMenuOpen(false)}
                   className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
                 >
-                  Favorites
+                  Wishlist
                 </Link>
               </>
             ) : null }
@@ -389,8 +389,7 @@ export default function AvatarMenu() {
               onClick={handleLogout}
               className="flex items-center gap-3 px-5 py-3 text-[var(--sage)] dark:text-[var(--sage)] hover:bg-gray-50 dark:hover:text-black dark:hover:bg-white transition cursor-pointer"
             >
-              <LogOut className="w-5 h-5 font-thin" />
-              <span className="font-normal">Sign Out</span>
+              <span className="font-normal">Sign out</span>
             </button>
           </div>
 
@@ -459,6 +458,25 @@ export default function AvatarMenu() {
 
               {/* Actions */}
               <div className="flex flex-col py-2">
+              {mounted && user ? (
+                <>
+                  <Link
+                    href="/my-orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
+                  >
+                    My Orders
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
+                  >
+                    Wishlist
+                  </Link>
+                </>
+              ) : null }
+
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
@@ -467,7 +485,6 @@ export default function AvatarMenu() {
                   }}
                   className="flex items-center gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition cursor-pointer"
                 >
-                  <User className="w-5 h-5" />
                   <span className="font-normal">Manage Account</span>
                 </button>
 
@@ -485,8 +502,7 @@ export default function AvatarMenu() {
                   onClick={handleLogout}
                   className="flex items-center gap-3 px-5 py-3 text-[var(--sage)] dark:text-[var(--sage)] hover:bg-gray-50 dark:hover:text-black dark:hover:bg-white transition cursor-pointer"
                 >
-                  <LogOut className="w-5 h-5" />
-                  <span className="font-normal">Sign Out</span>
+                  <span className="font-normal">Sign out</span>
                 </button>
               </div>
 

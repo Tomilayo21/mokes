@@ -41,17 +41,24 @@ const ProductCard = ({ product }) => {
   // ------------------ Fetch Favorites ------------------
   useEffect(() => {
     const checkFavorite = async () => {
-      if (!user?.id) return; // ✅ use NextAuth user
+      if (!user?.id) return;
+
       try {
         const res = await fetch(`/api/favorites?userId=${user.id}`);
         if (!res.ok) return;
+
         const data = await res.json();
-        const found = data.find((f) => f.productId._id === product._id);
+
+        const found = data.find(
+          (f) => f.productId && f.productId._id === product._id
+        );
+
         setIsFavorite(!!found);
       } catch (err) {
         console.error("Favorite fetch failed:", err);
       }
     };
+
     checkFavorite();
   }, [user?.id, product._id]);
 
@@ -68,7 +75,7 @@ const ProductCard = ({ product }) => {
           >
             <AlertTriangle className="text-red-500 shrink-0" size={20} />
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Please login to add items as favorite
+              Please login to add items to wishlist
             </p>
           </div>
         ),
@@ -82,7 +89,7 @@ const ProductCard = ({ product }) => {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/favorites", {
+      const res = await fetch("/api/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -99,22 +106,17 @@ const ProductCard = ({ product }) => {
             <div
               className={`${
                 t.visible ? "animate-enter" : "animate-leave"
-              } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-2 p-4`}
+              } max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm pointer-events-auto flex items-center gap-2 p-4`}
             >
-              {isFavorite ? (
-                <XCircle className="text-red-500" size={20} />
-              ) : (
-                <Heart className="text-orange-500 fill-orange-500" size={20} />
-              )}
-              <p className="text-sm font-normal text-black dark:text-white">
-                {!isFavorite ? "Added to favorites" : "Removed from favorites"}
+              <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
+                {!isFavorite ? "Added to wishlist" : "Removed from wishlist"}
               </p>
             </div>
           ),
           { duration: 2000 }
         );
       } else {
-        toast.error("Failed to update favorites");
+        toast.error("Failed to update wishlist");
       }
     } catch (error) {
       toast.error("An error occurred");
@@ -191,7 +193,7 @@ const ProductCard = ({ product }) => {
           <button
             onClick={toggleFavorite}
             className="absolute top-3 right-3 bg-white/90 dark:bg-white/90 p-2 rounded-full border border-black hover:scale-110 transition"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart
               size={16}
