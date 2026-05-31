@@ -23,9 +23,10 @@ const authFetcher = async (url, token) => {
 };
 
 export default function FavoritesPage() {
-  const { addToCart, currency } = useAppContext();
   const { data: session, status } = useSession();
   const [favorites, setFavorites] = useState([]);
+  const [products, setProducts] = useState([]);
+  const currency = "₦";
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -43,7 +44,16 @@ export default function FavoritesPage() {
 
         setLoading(true);
 
-        const res = await fetch("/api/wishlist");
+        // const res = await fetch("/api/wishlist");
+        const res = await fetch("/api/wishlist", {
+            credentials: "include",
+        });
+
+        // const res = await fetch("/api/wishlist", {
+        //     headers: {
+        //         Authorization: `Bearer ${session?.accessToken}`,
+        //     },
+        // });
         const data = await res.json();
 
         setFavorites(data || []);
@@ -59,19 +69,6 @@ export default function FavoritesPage() {
     if (status === "authenticated") fetchFavorites();
   }, [status, fetchFavorites]);
 
-  /* -------- Ratings lookup -------- */
-  const ratingsMap = {};
-    favorites.forEach((fav) => {
-      const reviews = fav.productId?.reviews || [];
-      if (reviews.length > 0) {
-        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-        ratingsMap[fav.productId._id] = {
-          avg: sum / reviews.length,
-          count: reviews.length,
-        };
-      }
-    }
-  );
 
   /* -------- Remove favorite -------- */
     const removeFavorite = async (productId) => {
@@ -98,7 +95,6 @@ export default function FavoritesPage() {
     }
     };
 
-  const handleAddToCart = (product) => addToCart(product);
 
   const toTitleCase = (str = "") => {
     return str
@@ -153,7 +149,7 @@ export default function FavoritesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
           {favorites.map(({ _id, productId }) => {
             const isDeleted = !productId;
-            const rating = productId ? ratingsMap[productId._id] || { avg: 0, count: 0 } : null;
+            // const rating = productId ? ratingsMap[productId._id] || { avg: 0, count: 0 } : null;
 
             return (
               <div
@@ -178,7 +174,7 @@ export default function FavoritesPage() {
                   </div>
                 ) : (
                     <Link
-                    href={`/product/${productId._id}`}
+                    href={`/collection/${productId.slug}`}
                     className="group flex flex-col w-full bg-gray-50 overflow-hidden transition-all hover:scale-[1.02]"
                     >
                     {/* Image Section */}

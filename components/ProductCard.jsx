@@ -3,23 +3,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAppContext } from "@/context/AppContext";
 import { useSession } from "next-auth/react";
-import useSWR from "swr";
 import toast from "react-hot-toast";
-import { Heart, Star, XCircle, ShoppingCart, AlertTriangle } from "lucide-react";
+import { Heart, AlertTriangle } from "lucide-react";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, currency }) => {
   if (product.visible === false) return null;
-
   const router = useRouter();
-  const { currency, addToCart } = useAppContext();
-
   const { data: session } = useSession(); 
   const user = session?.user;
-
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +20,8 @@ const ProductCard = ({ product }) => {
   const availableSizes = (product.sizes || []).filter(
     (item) => Number(item.stock) > 0
   );
+
+  
 
   // ------------------ Long Press Modal ------------------
   const handleLongPressStart = () => {
@@ -44,7 +39,7 @@ const ProductCard = ({ product }) => {
       if (!user?.id) return;
 
       try {
-        const res = await fetch(`/api/favorites?userId=${user.id}`);
+        const res = await fetch(`/api/wishlist?userId=${user.id}`);
         if (!res.ok) return;
 
         const data = await res.json();
@@ -131,32 +126,6 @@ const ProductCard = ({ product }) => {
     scrollTo(0, 0);
   };
 
-  // ------------------ Add to Cart ------------------
-  const handleAddToCart = () => {
-    if (loading) return;
-    if (!user) {
-      toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 border-l-4 border-red-500 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <AlertTriangle className="text-red-500 shrink-0" size={20} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Please login to add items to your cart
-            </p>
-          </div>
-        ),
-        {
-          duration: 2500,
-          position: "top-right",
-        }
-      );
-      return;
-    }
-    addToCart(product);
-  };
 
   const toTitleCase = (str = "") => {
     return str
@@ -182,8 +151,8 @@ const ProductCard = ({ product }) => {
         {/* === Image Section === */}
         <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-gray-50 flex items-center justify-center overflow-hidden">
           <Image
-            src={product.image[0]}
-            alt={product.name}
+            src={product?.image?.[0] || "/placeholder.png"}
+            alt={product?.name || "Product"}
             width={400}
             height={400}
             className="w-[80%] h-auto object-contain transition-transform duration-300 group-hover:scale-105"

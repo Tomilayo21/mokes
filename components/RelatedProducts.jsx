@@ -15,14 +15,10 @@ const ProductCard = ({ product }) => {
   const { data: session } = useSession(); 
   const user = session?.user;
   if (product.visible === false) return null;
-  
-  const { currency, addToCart } = useAppContext();
+  const currency = "₦";
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [likes, setLikes] = useState(product.likes || []);
   const [loading, setLoading] = useState(false);
-  const liked = user && likes.includes(user.id);
-
   const [showModal, setShowModal] = useState(false);
   const pressTimer = useRef(null);
 
@@ -54,17 +50,34 @@ const ProductCard = ({ product }) => {
     checkFavorite();
   }, [user, product._id]);
 
-  // ------------------ Toggle Favorite ------------------
+  // Toggle favorites
   const toggleFavorite = async (e) => {
     e.stopPropagation();
     if (!user) {
-      toast.error("Please log in first.");
+      toast.custom(
+        (t) => (
+          <div
+            className={`max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 border-l-4 border-red-500 ${
+              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            }`}
+          >
+            <AlertTriangle className="text-red-500 shrink-0" size={20} />
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Please login to add items to wishlist
+            </p>
+          </div>
+        ),
+        {
+          duration: 2500,
+          position: "top-right",
+        }
+      );
       return;
     }
 
     try {
       setLoading(true);
-      const res = await fetch("/api/favorites", {
+      const res = await fetch("/api/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,22 +94,17 @@ const ProductCard = ({ product }) => {
             <div
               className={`${
                 t.visible ? "animate-enter" : "animate-leave"
-              } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex items-center gap-2 p-4`}
+              } max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm pointer-events-auto flex items-center gap-2 p-4`}
             >
-              {isFavorite ? (
-                <XCircle className="text-red-500" size={20} />
-              ) : (
-                <Heart className="text-orange-500 fill-orange-500" size={20} />
-              )}
-              <p className="text-sm font-normal text-black dark:text-white">
-                {!isFavorite ? "Added to favorites" : "Removed from favorites"}
+              <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
+                {!isFavorite ? "Added to wishlist" : "Removed from wishlist"}
               </p>
             </div>
           ),
           { duration: 2000 }
         );
       } else {
-        toast.error("Failed to update favorites");
+        toast.error("Failed to update wishlist");
       }
     } catch (error) {
       toast.error("An error occurred");
@@ -105,30 +113,12 @@ const ProductCard = ({ product }) => {
     }
   };
 
-
-  const { data: reviews = [] } = useSWR(
-    `/api/reviews?productId=${product._id}`,
-    fetcher
-  );
-
-  const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
-
   const handleCardClick = () => {
     router.push(`/collection/${product.slug}`);
     scrollTo(0, 0);
   };
 
-  const handleAddToCart = () => {
-    if (!user) {
-      toast.error("Please log in to add items to your cart.");
-      router.push("/authentication");
-      return;
-    }
-    addToCart(product);
-  };
+
 
   return (
     <div
@@ -166,7 +156,6 @@ const ProductCard = ({ product }) => {
             {Number(product.offerPrice).toLocaleString()}
           </p>
         </div>
-
       </div>
     </div>
   );

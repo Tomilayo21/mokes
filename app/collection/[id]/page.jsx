@@ -21,11 +21,13 @@ export default function ProductPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { products, addToCart, currency } = useAppContext();
+  const { addToCart } = useAppContext();
+  const currency = "₦";
+  const [products, setProducts] = useState([]);
   const [productData, setProductData] = useState(null); 
   const [mainImage, setMainImage] = useState(null); 
   const [page, setPage] = useState(1); 
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(true); 
   const [selectedSize, setSelectedSize] = useState("");
   const scrollRef = useRef(null);
   const thumbRef = useRef(null);
@@ -54,27 +56,72 @@ export default function ProductPage() {
     });
   };
 
-  useEffect(() => 
-    { if (!id) return; 
-      if (!products || products.length === 0) 
-        return; 
-      const product = products.find( (p) => p.slug?.toLowerCase() === id?.toLowerCase() ); 
-      console.log("FOUND PRODUCT:", product); 
-      if (product) { setProductData(product); } 
-    },[id, products]
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const [productRes, listRes] = await Promise.all([
+          fetch(`/api/product/${id}`),
+          fetch("/api/product/list"),
+        ]);
+
+        const productJson = await productRes.json();
+        const listJson = await listRes.json();
+
+        console.log("PRODUCT:", productJson);
+        console.log("LIST:", listJson);
+
+        setProductData(
+          productJson.product ||
+          productJson.data ||
+          productJson
+        );
+
+        setProducts(
+          Array.isArray(listJson)
+            ? listJson
+            : listJson.products ||
+              listJson.data ||
+              []
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    if (!Array.isArray(products) || products.length === 0) return;
+
+    const product = products.find(
+      (p) => p.slug?.toLowerCase() === id?.toLowerCase()
+    );
+
+    if (product) {
+      setProductData(product);
+    }
+  }, [id, products]);
+
 
   // Add to Cart 
   const handleAddToCart = () => {
     if (status !== "authenticated") {
-      const currentUrl =
-        pathname +
-        (searchParams.toString()
+      const currentUrl = `${pathname}${
+        searchParams.size
           ? `?${searchParams.toString()}`
-          : "");
+          : ""
+      }`;
 
-      return router.push(
-        `/authentication?callbackUrl=${encodeURIComponent(currentUrl)}`
+      router.push(
+        `/authentication?callbackUrl=${encodeURIComponent(
+          currentUrl
+        )}`
       );
     }
 
@@ -100,36 +147,47 @@ export default function ProductPage() {
   };
 
   const relatedProducts = React.useMemo(() => {
-    if (!productData) return [];
+    if (!productData || !Array.isArray(products)) return [];
 
     return products
-    .filter( 
-      (p) => 
-      p._id !== productData._id && 
-      p.slug !== productData.slug && 
-      p.visible !== false 
+      .filter(
+        (p) =>
+          p._id !== productData._id &&
+          p.slug !== productData.slug &&
+          p.visible !== false
       )
-    .map((p) => {
-      let score = 0;
+      .map((p) => {
+        let score = 0;
 
-      if (p.category === productData.category) score += 3;
-      if (p.subcategory === productData.subcategory) score += 2;
-      if (p.brand === productData.brand) score += 1;
+        if (p.category === productData.category) score += 3;
+        if (
+          (p.subcategory || p.subCategory) ===
+          (productData.subcategory || productData.subCategory)
+        ) {
+          score += 2;
+        }
 
-      const price = Number(String(p.price).replace(/,/g, ""));
-      const basePrice = Number(String(productData.price).replace(/,/g, ""));
+        if (p.brand === productData.brand) score += 1;
 
-      if (!isNaN(price) && !isNaN(basePrice)) {
-        if (Math.abs(price - basePrice) / basePrice < 0.2) {
+        const price = Number(String(p.price || 0).replace(/,/g, ""));
+        const basePrice = Number(
+          String(productData.price || 0).replace(/,/g, "")
+        );
+
+        if (
+          !isNaN(price) &&
+          !isNaN(basePrice) &&
+          basePrice > 0 &&
+          Math.abs(price - basePrice) / basePrice < 0.2
+        ) {
           score += 1;
         }
-      }
 
-      return { ...p, score };
-    })
-    .filter((p) => p.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+        return { ...p, score };
+      })
+      .filter((p) => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
   }, [products, productData]);
 
   useEffect(() => {
@@ -212,14 +270,14 @@ export default function ProductPage() {
   }, [productData]);
   
   if (!id) return null; 
-  if (!productData && products.length > 0) { 
-    return 
-    ( 
-    <div className="flex items-center justify-center min-h-screen"> 
-      Product not found 
-    </div> 
-    ); 
-  } 
+
+  if (!productData && products.length > 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Product not found
+      </div>
+    );
+  }
 
   if (!productData) return <Loading />;
 
@@ -234,8 +292,8 @@ export default function ProductPage() {
               <div>
                 <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
                   <Image
-                    src={mainImage || productData.image[0]}
-                    alt={productData.name}
+                    src={mainImage || productData?.image?.[0] || "/placeholder.png"}
+                    alt={productData?.name}
                     width={1280}
                     height={720}
                     className="w-full h-[280px] sm:h-[350px] md:h-[400px] object-cover"
@@ -245,7 +303,7 @@ export default function ProductPage() {
                 <div className="relative w-full mt-3 flex items-center gap-4 sm:gap-0">
 
                   {/* LEFT ARROW */}
-                  {productData.image.length > 4 && (
+                  {productData?.image?.length > 4 && (
                     <button
                       onClick={scrollLeft}
                       className="sm:hidden flex-shrink-0 text-black dark:text-black hover:scale-110 transition px-2"
@@ -259,9 +317,9 @@ export default function ProductPage() {
                     <div
                       ref={thumbRef}
                       className={`flex gap-3 overflow-x-auto sm:overflow-visible sm:flex-wrap scroll-smooth scrollbar-hide snap-x snap-mandatory
-                      ${productData.image.length > 4 ? "px-2 sm:px-0" : "px-0"}`}
+                      ${(productData?.image?.length || 0) > 4 ? "px-2 sm:px-0" : "px-0"}`}
                     >
-                      {productData.image.map((img, i) => (
+                      {productData?.image?.map((img, i) => (
                         <div
                           key={i}
                           onClick={() => {
@@ -285,7 +343,7 @@ export default function ProductPage() {
                   </div>
 
                   {/* RIGHT ARROW */}
-                  {productData.image.length > 4 && (
+                  {productData?.image?.length > 4 && (
                     <button
                       onClick={scrollRight}
                       className="sm:hidden flex-shrink-0 text-black dark:text-black hover:scale-110 transition px-2"

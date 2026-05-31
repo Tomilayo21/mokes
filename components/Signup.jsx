@@ -28,7 +28,17 @@ import Image from "next/image";
 export default function AuthForm({ initialMode = "login", onSuccess }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrlRaw = searchParams.get("callbackUrl");
+
+  const callbackUrl =
+    callbackUrlRaw &&
+    !callbackUrlRaw.includes("authentication")
+      ? callbackUrlRaw
+      : "/";
+
+  const safeCallbackUrl =
+    callbackUrl.includes("authentication") ? "/" : callbackUrl;
+  
   const [mode, setMode] = useState(initialMode); // signup | login | forgot | reset
 
   const [form, setForm] = useState({
@@ -135,6 +145,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
     setMessage("");
   }
 
+
   async function handleSubmit(e) {
     e.preventDefault();
     setMessage("");
@@ -148,6 +159,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
+
         const data = await res.json();
 
         if (!res.ok) {
@@ -157,10 +169,11 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
                 (t) => (
                   <div
                     className={`max-w-md w-full bg-red-50 dark:bg-red-900 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
-                      t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+                      t.visible
+                        ? "translate-x-0 opacity-100"
+                        : "translate-x-10 opacity-0"
                     }`}
                   >
-                    {/* <XCircle className="text-red-500" size={20} /> */}
                     <p className="text-sm font-medium text-red-700 dark:text-red-300">
                       {errMsg}
                     </p>
@@ -196,112 +209,147 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
           }
         );
 
-        // Wait so user sees success state + toast
         setTimeout(() => {
           setSuccess(false);
           setMode("login");
 
-          // optionally prefill email
           setForm((prev) => ({
             ...prev,
             password: "",
             verifyPassword: "",
           }));
         }, 3000);
-        } else if (mode === "login") {
-          const res = await signIn("credentials", {
-            redirect: false,
-            email: form.email,
-            password: form.password,
+      } 
+      
+      
+      else if (mode === "login") {
+        const res = await signIn("credentials", {
+          redirect: false,
+          email: form.email,
+          password: form.password,
+          callbackUrl: safeCallbackUrl,
+        });
+
+        //  FIXED: single clean success flow
+        if (!res?.error) {
+          toast.custom((t) => (
+            <div className={`max-w-md w-full bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            }`}>
+              <p className="text-sm font-light tracking-wide text-gray-800">
+                Sign in successful
+              </p>
+            </div>
+          ), {
+            duration: 1200,
+            position: "top-right",
           });
-          if (!res.error) {
-            router.push(callbackUrl); 
-            return;
+
+          setTimeout(() => {
+            router.replace(safeCallbackUrl || "/");
+            router.refresh();
+          }, 1200);
+
+          return;
+        }
+
+        if (res.error) {
+          let message = "Login failed";
+
+          switch (res.error) {
+            case "INVALID_CREDENTIALS":
+              message = "Invalid email or password";
+              break;
+            case "EMAIL_NOT_VERIFIED":
+              message = "Please verify your email before logging in";
+              break;
+            default:
+              message = "Something went wrong";
           }
-          if (res.error) {
-            let message = "Login failed";
 
-            switch (res.error) {
-              case "INVALID_CREDENTIALS":
-                message = "Invalid email or password";
-                break;
-
-              case "EMAIL_NOT_VERIFIED":
-                message = "Please verify your email before logging in";
-                break;
-
-              default:
-                message = "Something went wrong";
-            }
-
-            toast.custom((t) => (
-              <div className={`max-w-md w-full bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
-                t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-              }`}>
+          toast.custom(
+            (t) => (
+              <div
+                className={`max-w-md w-full bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+                  t.visible
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-10 opacity-0"
+                }`}
+              >
                 <p className="text-sm font-light tracking-wide text-red-700">
                   {message}
                 </p>
               </div>
-            ), {
+            ),
+            {
               duration: 4000,
               position: "top-right",
-            });
+            }
+          );
 
-            return;
-          }
+          return;
+        }
 
-          // success flow
-          let locationData = { ip: "Unknown", city: "Unknown", country: "Unknown" };
+        // success flow (device tracking)
+        let locationData = {
+          ip: "Unknown",
+          city: "Unknown",
+          country: "Unknown",
+        };
 
-          try {
-            const locRes = await fetch("https://ipapi.co/json/");
-            if (locRes.ok) locationData = await locRes.json();
-          } catch (err) {
-            console.warn("Failed to fetch location", err);
-          }
+        try {
+          const locRes = await fetch("https://ipapi.co/json/");
+          if (locRes.ok) locationData = await locRes.json();
+        } catch (err) {
+          console.warn("Failed to fetch location", err);
+        }
 
-          const deviceInfo = {
-            os: navigator.platform || "Unknown",
-            browser: navigator.userAgent || "Unknown",
-            ip: locationData.ip || "Unknown",
-            city: locationData.city || "Unknown",
-            country: locationData.country_name || "Unknown",
-          };
+        const deviceInfo = {
+          os: navigator.platform || "Unknown",
+          browser: navigator.userAgent || "Unknown",
+          ip: locationData.ip || "Unknown",
+          city: locationData.city || "Unknown",
+          country: locationData.country_name || "Unknown",
+        };
 
-          await fetch("/api/user/track-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(deviceInfo),
-          });
+        await fetch("/api/user/track-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(deviceInfo),
+        });
 
-          setSuccess(true);
-          setTimeout(() => setSuccess(false), 3000);
-
-          toast.custom((t) => (
-            <div className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}>
+        toast.custom(
+          (t) => (
+            <div
+              className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+                t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+              }`}
+            >
               <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
-                Login successful
+                Sign in successful
               </p>
             </div>
-          ), {
+          ),
+          {
             duration: 3000,
             position: "top-right",
-          });
+          }
+        );
 
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(false);
-            router.push(callbackUrl); // 🔥 redirect back to page user came from
-          }, 500);
-      } else if (mode === "forgot") {
-        // Forgot password mode
+        setTimeout(() => {
+          setSuccess(false);
+          router.push(callbackUrl);
+        }, 500);
+      } 
+      
+      
+      else if (mode === "forgot") {
         const res = await fetch("/api/auth/forgot-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: resetEmail }),
         });
+
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.error || "Reset failed");
@@ -314,7 +362,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
               }`}
             >
               <CheckCircle className="text-yellow-600" size={20} />
-              <p className="text-sm font-medium text-[var(--sage)] dark:text-[var(--sage">
+              <p className="text-sm font-medium text-[var(--sage)] dark:text-[var(--sage)]">
                 Reset link sent! Check your email.
               </p>
             </div>
@@ -327,6 +375,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
       }
     } catch (err) {
       console.error(err);
+
       toast.custom(
         (t) => (
           <div
@@ -341,12 +390,12 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
         ),
         { duration: 4000, position: "top-right" }
       );
+
       setMessage(err.message);
     } finally {
       setLoading(false);
     }
   }
-
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
@@ -398,7 +447,14 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
             <>
               <button
                 type="button"
-                onClick={() => signIn("google", { callbackUrl, })}
+                onClick={() =>
+                  signIn("google", {
+                    callbackUrl:
+                      callbackUrl.startsWith("/")
+                        ? callbackUrl
+                        : "/",
+                  })
+                }
                 className="w-full py-3 border text-gray-900 border-gray-300 rounded-sm flex items-center justify-center gap-3 hover:bg-gray-50 transition mb-4"
               >
                 <FcGoogle alt="Google" className="w-5 h-5" />
@@ -712,7 +768,7 @@ export default function AuthForm({ initialMode = "login", onSuccess }) {
                 {mode === "signup"
                   ? "Create Account"
                   : mode === "login"
-                  ? "Login"
+                  ? "Sign in"
                   : mode === "forgot"
                   ? "Send Reset Link"
                   : "Reset Password"}

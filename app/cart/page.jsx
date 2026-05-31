@@ -14,13 +14,13 @@ const Cart = () => {
   const router = useRouter();
 
   const {
-    products,
     cartItems,
     updateCartQuantity,
     getCartCount,
-    currency,
   } = useAppContext();
 
+  const currency = "₦";
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const thumbRef = useRef(null);
@@ -28,7 +28,22 @@ const Cart = () => {
   const [canScroll, setCanScroll] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false); 
   const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
-  
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/product/list");
+        const data = await res.json();
+
+        setProducts(Array.isArray(data) ? data : data.products || []);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);  
+
   useEffect(() => {
     const viewed = JSON.parse(
       localStorage.getItem("recentlyViewed") || "[]"
@@ -214,8 +229,8 @@ const Cart = () => {
             {/* Cart Items */}
             <div className="flex-1 relative">
                {!loading && cartCount > 0 && (
-                  <p className="absolute right-0 -top-7 text-lg md:text-xl font-medium text-gray-700">
-                    {cartCount} {cartCount === 1 ? "Product" : "Products"}
+                  <p className="absolute right-0 -top-8 text-lg px-4 md:text-xl font-medium text-gray-700">
+                    {cartCount} {cartCount === 1 ? "Item" : "Items"}
                   </p>
                 )}
 
@@ -366,7 +381,7 @@ const Cart = () => {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="mt-8 md:mt-12">
+          <section className="mt-8 px-4 md:mt-12">
 
             {/* Title */}
             <div className="mb-6 text-center">

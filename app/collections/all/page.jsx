@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useEffect, useState } from "react";
 import {
   useSearchParams,
   usePathname,
@@ -27,16 +27,41 @@ export default function Page() {
 }
 
 const AllProducts = () => {
-  const { products, loading, themeColor, secondaryColor, tertiaryColor, fontSize, layoutStyle, layoutStyle: effectiveLayout } = useAppContext();
+  // const { products, loading, themeColor, secondaryColor, tertiaryColor, fontSize, layoutStyle, layoutStyle: effectiveLayout } = useAppContext();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const currency = "₦";
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch("/api/product/list");
+        const data = await res.json();
+
+        const safeProducts = Array.isArray(data)
+          ? data
+          : data?.products || [];
+
+        setProducts(safeProducts);
+      } catch (err) {
+        console.error("Failed to load products:", err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const minRaw = searchParams.get("min");
   const maxRaw = searchParams.get("max");
   const type = searchParams.get("type") || "";
-  // const category = searchParams.get("category") || "";
-  // const subcategory = searchParams.get("subcategory") || "";
   const brand = searchParams.get("brand") || "";
   const color = searchParams.get("color") || "";
   const searchQuery = searchParams.get("search") || "";
@@ -44,13 +69,12 @@ const AllProducts = () => {
   const pageRaw = searchParams.get("page");
   const category = searchParams.get("category") || "";
   const subcategory = searchParams.get("subcategory") || "";
-
   const min = minRaw !== null && !isNaN(parseFloat(minRaw)) ? parseFloat(minRaw) : 0;
   const max = maxRaw !== null && !isNaN(parseFloat(maxRaw)) ? parseFloat(maxRaw) : Infinity;
   const currentPage = pageRaw && !isNaN(parseInt(pageRaw)) && parseInt(pageRaw) > 0 ? parseInt(pageRaw) : 1;
 
   const filteredProducts = useMemo(() => {
-    let filtered = [...products];
+    let filtered = Array.isArray(products) ? [...products] : [];
 
     if (type) filtered = filtered.filter((p) => p.type === type);
     if (brand)
@@ -200,7 +224,7 @@ const AllProducts = () => {
               "
             >
             {paginatedProducts.map((product, index) => (
-              <ProductCard key={index} product={product} />
+              <ProductCard key={index} product={product} currency={currency} />
             ))}
           </div>
         )}

@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import useSWR from "swr";
 import ProductCard from "./ProductCard";
 import { useAppContext } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
+
+const fetcher = (url) => fetch(url).then(res => res.json());
+
 
 const Products = () => {
-  const { products, router } = useAppContext();
+  const { data, isLoading } = useSWR("/api/product/list", fetcher);
+  const router = useRouter();
+
+  if (isLoading) return <p>Loading...</p>;
+
+  const products = data?.products || [];
+
   const [visibleCount, setVisibleCount] = useState(10);
 
   const visibleProducts = products.slice(0, visibleCount);

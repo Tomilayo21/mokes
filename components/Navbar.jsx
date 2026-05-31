@@ -18,9 +18,9 @@ import { HiOutlineShoppingBag } from "react-icons/hi2"
 
 export default function Navbar() {
   const { data: session, status } = useSession(); 
-  const user = session?.user
+  const user = status === "authenticated" ? session?.user : null;
   const router = useRouter();
- const { getCartCount } = useAppContext();
+  const { getCartCount } = useAppContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCollections, setOpenCollections] = useState(false);

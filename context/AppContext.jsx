@@ -93,22 +93,6 @@ export const AppContextProvider = ({ children }) => {
     // -------------------- Products --------------------
     const [products, setProducts] = useState([]);
     
-    useEffect(() => {
-      async function fetchData() {
-        try {
-          const { data } = await axios.get("/api/product/list");
-          if (data.success) setProducts(data.products);
-          else toast.error(data.message);
-        } catch (err) {
-          toast.error(err.message);
-        } finally {
-          setLoading(false); // ✅ Important: mark loading done
-        }
-      }
-      fetchData();
-    }, []);
-
-     // -------------------- Products & Cart --------------------
     const [cartItems, setCartItems] = useState({});
 
     
@@ -120,43 +104,28 @@ export const AppContextProvider = ({ children }) => {
     useEffect(() => {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
 
-      // If user is logged in, update MongoDB
-      if (status === "authenticated") {
-        const updateDBCart = async () => {
-          try {
-            await axios.post(
-              "/api/cart/update",
-              { cartData: cartItems },
-              { headers: { Authorization: `Bearer ${session.user.id}` } }
-            );
-          } catch (err) {
-            console.error("Failed to update cart in DB:", err);
-          }
-        };
+      if (status !== "authenticated" || !session?.user?.id) return;
 
-        updateDBCart();
-      }
-    }, [cartItems, status, session]);
-    //   const itemId = product._id;
-    //   let cartData = structuredClone(cartItems);
-    //   cartData[itemId] = (cartData[itemId] || 0) + 1;
-    //   setCartItems(cartData);
+      const updateDBCart = async () => {
+        try {
+          await axios.post(
+            "/api/cart/update",
+            { cartData: cartItems },
+            {
+              headers: {
+                Authorization: `Bearer ${session.user.id}`,
+              },
+            }
+          );
+        } catch (err) {
+          console.error("Failed to update cart in DB:", err);
+        }
+      };
 
-    //   toast.custom(
-    //     (t) => (
-    //       <div
-    //         className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
-    //           t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-    //         }`}
-    //       >
-    //         <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">Item added to cart</p>
-    //       </div>
-    //     ),
-    //     { duration: 3000, position: "top-right" }
-    //   );
-    // };
+      updateDBCart();
+    }, [cartItems, status, session?.user?.id]);
 
-    const addToCart = async (product, size) => {
+    const addToCart = async (product, size = "default") => {
       const itemId = product._id;
 
       let cartData = structuredClone(cartItems);
@@ -169,20 +138,6 @@ export const AppContextProvider = ({ children }) => {
         (cartData[itemId][size] || 0) + 1;
 
       setCartItems(cartData);
-      toast.custom(
-        (t) => (
-          <div
-            className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
-              Added <span className="lowercase">{size}</span> size to cart
-            </p>
-          </div>
-        ),
-        { duration: 3000, position: "top-right" }
-      );
     };
 
     //   const updated = { ...cartItems };
