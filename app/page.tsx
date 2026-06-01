@@ -12,7 +12,7 @@ export default function Home() {
     <>
       <HeroSection />
       <FeaturedProduct /> 
-      {/* <Products /> */}
+      <Products />
       {/* <AddProductPanel />
       <ProductListPanel /> */}
       <Footer />
