@@ -1,33 +1,21 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { useAppContext } from "@/context/AppContext";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { HeartOff, ShoppingCart, Star, Trash2, PackageX, Heart, XCircle } from "lucide-react";
+import { Trash2, PackageX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
-/* -------- Helper: fetch with NextAuth token -------- */
-const authFetcher = async (url, token) => {
-  if (!token) throw new Error("No token found");
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error("Failed to fetch " + url);
-  return res.json();
-};
 
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
-  const [favorites, setFavorites] = useState([]);
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
   const currency = "₦";
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   /* -------- Redirect if not logged in -------- */
@@ -37,63 +25,57 @@ export default function FavoritesPage() {
     }
   }, [status, router]);
 
-  /* -------- Fetch favorites -------- */
-    const fetchFavorites = useCallback(async () => {
-    try {
-        if (status !== "authenticated") return;
 
-        setLoading(true);
+  const fetcher = (url) =>
+    fetch(url, {
+      credentials: "include",
+      cache: "no-store",
+    }).then((res) => res.json());
 
-        // const res = await fetch("/api/wishlist");
-        const res = await fetch("/api/wishlist", {
-            credentials: "include",
-        });
+  const {
+    data: favorites = [],
+    isLoading,
+    mutate,
+  } = useSWR(
+    status === "authenticated" ? "/api/wishlist" : null,
+    fetcher
+  );
+  
+  const isReady = status === "authenticated" && !isLoading;
 
-        // const res = await fetch("/api/wishlist", {
-        //     headers: {
-        //         Authorization: `Bearer ${session?.accessToken}`,
-        //     },
-        // });
-        const data = await res.json();
 
-        setFavorites(data || []);
-    } catch (err) {
-        console.error(err);
-        setFavorites([]);
-    } finally {
-        setLoading(false);
-    }
-    }, [status]);
-
-  useEffect(() => {
-    if (status === "authenticated") fetchFavorites();
-  }, [status, fetchFavorites]);
 
 
   /* -------- Remove favorite -------- */
-    const removeFavorite = async (productId) => {
+  const removeFavorite = async (productId) => {
+    const previousFavorites = favorites;
+
     try {
-        // 🔥 instant UI update (no waiting)
-        setFavorites((prev) =>
-        prev.filter((f) => f.productId?._id !== productId)
-        );
+      mutate(
+        favorites.filter(
+          (f) => f.productId?._id !== productId
+        ),
+        false
+      );
 
-        const res = await fetch("/api/wishlist", {
+      const res = await fetch("/api/wishlist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ productId }),
-        });
+      });
 
-        if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error();
 
-        toast.success("Updated wishlist");
+      await mutate();
+
+      toast.success("Updated wishlist");
     } catch (err) {
-        toast.error("Failed to update");
-
-        // rollback
-        fetchFavorites();
+      mutate(previousFavorites, false);
+      toast.error("Failed to update");
     }
-    };
+  };
 
 
   const toTitleCase = (str = "") => {
@@ -104,6 +86,13 @@ export default function FavoritesPage() {
       .join(" ");
   };
 
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Loading wishlist...</p>
+      </div>
+    );
+  }
   /* -------- UI -------- */
   return (
     <>
@@ -120,29 +109,30 @@ export default function FavoritesPage() {
         </div>
 
         {/* Loading */}
-        {loading && (
-          <p className="text-gray-500 dark:text-gray-400">Loading wishlist...</p>
+        {(status === "loading" || isLoading) && (
+          <p className="text-gray-500">
+            Loading wishlist...
+          </p>
         )}
-
         {/* Empty State */}
-        {!loading && favorites.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-16 text-center">
-            <img src="document.png" alt="favorites" className="w-32 h-32 opacity-70 mb-4" />
-            <p className="text-lg font-medium text-gray-800 dark:text-gray-800">
-              Your favorites list is empty
-            </p>
-            <p className="text-sm text-gray-800 dark:text-gray-800 mt-1">
-              Browse products and tap the heart to save them here.
-            </p>
-            <button
-              onClick={() => router.push("/collections/all")}
-              className="mt-6 px-6 py-3 rounded-sm shadow-sm border-t border-zinc-300 
-              cursor-pointer bg-[var(--sage)] text-white 
-              hover:bg-zinc-500 transition uppercase transition"
-            >
-              Browse Collections 
-            </button>
-          </div>
+        {isReady && favorites.length === 0 && (
+            <div className="flex flex-col items-center justify-center mt-16 text-center">
+              <img src="document.png" alt="favorites" className="w-32 h-32 opacity-70 mb-4" />
+              <p className="text-lg font-medium text-gray-800 dark:text-gray-800">
+                Your favorites list is empty
+              </p>
+              <p className="text-sm text-gray-800 dark:text-gray-800 mt-1">
+                Browse products and tap the heart to save them here.
+              </p>
+              <button
+                onClick={() => router.push("/collections/all")}
+                className="mt-6 px-6 py-3 rounded-sm shadow-sm border-t border-zinc-300 
+                cursor-pointer bg-[var(--sage)] text-white 
+                hover:bg-zinc-500 transition uppercase transition"
+              >
+                Browse Collections 
+              </button>
+            </div>
         )}
 
         {/* Favorites Grid */}

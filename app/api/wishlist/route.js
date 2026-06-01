@@ -1,4 +1,6 @@
 // app/api/wishlist/route.js
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Wishlist from "@/models/Wishlist";
