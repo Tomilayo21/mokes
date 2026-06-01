@@ -12,18 +12,21 @@ const fetcher = (url) => fetch(url).then(res => res.json());
 
 const Products = () => {
   const { data, isLoading } = useSWR("/api/product/list", fetcher);
+  
   const router = useRouter();
 
-  if (isLoading) return <p>Loading...</p>;
+  const [visibleCount, setVisibleCount] = useState(10);
+  
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
   const products = data?.products || [];
-
-  const [visibleCount, setVisibleCount] = useState(10);
 
   const visibleProducts = products.slice(0, visibleCount);
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 10);
+    setVisibleCount((prev) => prev + 10);
   };
 
   return (
@@ -48,13 +51,13 @@ const Products = () => {
       </div>
 
       {/* GRID */}
-      {/*<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-4 gap-x-4 sm:gap-6 lg:gap-8 px-4 sm:px-6 md:px-12 lg:px-20 mt-12 w-full max-w-7xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-4 gap-x-4 sm:gap-6 lg:gap-8 px-4 sm:px-6 md:px-12 lg:px-20 mt-12 w-full max-w-7xl">
           {visibleProducts.map((product, index) => (
               <ProductCard key={index} product={product} />
           ))}
-        </div> */}
+        </div>
 
-      {/* {visibleCount < products.length ? (
+        {visibleCount < products.length ? (
           <button
             onClick={handleLoadMore}
             className="px-12 py-2.5 mt-12 cursor-pointer border rounded text-gray-500/70 hover:bg-slate-50/90 transition"
@@ -70,7 +73,7 @@ const Products = () => {
               See all
             </button>
           )
-        )}*/}
+        )}
     </div>
   );
 };
