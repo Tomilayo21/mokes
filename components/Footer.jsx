@@ -15,6 +15,8 @@ import {
 } from "react-icons/fa";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
   return (
     <footer className="w-full border-t border-zinc-200 mt-24 bg-gray-50 text-black">
       
@@ -31,25 +33,25 @@ export default function Footer() {
 
             <ul className="space-y-3 text-sm text-zinc-600">
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/info/about" className="hover:text-black transition">
                   About
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/info/shipping" className="hover:text-black transition">
                   Shipping
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/info/returns" className="hover:text-black transition">
                   Returns
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/info/privacy" className="hover:text-black transition">
                   Privacy Policy
                 </a>
               </li>
@@ -77,19 +79,19 @@ export default function Footer() {
 
             <ul className="space-y-3 text-sm text-zinc-600">
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/careers/open-roles" className="hover:text-black transition">
                   Open Roles
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/careers/culture" className="hover:text-black transition">
                   Culture
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-black transition">
+                <a href="/careers/internships" className="hover:text-black transition">
                   Internships
                 </a>
               </li>
@@ -106,19 +108,19 @@ export default function Footer() {
 
           {/* SOCIAL ICONS */}
           <div className="flex items-center gap-5 text-zinc-600">
-            <a href="#" className="hover:text-black transition">
+            <a href="https://instagram.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
               <BsInstagram size={18} />
             </a>
 
-            <a href="#" className="hover:text-black transition">
+            <a href="https://twitter.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
               <FaSquareXTwitter size={18} />
             </a>
 
-            <a href="#" className="hover:text-black transition">
+            <a href="https://facebook.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
               <FaFacebook size={18} />
             </a>
 
-            <a href="#" className="hover:text-black transition">
+            <a href="https://linkedin.com/company/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
               <FaLinkedin size={18} />
             </a>
           </div>
@@ -136,7 +138,7 @@ export default function Footer() {
         {/* COPYRIGHT */}
         <div className="mt-6 pt-6">
           <p className="text-xs tracking-wide text-zinc-500">
-            © 2026 MOKÉS. All rights reserved.
+            © {currentYear} MOKÉS. All rights reserved.
           </p>
         </div>
 
