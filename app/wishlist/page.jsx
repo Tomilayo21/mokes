@@ -135,12 +135,12 @@ export default function FavoritesPage() {
               Browse products and tap the heart to save them here.
             </p>
             <button
-              onClick={() => router.push("/all-products")}
+              onClick={() => router.push("/collections/all")}
               className="mt-6 px-6 py-3 rounded-sm shadow-sm border-t border-zinc-300 
               cursor-pointer bg-[var(--sage)] text-white 
               hover:bg-zinc-500 transition uppercase transition"
             >
-              Browse Products
+              Browse Collections 
             </button>
           </div>
         )}
