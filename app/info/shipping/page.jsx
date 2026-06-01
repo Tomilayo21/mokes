@@ -77,7 +77,7 @@ const ShippingPage = () => {
                   Within Nigeria
                 </h3>
                 <p className="leading-7">
-                  Delivery typically takes <span className="font-medium text-gray-900">2–5 business days</span>
+                  Delivery typically takes <span className="font-medium text-gray-900">2–5 business days </span>
                   depending on your location. Major cities like Lagos, Abuja, and Port Harcourt may receive
                   orders faster due to logistics accessibility.
                 </p>
@@ -88,7 +88,7 @@ const ShippingPage = () => {
                   International Orders
                 </h3>
                 <p className="leading-7">
-                  International delivery takes approximately <span className="font-medium text-gray-900">5–12 business days</span>
+                  International delivery takes approximately <span className="font-medium text-gray-900">5–12 business days </span>
                   depending on customs clearance and destination country regulations.
                 </p>
               </div>
