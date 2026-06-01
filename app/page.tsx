@@ -11,8 +11,8 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      {/* <FeaturedProduct /> */}
-      {/* <Products /> */}
+      <FeaturedProduct />
+      <Products />
       {/* <AddProductPanel />
       <ProductListPanel /> */}
       <Footer />
