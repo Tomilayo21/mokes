@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -70,7 +70,7 @@ export const AppContextProvider = ({ children }) => {
     localStorage.removeItem("authToken");
   };
 
-  // -------------------- Persist Auth --------------------
+  //  Persist Auth 
   useEffect(() => {
     const savedUser = localStorage.getItem("currentUser");
     const savedToken = localStorage.getItem("authToken");
@@ -90,40 +90,60 @@ export const AppContextProvider = ({ children }) => {
     }
   }, []);
 
-    // -------------------- Products --------------------
+    // Products 
     const [products, setProducts] = useState([]);
     
     const [cartItems, setCartItems] = useState({});
+    const [cartLoaded, setCartLoaded] = useState(false);
+    const skipFirstSync = useRef(true);
 
-    
+    // Fetch Cart 
     useEffect(() => {
-      const savedCart = localStorage.getItem("cartItems");
-      if (savedCart) setCartItems(JSON.parse(savedCart));
-    }, []);
-    
-    useEffect(() => {
-      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      const fetchCart = async () => {
+        try {
+          if (status !== "authenticated" || !session?.user?.id) return;
 
-      if (status !== "authenticated" || !session?.user?.id) return;
+          const res = await axios.get("/api/cart/get");
+
+          const data = res.data?.cartItems || {};
+
+          setCartItems(data);
+          setCartLoaded(true);
+        } catch (err) {
+          console.error("Failed to fetch cart:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCart();
+    }, [status, session?.user?.id]);
+
+    // UPDATE Cart 
+    useEffect(() => {
+      if (
+        status !== "authenticated" ||
+        !cartLoaded
+      ) return;
+
+      // 🚨 skip first automatic trigger after hydration
+      if (skipFirstSync.current) {
+        skipFirstSync.current = false;
+        return;
+      }
 
       const updateDBCart = async () => {
         try {
-          await axios.post(
-            "/api/cart/update",
-            { cartData: cartItems },
-            {
-              headers: {
-                Authorization: `Bearer ${session.user.id}`,
-              },
-            }
-          );
+          await axios.post("/api/cart/update", {
+            cartItems,
+          });
         } catch (err) {
-          console.error("Failed to update cart in DB:", err);
+          console.error("Failed to update cart:", err);
         }
       };
 
       updateDBCart();
-    }, [cartItems, status, session?.user?.id]);
+    }, [cartItems, status, cartLoaded]);
 
     const addToCart = async (product, size = "default") => {
       const itemId = product._id;
@@ -139,12 +159,6 @@ export const AppContextProvider = ({ children }) => {
 
       setCartItems(cartData);
     };
-
-    //   const updated = { ...cartItems };
-    //   if (quantity <= 0) delete updated[productId];
-    //   else updated[productId] = quantity;
-    //   setCartItems(updated);
-    // };
 
     const updateCartQuantity = (
       productId,

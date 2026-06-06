@@ -131,15 +131,23 @@ export default function ProductPage() {
       toast.custom(
         (t) => (
           <div
-            className={`relative overflow-hidden max-w-md w-full bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
               t.visible
                 ? "animate-toast-bounce opacity-100"
                 : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="text-sm font-medium text-red-800">
+            <p className="flex-1 text-sm font-medium text-red-800">
               Please select a size
             </p>
+
+            {/* Close */}
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 cursor-pointer hover:text-black transition"
+            >
+              ✕
+            </button>
 
             {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
