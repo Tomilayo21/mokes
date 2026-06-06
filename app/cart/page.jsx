@@ -140,21 +140,21 @@ const Cart = () => {
     return recommendations;
   }, [products, cartItems, recentlyViewedIds]);
 
-  const checkOverflow = () => {
+  const updateScrollProgress = () => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const hasOverflow = el.scrollWidth > el.clientWidth;
-
-    setHasOverflow(hasOverflow);
-
     const maxScroll = el.scrollWidth - el.clientWidth;
 
-    const progress =
-      maxScroll > 0
-        ? (el.scrollLeft / maxScroll) * 100
-        : 0;
+    if (maxScroll <= 0) {
+      setHasOverflow(false);
+      setScrollProgress(0);
+      return;
+    }
 
+    setHasOverflow(true);
+
+    const progress = (el.scrollLeft / maxScroll) * 100;
     setScrollProgress(progress);
   };
 
@@ -162,25 +162,21 @@ const Cart = () => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const update = () => checkOverflow();
+    const handle = () => updateScrollProgress();
 
-    update(); // initial run
+    el.addEventListener("scroll", handle, { passive: true });
 
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
+    const resizeObserver = new ResizeObserver(handle);
+    resizeObserver.observe(el);
 
-    window.addEventListener("resize", update);
+    const timeout = setTimeout(handle, 300);
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
+      el.removeEventListener("scroll", handle);
+      resizeObserver.disconnect();
+      clearTimeout(timeout);
     };
-  }, [relatedProducts]);  
-
-  const updateScroll = () => {
-    checkOverflow();
-  };
-
+  }, [relatedProducts]);
 
 
   return (
@@ -395,7 +391,7 @@ const Cart = () => {
 
               <div
                 ref={scrollRef}
-                onScroll={updateScroll}
+                onScroll={updateScrollProgress}
                 className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory pb-4"
               >
                 {relatedProducts.map((p) => (

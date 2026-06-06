@@ -289,21 +289,21 @@ export default function ProductPage() {
     return () => window.removeEventListener("resize", check);
   }, [relatedProducts, productData]);
 
-  const checkOverflow = () => {
+  const updateScrollProgress = () => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const hasOverflow = el.scrollWidth > el.clientWidth;
-
-    setHasOverflow(hasOverflow);
-
     const maxScroll = el.scrollWidth - el.clientWidth;
 
-    const progress =
-      maxScroll > 0
-        ? (el.scrollLeft / maxScroll) * 100
-        : 0;
+    if (maxScroll <= 0) {
+      setHasOverflow(false);
+      setScrollProgress(0);
+      return;
+    }
 
+    setHasOverflow(true);
+
+    const progress = (el.scrollLeft / maxScroll) * 100;
     setScrollProgress(progress);
   };
 
@@ -311,24 +311,25 @@ export default function ProductPage() {
     const el = scrollRef.current;
     if (!el) return;
 
-    const update = () => checkOverflow();
+    const handle = () => updateScrollProgress();
 
-    update(); // initial run
+    // scroll tracking
+    el.addEventListener("scroll", handle);
 
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
+    // resize tracking
+    const resizeObserver = new ResizeObserver(handle);
+    resizeObserver.observe(el);
 
-    window.addEventListener("resize", update);
+    // image/layout delay fix
+    const timeout = setTimeout(handle, 300);
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
+      el.removeEventListener("scroll", handle);
+      resizeObserver.disconnect();
+      clearTimeout(timeout);
     };
-  }, [relatedProducts]);  
+  }, [relatedProducts]);
 
-  const updateScroll = () => {
-    checkOverflow();
-  };
 
   useEffect(() => {
     if (!productData?._id) return;
@@ -558,7 +559,7 @@ export default function ProductPage() {
 
                   <div
                     ref={scrollRef}
-                    onScroll={updateScroll}
+                    onScroll={updateScrollProgress}
                     className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory pb-4"
                   >
                     {relatedProducts.map((p) => (

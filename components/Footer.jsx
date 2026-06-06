@@ -16,6 +16,12 @@ import {
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
   
   return (
     <footer className="w-full border-t border-zinc-200 mt-24 bg-gray-50 text-black">
@@ -142,6 +148,15 @@ export default function Footer() {
           </p>
         </div>
 
+        {/* BACK TO TOP BUTTON */}
+        <div className="w-full">
+          <button
+            onClick={scrollToTop}
+            className="w-full cursor-pointer py-4 text-xs uppercase tracking-widest hover:text-black transition"
+          >
+            Back to Top ↑
+          </button>
+        </div>
       </div>
     </footer>
   );
