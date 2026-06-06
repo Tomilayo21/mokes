@@ -3,8 +3,11 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
 
 const ShippingPage = () => {
+  const router = useRouter();
+
   return (
     <>
       <Navbar />
@@ -205,7 +208,8 @@ const ShippingPage = () => {
             </p>
 
             <button
-              className="mt-8 px-8 py-3 uppercase text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm"
+              onClick={() => router.push("/contact")}
+              className="mt-8 px-8 py-3 cursor-pointer uppercase text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm"
             >
               Contact Support
             </button>

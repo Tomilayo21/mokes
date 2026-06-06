@@ -3,8 +3,11 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
 
 const ReturnsPage = () => {
+  const router = useRouter();
+
   return (
     <>
       <Navbar />
@@ -220,7 +223,9 @@ const ReturnsPage = () => {
             We aim to make every resolution smooth, fair, and stress-free.
           </p>
 
-          <button className="mt-8 px-8 py-3 uppercase text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm">
+          <button 
+            onClick={() => router.push("/contact")}
+            className="mt-8 px-8 py-3 uppercase cursor-pointer text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm">
             Contact Support
           </button>
         </section>

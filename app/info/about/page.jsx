@@ -6,7 +6,8 @@ import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";   
 
 const AboutPage = () => {
-    const router = useRouter();
+  const router = useRouter();
+
   return (
     <>
       <Navbar />

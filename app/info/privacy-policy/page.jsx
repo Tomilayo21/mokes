@@ -3,8 +3,11 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
 
 const PrivacyPolicyPage = () => {
+  const router = useRouter();
+
   return (
     <>
       <Navbar />
@@ -249,7 +252,10 @@ const PrivacyPolicyPage = () => {
             please contact our support team. We are always here to help.
           </p>
 
-          <button className="mt-8 px-8 py-3 uppercase text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm">
+          <button 
+              onClick={() => router.push("/contact")}
+              className="mt-8 px-8 py-3 uppercase cursor-pointer text-white bg-[var(--sage)] hover:bg-zinc-500 transition rounded-sm"
+            >
             Contact Support
           </button>
         </section>
