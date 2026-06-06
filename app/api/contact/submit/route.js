@@ -23,10 +23,10 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Get user-agent and IP
+    // USER AGENT
     const userAgent = req.headers.get("user-agent") || "";
 
-    // Better IP detection
+    // REAL IP DETECTION
     const forwardedFor = req.headers.get("x-forwarded-for");
 
     const ip =
@@ -35,19 +35,23 @@ export async function POST(req) {
       req.headers.get("cf-connecting-ip") ||
       "";
 
-    // Parse device info
+    console.log("REAL IP:", ip);
+
+    // DEVICE DETECTION
     const parser = new UAParser(userAgent);
 
-    const browser = parser.getBrowser().name || "Unknown Browser";
-    const os = parser.getOS().name || "Unknown OS";
+    const browser =
+      parser.getBrowser().name || "Unknown Browser";
+
+    const os =
+      parser.getOS().name || "Unknown OS";
 
     const device = `${browser} on ${os}`;
 
-    // Location lookup
+    // LOCATION LOOKUP
     let location = "Unknown";
 
     try {
-      // skip localhost/private IPs
       const isPrivateIp =
         !ip ||
         ip === "127.0.0.1" ||
@@ -57,12 +61,14 @@ export async function POST(req) {
         ip.startsWith("172.");
 
       if (!isPrivateIp) {
-        const res = await fetch(`https://ipwho.is/${ip}`);
+        // PRIMARY PROVIDER
+        const res = await fetch(
+          `https://ipwho.is/${ip}`
+        );
 
         const data = await res.json();
 
-        console.log("IP:", ip);
-        console.log("Location response:", data);
+        console.log("IPWHOIS:", data);
 
         if (data?.success) {
           location = [
@@ -73,11 +79,45 @@ export async function POST(req) {
             .filter(Boolean)
             .join(", ");
         }
+
+        // FALLBACK PROVIDER
+        if (
+          !location ||
+          location === "Unknown" ||
+          location.includes("Cross River")
+        ) {
+          const fallbackRes = await fetch(
+            `http://ip-api.com/json/${ip}`
+          );
+
+          const fallbackData =
+            await fallbackRes.json();
+
+          console.log("IP-API:", fallbackData);
+
+          if (
+            fallbackData?.status === "success"
+          ) {
+            location = [
+              fallbackData.city,
+              fallbackData.regionName,
+              fallbackData.country,
+            ]
+              .filter(Boolean)
+              .join(", ");
+          }
+        }
       } else {
-        console.log("Private/local IP detected:", ip);
+        console.log(
+          "Private/local IP detected:",
+          ip
+        );
       }
     } catch (err) {
-      console.warn("Location lookup failed:", err.message);
+      console.warn(
+        "Location lookup failed:",
+        err.message
+      );
     }
 
     // SAVE TO DATABASE
@@ -112,45 +152,132 @@ export async function POST(req) {
 
     // EMAIL TEMPLATE
     const mailOptions = {
-      from: `"Website Contact" <${process.env.EMAIL_USER}>`,
+      from: `"MOKÉS Website" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
-      subject: `Customer Inquiry: ${subject}`,
+      subject: `New Contact Form Submission — ${subject}`,
       html: `
-        <div style="max-width:600px;margin:30px auto;padding:30px;font-family:Arial,sans-serif;background:#fff;border:1px solid #eaeaea;border-radius:8px;color:#333;">
-          
-          <div style="text-align:center;margin-bottom:20px;">
-            <h2 style="color:#2c3e50;">📬 New Message Received</h2>
+        <div style="
+          max-width: 640px;
+          margin: 40px auto;
+          padding: 40px;
+          font-family: Arial, sans-serif;
+          background-color: #ffffff;
+          border: 1px solid #e5e5e5;
+          color: #1f2937;
+        ">
 
-            <p style="font-size:14px;color:#777;">
-              A customer submitted a message through your contact form.
+          <!-- Header -->
+          <div style="margin-bottom: 32px; text-align: center;">
+            <h1 style="
+              margin: 0;
+              font-size: 24px;
+              font-weight: 600;
+              color: #111827;
+              letter-spacing: -0.02em;
+            ">
+              New Contact Form Submission
+            </h1>
+
+            <p style="
+              margin-top: 10px;
+              font-size: 14px;
+              line-height: 1.6;
+              color: #6b7280;
+            ">
+              A new inquiry has been submitted through the MOKÉS website contact form.
             </p>
           </div>
 
-          <div style="font-size:15px;line-height:1.7;">
-            <p><strong>👤 Name:</strong> ${name}</p>
+          <!-- Details -->
+          <div style="
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 24px 0;
+          ">
 
-            <p><strong>📧 Email:</strong> ${email}</p>
+            <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Name
+              </p>
 
-            <p><strong>🎯 Subject:</strong> ${subject}</p>
+              <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
+                ${name}
+              </p>
+            </div>
 
-            <p><strong>💻 Device:</strong> ${device}</p>
+            <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Email Address
+              </p>
 
-            <p><strong>📍 Location:</strong> ${location}</p>
+              <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
+                ${email}
+              </p>
+            </div>
 
-            <p>
-              <strong>📝 Message:</strong><br/><br/>
-              ${safeMessage}
-            </p>
+            <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Subject
+              </p>
+
+              <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
+                ${subject}
+              </p>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Device Information
+              </p>
+
+              <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
+                ${device}
+              </p>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Location
+              </p>
+
+              <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
+                ${location}
+              </p>
+            </div>
+
+            <div>
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+                Message
+              </p>
+
+              <div style="
+                margin-top: 10px;
+                padding: 18px;
+                background-color: #f9fafb;
+                border: 1px solid #eeeeee;
+                font-size: 15px;
+                line-height: 1.8;
+                color: #111827;
+                white-space: pre-line;
+              ">
+                ${safeMessage}
+              </div>
+            </div>
           </div>
 
-          <hr style="margin:30px 0;border:none;border-top:1px solid #eee;" />
-
-          <div style="text-align:center;font-size:13px;color:#999;">
-            <p>
-              You received this message because someone submitted the contact form on your website.
+          <!-- Footer -->
+          <div style="
+            margin-top: 28px;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #9ca3af;
+          ">
+            <p style="margin: 0;">
+              This email was automatically generated from the MOKÉS contact form.
             </p>
 
-            <p style="margin-top:10px;">
+            <p style="margin-top: 10px;">
               &copy; ${new Date().getFullYear()} MOKÉS. All rights reserved.
             </p>
           </div>
@@ -159,7 +286,9 @@ export async function POST(req) {
     };
 
     // SEND EMAIL
-    const info = await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(
+      mailOptions
+    );
 
     console.log("Email sent:", info.messageId);
 
