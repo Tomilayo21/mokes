@@ -112,10 +112,10 @@ export default function ProductPage() {
   // Add to Cart 
   const handleAddToCart = () => {
     if (status !== "authenticated") {
+      const query = searchParams.toString();
+
       const currentUrl = `${pathname}${
-        searchParams.size
-          ? `?${searchParams.toString()}`
-          : ""
+        query ? `?${query}` : ""
       }`;
 
       router.push(
@@ -123,27 +123,101 @@ export default function ProductPage() {
           currentUrl
         )}`
       );
+
+      return;
     }
 
     if (!selectedSize) {
       toast.custom(
         (t) => (
           <div
-            className={`max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            className={`relative overflow-hidden max-w-md w-full bg-gray-50 shadow-sm rounded-sm flex items-center gap-3 p-4 transition-all duration-300 ${
+              t.visible
+                ? "animate-toast-bounce opacity-100"
+                : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="text-sm font-medium text-red-800 dark:text-red-800">
+            <p className="text-sm font-medium text-red-800">
               Please select a size
             </p>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+              <div
+                className="h-full bg-[var(--sage)]"
+                style={{
+                  animation: `toast-progress ${t.duration}ms linear forwards`,
+                }}
+              />
+            </div>
           </div>
         ),
-        { duration: 4000, position: "top-right" }
+        {
+          duration: 4000,
+          position: "top-right",
+        }
       );
       return;
     }
 
     addToCart(productData, selectedSize);
+
+    toast.custom(
+      (t) => (
+        <div
+          className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
+            t.visible
+              ? "translate-x-0 opacity-100"
+              : "translate-x-10 opacity-0"
+          }`}
+        >
+          {/* Product Image */}
+          <div className="w-14 h-14 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
+            <Image
+              src={productData.image?.[0] || "/placeholder.png"}
+              alt={productData.name}
+              width={56}
+              height={56}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Product Info */}
+          <div className="flex-1">
+            <p className="text-sm font-normal text-black tracking-wide">
+              Now in your bag
+            </p>
+
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              {productData.name?.toUpperCase()} in{" "}
+              {selectedSize?.toLowerCase()} size has been added to your cart.
+            </p>
+          </div>
+
+          {/* Close */}
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="text-gray-400 cursor-pointer hover:text-black transition"
+          >
+            ✕
+          </button>
+
+          {/* Progress Bar */}
+          <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+            <div
+              className="h-full bg-[var(--sage)]"
+              style={{
+                animation: `toast-progress ${t.duration}ms linear forwards`,
+              }}
+            />
+          </div>
+        </div>
+      ),
+      {
+        duration: 5000,
+        position: "top-right",
+      }
+    );
   };
 
   const relatedProducts = React.useMemo(() => {
@@ -293,7 +367,7 @@ export default function ProductPage() {
                 <div className="overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6 hover:shadow-md">
                   <Image
                     src={mainImage || productData?.image?.[0] || "/placeholder.png"}
-                    alt={productData?.name}
+                    alt={productData?.name || "Product image"}
                     width={1280}
                     height={720}
                     className="w-full h-[280px] sm:h-[350px] md:h-[400px] object-cover"
@@ -332,7 +406,7 @@ export default function ProductPage() {
                         >
                           <Image
                             src={img}
-                            alt={productData.name}
+                            alt={`${productData?.name || "Product"} thumbnail ${i + 1}`}
                             width={150}
                             height={150}
                             className="w-full h-20 sm:h-24 object-cover"

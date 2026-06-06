@@ -52,3 +52,40 @@ h1, h2, h3, h4 {
   pointer-events: none;
   font-style: normal;
 }
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.toast-progress-bar {
+  animation: toast-progress 5s linear forwards;
+}
+
+@keyframes toast-bounce {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateX(-6px);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-toast-bounce {
+  animation: toast-bounce 0.28s cubic-bezier(0.2, 1.2, 0.2, 1);
+}
