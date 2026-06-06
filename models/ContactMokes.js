@@ -11,7 +11,12 @@ const ContactMokesSchema = new mongoose.Schema({
   deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   device: String,
-  location: String,
+  location: {
+    gps: String,
+    ip: String,
+    accuracy: String,
+    label: String,
+  },
 });
 
 export default mongoose.models.ContactMokes || mongoose.model("ContactMokes", ContactMokesSchema);
