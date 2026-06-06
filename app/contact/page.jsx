@@ -16,6 +16,49 @@ const ContactPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
+  const getGPSLocation = () => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          try {
+            // Reverse geocoding (OpenCage - free tier available)
+            const res = await fetch(
+              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_OPENCAGE_KEY`
+            );
+
+            const data = await res.json();
+
+            const components = data?.results?.[0]?.components;
+
+            const gpsLocation = [
+              components?.suburb,
+              components?.city || components?.town,
+              components?.state,
+              components?.country,
+            ]
+              .filter(Boolean)
+              .join(", ");
+
+            resolve(gpsLocation);
+          } catch (err) {
+            resolve(null);
+          }
+        },
+        () => resolve(null), // user denied permission
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+        }
+      );
+    });
+  };
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -25,11 +68,19 @@ const ContactPage = () => {
     e.preventDefault();
     setLoading(true);
 
+     let gpsLocation = null;
+
+      try {
+        gpsLocation = await getGPSLocation();
+      } catch (err) {
+        gpsLocation = null;
+      }
+
     try {
       const res = await fetch("/api/contact/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, gpsLocation }),
       });
 
       const result = await res.json();

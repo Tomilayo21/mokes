@@ -7,26 +7,31 @@ import fetch from "node-fetch";
 export async function POST(req) {
   try {
     const body = await req.json();
-
-    const { name, email, subject, message } = body;
+    const { name, email, subject, message, gpsLocation } = body;
 
     if (!name || !email || !subject || !message) {
       return new Response(
-        JSON.stringify({
-          error: "All fields are required",
-        }),
-        {
-          status: 400,
-        }
+        JSON.stringify({ error: "All fields are required" }),
+        { status: 400 }
       );
     }
 
     await connectDB();
 
-    // USER AGENT
+    // -------------------------
+    // USER AGENT + DEVICE
+    // -------------------------
     const userAgent = req.headers.get("user-agent") || "";
 
-    // REAL IP DETECTION
+    const parser = new UAParser(userAgent);
+
+    const device = `${parser.getBrowser().name || "Unknown Browser"} on ${
+      parser.getOS().name || "Unknown OS"
+    }`;
+
+    // -------------------------
+    // IP DETECTION
+    // -------------------------
     const forwardedFor = req.headers.get("x-forwarded-for");
 
     const ip =
@@ -37,90 +42,48 @@ export async function POST(req) {
 
     console.log("REAL IP:", ip);
 
-    // DEVICE DETECTION
-    const parser = new UAParser(userAgent);
-
-    const browser =
-      parser.getBrowser().name || "Unknown Browser";
-
-    const os =
-      parser.getOS().name || "Unknown OS";
-
-    const device = `${browser} on ${os}`;
-
-    // LOCATION LOOKUP
-    let location = "Unknown";
+    // -------------------------
+    // IP LOCATION (FALLBACK)
+    // -------------------------
+    let ipLocation = "Unknown";
 
     try {
       const isPrivateIp =
         !ip ||
-        ip === "127.0.0.1" ||
-        ip === "::1" ||
-        ip.startsWith("192.168.") ||
+        ip.startsWith("127.") ||
         ip.startsWith("10.") ||
+        ip.startsWith("192.168.") ||
         ip.startsWith("172.");
 
       if (!isPrivateIp) {
-        // PRIMARY PROVIDER
-        const res = await fetch(
-          `https://ipwho.is/${ip}`
-        );
-
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
         const data = await res.json();
 
-        console.log("IPWHOIS:", data);
-
-        if (data?.success) {
-          location = [
-            data.city,
-            data.region,
-            data.country,
-          ]
-            .filter(Boolean)
-            .join(", ");
+        if (data?.city) {
+          ipLocation = `${data.city}, ${data.region}, ${data.country_name}`;
         }
-
-        // FALLBACK PROVIDER
-        if (
-          !location ||
-          location === "Unknown" ||
-          location.includes("Cross River")
-        ) {
-          const fallbackRes = await fetch(
-            `http://ip-api.com/json/${ip}`
-          );
-
-          const fallbackData =
-            await fallbackRes.json();
-
-          console.log("IP-API:", fallbackData);
-
-          if (
-            fallbackData?.status === "success"
-          ) {
-            location = [
-              fallbackData.city,
-              fallbackData.regionName,
-              fallbackData.country,
-            ]
-              .filter(Boolean)
-              .join(", ");
-          }
-        }
-      } else {
-        console.log(
-          "Private/local IP detected:",
-          ip
-        );
       }
     } catch (err) {
-      console.warn(
-        "Location lookup failed:",
-        err.message
-      );
+      console.log("IP lookup failed:", err.message);
     }
 
-    // SAVE TO DATABASE
+    // -------------------------
+    // HYBRID LOCATION LOGIC
+    // -------------------------
+    let location = {
+      gps: gpsLocation || null,
+      ip: ipLocation,
+      accuracy: gpsLocation ? "gps" : "ip",
+
+      // 👇 THIS is what you are missing
+      label: gpsLocation
+        ? gpsLocation.address || gpsLocation.city || ipLocation
+        : ipLocation,
+    };
+
+    // -------------------------
+    // SAVE TO DB
+    // -------------------------
     await ContactMokes.create({
       name,
       email,
@@ -133,7 +96,9 @@ export async function POST(req) {
       deleted: false,
     });
 
-    // EMAIL TRANSPORTER
+    // -------------------------
+    // EMAIL
+    // -------------------------
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: Number(process.env.EMAIL_PORT),
@@ -144,13 +109,11 @@ export async function POST(req) {
       },
     });
 
-    // ESCAPE MESSAGE HTML
     const safeMessage = message
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\n/g, "<br/>");
 
-    // EMAIL TEMPLATE
     const mailOptions = {
       from: `"MOKÉS Website" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
@@ -235,13 +198,21 @@ export async function POST(req) {
               </p>
             </div>
 
-            <div style="margin-bottom: 18px;">
-              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;">
+           <div style="margin-bottom: 18px;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase;">
                 Location
               </p>
 
               <p style="margin: 6px 0 0; font-size: 15px; color: #111827;">
-                ${location}
+                ${location.label}
+              </p>
+
+              <p style="margin: 6px 0 0; font-size: 13px; color: #6b7280;">
+                IP: ${location.ip}
+              </p>
+
+              <p style="margin: 4px 0 0; font-size: 13px; color: #6b7280;">
+                Source: ${location.accuracy}
               </p>
             </div>
 
@@ -285,31 +256,19 @@ export async function POST(req) {
       `,
     };
 
-    // SEND EMAIL
-    const info = await transporter.sendMail(
-      mailOptions
-    );
+    const info = await transporter.sendMail(mailOptions);
 
     console.log("Email sent:", info.messageId);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-      }),
-      {
-        status: 200,
-      }
-    );
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+    });
   } catch (error) {
     console.error("Submit error:", error);
 
     return new Response(
-      JSON.stringify({
-        error: "Failed to submit message",
-      }),
-      {
-        status: 500,
-      }
+      JSON.stringify({ error: "Failed to submit message" }),
+      { status: 500 }
     );
   }
 }
