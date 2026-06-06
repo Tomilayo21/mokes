@@ -10,8 +10,7 @@ const ShippingPage = () => {
 
   return (
     <>
-      <Navbar />
-
+    
       <div className="px-8 md:px-8 lg:px-8 pt-10 mt-8 mb-20">
 
         {/* Header */}

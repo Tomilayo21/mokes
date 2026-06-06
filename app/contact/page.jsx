@@ -120,13 +120,13 @@ const ContactPage = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center mt-12 pb-20 px-6 md:px-16 lg:px-32 pt-16">
+      <div className="flex flex-col items-center px-8 md:px-8 lg:px-8 pt-10 mt-8 mb-20">
 
         {/* HEADER */}
         <div className="text-center mb-14">
-          <p className="text-2xl md:text-3xl font-normal text-gray-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-normal text-gray-900 tracking-tight">
             Get in Touch
-          </p>
+          </h1>
 
           <div className="w-16 h-[1px] bg-black mx-auto my-5 opacity-30" />
 
