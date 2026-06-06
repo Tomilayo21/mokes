@@ -24,140 +24,143 @@ export default function Footer() {
   };
   
   return (
-    <footer className="w-full border-t border-zinc-200 mt-24 bg-gray-50 text-black">
-      
-      <div className="max-w-7xl mx-auto px-8 md:px-8 lg:px-8 py-16">
-
-        {/* TOP SECTION */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-
-          {/* INFO */}
-          <div>
-            <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
-              Info
-            </h3>
-
-            <ul className="space-y-3 text-sm text-zinc-600">
-              <li>
-                <a href="/info/about" className="hover:text-black transition">
-                  About
-                </a>
-              </li>
-
-              <li>
-                <a href="/info/shipping" className="hover:text-black transition">
-                  Shipping
-                </a>
-              </li>
-
-              <li>
-                <a href="/info/returns" className="hover:text-black transition">
-                  Returns
-                </a>
-              </li>
-
-              <li>
-                <a href="/info/privacy" className="hover:text-black transition">
-                  Privacy Policy
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* CONTACT */}
-          <div>
-            <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
-              Contact
-            </h3>
-
-            <ul className="space-y-3 text-sm text-zinc-600">
-              <li>support@mokes.com</li>
-              <li>+234 812 345 6789</li>
-              <li>Lagos, Nigeria</li>
-            </ul>
-          </div>
-
-          {/* CAREERS */}
-          <div>
-            <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
-              Careers
-            </h3>
-
-            <ul className="space-y-3 text-sm text-zinc-600">
-              <li>
-                <a href="/careers/open-roles" className="hover:text-black transition">
-                  Open Roles
-                </a>
-              </li>
-
-              <li>
-                <a href="/careers/culture" className="hover:text-black transition">
-                  Culture
-                </a>
-              </li>
-
-              <li>
-                <a href="/careers/internships" className="hover:text-black transition">
-                  Internships
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* NEWSLETTER */}
-          <Newsletter />
-
-        </div>
-
-        {/* SOCIALS + PAYMENTS */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 mt-16">
-
-          {/* SOCIAL ICONS */}
-          <div className="flex items-center gap-5 text-zinc-600">
-            <a href="https://instagram.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
-              <BsInstagram size={18} />
-            </a>
-
-            <a href="https://twitter.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
-              <FaSquareXTwitter size={18} />
-            </a>
-
-            <a href="https://facebook.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
-              <FaFacebook size={18} />
-            </a>
-
-            <a href="https://linkedin.com/company/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
-              <FaLinkedin size={18} />
-            </a>
-          </div>
-
-          {/* PAYMENT ICONS */}
-          <div className="flex items-center gap-5 text-3xl text-zinc-500">
-            <FaCcVisa />
-            <FaCcMastercard />
-            <FaApplePay />
-            <FaGooglePay />
-          </div>
-
-        </div>
-
-        {/* COPYRIGHT */}
-        <div className="mt-6 pt-6">
-          <p className="text-xs tracking-wide text-zinc-500">
-            © {currentYear} MOKÉS. All rights reserved.
-          </p>
-        </div>
-
-        {/* BACK TO TOP BUTTON */}
-        <div className="w-full">
-          <button
-            onClick={scrollToTop}
-            className="w-full cursor-pointer py-4 text-xs uppercase tracking-widest hover:text-black transition"
-          >
-            Back to Top ↑
-          </button>
-        </div>
+    <>
+      {/* BACK TO TOP BUTTON */}
+      <div className="w-full mt-24">
+        <button
+          onClick={scrollToTop}
+          className="w-full cursor-pointer py-4 text-xs text-black uppercase tracking-widest hover:text-gray-800 transition"
+        >
+          Back to Top ↑
+        </button>
       </div>
-    </footer>
+
+      <footer className="w-full border-t border-zinc-200 mt-2 bg-gray-50 text-black">
+        
+        <div className="max-w-7xl mx-auto px-8 md:px-8 lg:px-8 py-16">
+
+          {/* TOP SECTION */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+
+            {/* INFO */}
+            <div>
+              <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
+                Info
+              </h3>
+
+              <ul className="space-y-3 text-sm text-zinc-600">
+                <li>
+                  <a href="/info/about" className="hover:text-black transition">
+                    About
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/info/shipping" className="hover:text-black transition">
+                    Shipping
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/info/returns" className="hover:text-black transition">
+                    Returns
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/info/privacy" className="hover:text-black transition">
+                    Privacy Policy
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* CONTACT */}
+            <div>
+              <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
+                Contact
+              </h3>
+
+              <ul className="space-y-3 text-sm text-zinc-600">
+                <li>support@mokes.com</li>
+                <li>+234 812 345 6789</li>
+                <li>Lagos, Nigeria</li>
+              </ul>
+            </div>
+
+            {/* CAREERS */}
+            <div>
+              <h3 className="text-sm uppercase tracking-[0.2em] mb-5">
+                Careers
+              </h3>
+
+              <ul className="space-y-3 text-sm text-zinc-600">
+                <li>
+                  <a href="/careers/open-roles" className="hover:text-black transition">
+                    Open Roles
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/careers/culture" className="hover:text-black transition">
+                    Culture
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/careers/internships" className="hover:text-black transition">
+                    Internships
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* NEWSLETTER */}
+            <Newsletter />
+
+          </div>
+
+          {/* SOCIALS + PAYMENTS */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mt-16">
+
+            {/* SOCIAL ICONS */}
+            <div className="flex items-center gap-5 text-zinc-600">
+              <a href="https://instagram.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
+                <BsInstagram size={18} />
+              </a>
+
+              <a href="https://twitter.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
+                <FaSquareXTwitter size={18} />
+              </a>
+
+              <a href="https://facebook.com/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
+                <FaFacebook size={18} />
+              </a>
+
+              <a href="https://linkedin.com/company/mokes" target="_blank" rel="noopener noreferrer" className="hover:text-black transition">
+                <FaLinkedin size={18} />
+              </a>
+            </div>
+
+            {/* PAYMENT ICONS */}
+            <div className="flex items-center gap-5 text-3xl text-zinc-500">
+              <FaCcVisa />
+              <FaCcMastercard />
+              <FaApplePay />
+              <FaGooglePay />
+            </div>
+
+          </div>
+
+          {/* COPYRIGHT */}
+          <div className="mt-6 pt-6">
+            <p className="text-xs tracking-wide text-zinc-500">
+              © {currentYear} MOKÉS. All rights reserved.
+            </p>
+          </div>
+
+        </div>
+      </footer>
+    </>  
   );
 }
