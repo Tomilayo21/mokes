@@ -305,7 +305,7 @@ export default function AvatarMenu() {
         }}
         className={`flex items-center justify-center transition hover:opacity-90 ${
           user?.image
-            ? "w-9 h-9 rounded-full overflow-hidden shadow"
+            ? "w-6 h-6 rounded-full overflow-hidden shadow"
             : ""
         }`}
       >
@@ -313,7 +313,7 @@ export default function AvatarMenu() {
           <Image
             src={user.image}
             alt={user.name || "User"}
-            className="w-9 h-9 rounded-full object-cover"
+            className="w-6 h-6 rounded-full object-cover"
           />
         ) : (
           <FaRegUser className="w-4 h-4 text-black" />
