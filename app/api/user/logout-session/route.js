@@ -38,6 +38,10 @@ export async function POST(req) {
     user.sessions = user.sessions.filter(
       (s) => s.token !== token
     );
+    await User.findByIdAndUpdate(session.user.id, {
+      $pull: { sessions: { token } },
+      $inc: { sessionVersion: 1 },
+    });
 
     await user.save();
 
