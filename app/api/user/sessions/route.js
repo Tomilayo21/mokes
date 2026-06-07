@@ -1,11 +1,7 @@
-// app/api/user/sessions/route.js
-
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { getServerSession } from "next-auth/next";
 import connectDB from "@/config/db";
 import User from "@/models/User";
-import { UAParser } from "ua-parser-js";
-
 
 export async function GET() {
   try {
@@ -14,29 +10,21 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return Response.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await User.findById(session.user.id);
 
     return Response.json({
-      sessions:
-        user?.sessions?.sort(
-          (a, b) =>
-            new Date(b.lastActive) -
-            new Date(a.lastActive)
-        ) || [],
+      sessions: (user?.sessions || []).sort(
+        (a, b) => new Date(b.lastActive) - new Date(a.lastActive)
+      ),
     });
-  } catch (error) {
-    console.error(error);
-
+  } catch (err) {
+    console.error(err);
     return Response.json(
       { error: "Failed to fetch sessions" },
       { status: 500 }
     );
   }
 }
-

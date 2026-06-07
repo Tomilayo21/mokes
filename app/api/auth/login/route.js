@@ -60,6 +60,8 @@ response.cookies.set("token", token, {
   maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24, // 30 days or 1 day
 });
 
+
+
 return response;
 
   } catch (err) {

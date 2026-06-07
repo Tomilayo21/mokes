@@ -18,13 +18,6 @@ export async function POST(req) {
 
     const { token } = await req.json();
 
-    if (!token) {
-      return Response.json(
-        { error: "Session token required" },
-        { status: 400 }
-      );
-    }
-
     const user = await User.findById(session.user.id);
 
     if (!user) {
@@ -34,14 +27,13 @@ export async function POST(req) {
       );
     }
 
-    // 🔥 REMOVE SESSION FROM DATABASE
+    // remove device
     user.sessions = user.sessions.filter(
       (s) => s.token !== token
     );
-    await User.findByIdAndUpdate(session.user.id, {
-      $pull: { sessions: { token } },
-      $inc: { sessionVersion: 1 },
-    });
+
+    // invalidate JWT sessions
+    user.sessionVersion = (user.sessionVersion || 0) + 1;
 
     await user.save();
 

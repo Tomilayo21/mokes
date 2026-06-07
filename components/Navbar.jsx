@@ -29,6 +29,8 @@ export default function Navbar() {
   const [genderTab, setGenderTab] = useState("men");
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [mobileStack, setMobileStack] = useState(null);
+  
   useEffect(() => setMounted(true), []);
 
 
@@ -44,6 +46,61 @@ export default function Navbar() {
     else window.removeEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [showSignup, handleEsc]);
+
+    const MENU = {
+    shop: {
+        label: "Shop",
+        href: "/shop",
+    },
+    newArrivals: {
+        label: "New Arrivals",
+        href: "/new-arrivals",
+    },
+    men: {
+        label: "Men",
+        sections: {
+        collections: {
+            label: "Collections",
+            items: [
+            { label: "Streetwear", href: "#" },
+            { label: "Essentials", href: "#" },
+            { label: "Accessories", href: "#" },
+            ],
+        },
+        tees: {
+            label: "Tees",
+            items: [
+            { label: "All Tees", href: "#" },
+            { label: "Bundles", href: "#" },
+            { label: "Polos", href: "#" },
+            ],
+        },
+        },
+    },
+    women: {
+        label: "Women",
+        sections: {
+        collections: {
+            label: "Collections",
+            items: [
+            { label: "Dresses", href: "#" },
+            { label: "Luxury Basics", href: "#" },
+            { label: "Bags", href: "#" },
+            ],
+        },
+        linen: {
+            label: "Linen",
+            items: [
+            { label: "All Linen", href: "#" },
+            { label: "Tops", href: "#" },
+            { label: "Dresses", href: "#" },
+            ],
+        },
+        },
+    },
+    };
+
+
 
   return (
     <header className="w-full border-b bg-white backdrop-blur-md fixed top-0 left-0 right-0 z-50">
@@ -139,19 +196,52 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Links */}
-            <nav className="flex items-center gap-8 text-sm font-normal tracking-widest font-medium uppercase">
-                <a href="#" className="hover:text-black transition text-black">
-                Shop
-                </a>
-                <a href="#" className="hover:text-black transition text-black">
-                New Arrivals
-                </a>
-                <a href="#" className="hover:text-black transition text-black">
-                Collections
-                </a>
-                {/* <a href="#" className="hover:text-black transition text-black">
-                Contact
-                </a> */}
+            <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
+            <Link href={MENU.shop.href} className="hover:text-gray-800 text-black uppercase cursor-pointer">
+                {MENU.shop.label}
+            </Link>
+
+            <Link href={MENU.newArrivals.href} className="hover:text-gray-800 text-black uppercase cursor-pointer">
+                {MENU.newArrivals.label}
+            </Link>
+
+            {/* MEN DROPDOWN */}
+            <div className="relative group">
+                <button className="hover:text-gray-800 text-black uppercase cursor-pointer">{MENU.men.label}</button>
+
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white border shadow-md p-6 w-[300px]">
+                {Object.values(MENU.men.sections).map((section) => (
+                    <div key={section.label} className="mb-4">
+                    <p className="font-normal mb-2 text-gray-700">{section.label}</p>
+
+                    {section.items.map((item) => (
+                        <Link key={item.label} href={item.href} className="block py-1 text-sm text-black hover:underline">
+                        {item.label}
+                        </Link>
+                    ))}
+                    </div>
+                ))}
+                </div>
+            </div>
+
+            {/* WOMEN DROPDOWN */}
+            <div className="relative group">
+                <button className="hover:text-gray-800 text-black uppercase cursor-pointer">{MENU.women.label}</button>
+
+                <div className="absolute left-0 top-full hidden group-hover:block bg-white border shadow-md p-6 w-[300px]">
+                {Object.values(MENU.women.sections).map((section) => (
+                    <div key={section.label} className="mb-4">
+                    <p className="font-normal mb-2 text-gray-700">{section.label}</p>
+
+                    {section.items.map((item) => (
+                        <Link key={item.label} href={item.href} className="block py-1 text-sm text-black hover:underline">
+                        {item.label}
+                        </Link>
+                    ))}
+                    </div>
+                ))}
+                </div>
+            </div>
             </nav>
 
             {/* Right Actions */}
@@ -201,48 +291,48 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-                <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
-                    
-                    {/* BACKDROP */}
-                    <div
-                        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                            menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
-                        }`}
-                        onClick={() => setMenuOpen(false)}
-                    />
+            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
+                
+                {/* BACKDROP */}
+                <div
+                    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+                        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                />
 
-                    {/* DRAWER */}
-                    <div
-                        className={`absolute top-0 left-0 w-[85%] h-full bg-white overflow-y-auto px-4 py-6 text-sm text-black uppercase flex flex-col
-                        transform transition-transform duration-300 ease-in-out
-                        ${menuOpen ? "translate-x-0" : "-translate-x-full"}
-                        pointer-events-auto`}
-                    >
+                {/* DRAWER */}
+                <div
+                    className={`absolute top-0 left-0 w-[85%] justify-between h-full bg-white overflow-y-auto px-4 py-6 text-sm text-black uppercase flex flex-col
+                    transform transition-transform duration-300 ease-in-out
+                    ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+                    pointer-events-auto`}
+                >
 
                     {/* TOP TABS */}
                     <div className="flex items-center gap-8 border-b border-zinc-200 pb-4 mb-6">
 
-                    <button
-                        onClick={() => setGenderTab("men")}
-                        className={`pb-2 transition uppercase ${
-                        genderTab === "men"
-                            ? "border-b border-black text-black"
-                            : "text-zinc-400"
-                        }`}
-                    >
-                        Men
-                    </button>
+                        <button
+                            onClick={() => setGenderTab("men")}
+                            className={`pb-2 transition uppercase ${
+                            genderTab === "men"
+                                ? "border-b border-black text-black"
+                                : "text-zinc-400"
+                            }`}
+                        >
+                            Men
+                        </button>
 
-                    <button
-                        onClick={() => setGenderTab("women")}
-                        className={`pb-2 transition uppercase ${
-                        genderTab === "women"
-                            ? "border-b border-black text-black"
-                            : "text-zinc-400"
-                        }`}
-                    >
-                        Women
-                    </button>
+                        <button
+                            onClick={() => setGenderTab("women")}
+                            className={`pb-2 transition uppercase ${
+                            genderTab === "women"
+                                ? "border-b border-black text-black"
+                                : "text-zinc-400"
+                            }`}
+                        >
+                            Women
+                        </button>
 
                     </div>
 
@@ -250,213 +340,80 @@ export default function Navbar() {
                     {genderTab === "men" && (
                         <>
                             {/* MAIN MENU */}
-                            {activeMenu === "main" && (
+                            {activeMenu === "main" && genderTab === "men" && (
                             <div className="space-y-6">
 
                                 <a href="#" className="flex justify-between items-center">
                                 <span>Home</span>
                                 </a>
 
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Shop</span>
+                                <a href={MENU.shop.href} className="flex justify-between items-center">
+                                <span>{MENU.shop.label}</span>
                                 </a>
 
-                                <a href="#" className="flex justify-between items-center">
-                                <span>New Arrivals</span>
+                                <a href={MENU.newArrivals.href} className="flex justify-between items-center">
+                                <span>{MENU.newArrivals.label}</span>
                                 </a>
 
-                                {/* COLLECTIONS */}
+                                {Object.entries(MENU.men.sections).map(([key, section]) => (
                                 <button
-                                    onClick={() => setActiveMenu("collections")}
+                                    key={key}
+                                    onClick={() => setActiveMenu(key)}
                                     className="flex justify-between items-center w-full"
-                                    >
+                                >
                                     <span className="text-black tracking-wide uppercase">
-                                        COLLECTIONS
+                                    {section.label}
                                     </span>
 
                                     <IoIosArrowForward className="text-zinc-500" />
                                 </button>
-
-                                <button
-                                    onClick={() => setActiveMenu("mentees")}
-                                    className="flex justify-between items-center w-full"
-                                    >
-                                    <span className="text-black tracking-wide uppercase">
-                                        tees
-                                    </span>
-
-                                    <IoIosArrowForward className="text-zinc-500" />
-                                </button>
-
-                                <button
-                                    onClick={() => setActiveMenu("shirts")}
-                                    className="flex justify-between items-center w-full"
-                                    >
-                                    <span className="text-black tracking-wide uppercase">
-                                        shirts
-                                    </span>
-
-                                    <IoIosArrowForward className="text-zinc-500" />
-                                </button>
+                                ))}
 
                                 <a href="#" className="flex justify-between items-center">
                                 <span>Pants</span>
-                                </a>
-
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Contact</span>
                                 </a>
 
                             </div>
                             )}
 
                             {/* MEN COLLECTIONS */}
-                            {activeMenu === "collections" && (
-                                <div className="space-y-8">
+                            {genderTab === "men" && activeMenu !== "main" && (
+                            <div className="space-y-8">
 
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
+                                {/* HEADER (UNCHANGED UI) */}
+                                <div className="relative flex items-center justify-center">
 
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
+                                <button
+                                    onClick={() => setActiveMenu("main")}
+                                    className="absolute left-0"
+                                >
+                                    <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
+                                </button>
 
-                                    <h2 className="tracking-[0.2em]">
-                                        Men's Collections
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        Collections
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        Streetwear
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        Essentials
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        Accessories
-                                    </a>
-
-                                    </div>
+                                <h2 className="tracking-[0.2em]">
+                                    Men’s {MENU.men.sections[activeMenu]?.label}
+                                </h2>
 
                                 </div>
-                            )}
-                            {activeMenu === "mentees" && (
-                                <div className="space-y-8">
 
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
+                                {/* LINKS */}
+                                <div className="space-y-6">
 
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
+                                <div className="border-b border-zinc-100 pb-4">
+                                    <span className="font-semibold tracking-wide">
+                                    {MENU.men.sections[activeMenu]?.label}
+                                    </span>
+                                </div>
 
-                                    <h2 className="tracking-[0.2em]">
-                                        Men's Tees
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        tees
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        all tees
+                                {MENU.men.sections[activeMenu]?.items.map((item) => (
+                                    <a key={item.label} href={item.href} className="block">
+                                    {item.label}
                                     </a>
-
-                                    <a href="#" className="block">
-                                        shop tee bundles
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        tees & tanks
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        polos
-                                    </a>
-                                    </div>
+                                ))}
 
                                 </div>
-                            )}
-                            {activeMenu === "shirts" && (
-                                <div className="space-y-8">
 
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
-
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
-
-                                    <h2 className="tracking-[0.2em]">
-                                        Men's Shirts
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        shirts
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        All Shirts
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        shirt bundles
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        long sleeves
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        short sleeve
-                                    </a>
-                                    <a href="#" className="block">
-                                        shirt jackets
-                                    </a>
-                                    <a href="#" className="block">
-                                        linens shirts
-                                    </a>
-                                    <a href="#" className="block">
-                                        polos
-                                    </a>
-                                    </div>
-
-                                </div>
+                            </div>
                             )}
                         </>
                     )}
@@ -465,228 +422,90 @@ export default function Navbar() {
                     {genderTab === "women" && (
                         <>
                             {/* MAIN MENU */}
-                            {activeMenu === "main" && (
+                            {activeMenu === "main" && genderTab === "women" && (
                             <div className="space-y-6">
 
                                 <a href="#" className="flex justify-between items-center">
                                 <span>Home</span>
                                 </a>
 
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Shop</span>
+                                <a href={MENU.shop.href} className="flex justify-between items-center">
+                                <span>{MENU.shop.label}</span>
                                 </a>
 
-                                <a href="#" className="flex justify-between items-center">
-                                <span>New Arrivals</span>
+                                <a href={MENU.newArrivals.href} className="flex justify-between items-center">
+                                <span>{MENU.newArrivals.label}</span>
                                 </a>
 
-                                {/* COLLECTIONS */}
+                                {Object.entries(MENU.women.sections).map(([key, section]) => (
                                 <button
-                                onClick={() => setActiveMenu("collections")}
-                                className="flex justify-between items-center w-full"
+                                    key={key}
+                                    onClick={() => setActiveMenu(key)}
+                                    className="flex justify-between items-center w-full"
                                 >
-                                <span className="text-black tracking-wide uppercase">Collections</span>
-                                <IoIosArrowForward className="text-zinc-500" />
+                                    <span className="text-black tracking-wide uppercase">
+                                    {section.label}
+                                    </span>
+
+                                    <IoIosArrowForward className="text-zinc-500" />
                                 </button>
+                                ))}
 
-                                <button
-                                onClick={() => setActiveMenu("linen")}
-                                className="flex justify-between items-center w-full"
-                                >
-                                <span className="text-black tracking-wide uppercase">linen</span>
-                                <IoIosArrowForward className="text-zinc-500" />
-                                </button>
-
-                                <button
-                                onClick={() => setActiveMenu("womentees")}
-                                className="flex justify-between items-center w-full"
-                                >
-                                <span className="text-black tracking-wide uppercase">tees</span>
-                                <IoIosArrowForward className="text-zinc-500" />
-                                </button>
-
-
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Contact</span>
-                                </a>
 
                             </div>
                             )}
 
                             {/* WOMEN COLLECTIONS */}
-                            {activeMenu === "collections" && (
-                                <div className="space-y-8">
+                            {genderTab === "women" && activeMenu !== "main" && (
+                            <div className="space-y-8">
 
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
+                                <div className="relative flex items-center justify-center">
 
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
+                                <button
+                                    onClick={() => setActiveMenu("main")}
+                                    className="absolute left-0"
+                                >
+                                    <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
+                                </button>
 
-                                    <h2 className="tracking-[0.2em]">
-                                        Women's Collections
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        Collections
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        Dresses
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        Luxury Basics
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        Bags
-                                    </a>
-
-                                    </div>
+                                <h2 className="tracking-[0.2em]">
+                                    Women’s {MENU.women.sections[activeMenu]?.label}
+                                </h2>
 
                                 </div>
-                            )}
 
-                            {/* WOMEN LINENS */}
-                            {activeMenu === "linen" && (
-                                <div className="space-y-8">
+                                <div className="space-y-6">
 
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
+                                <div className="border-b border-zinc-100 pb-4">
+                                    <span className="font-semibold tracking-wide">
+                                    {MENU.women.sections[activeMenu]?.label}
+                                    </span>
+                                </div>
 
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
-
-                                    <h2 className="tracking-[0.2em]">
-                                        Women's Linen
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        LINEN
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        All linen
+                                {MENU.women.sections[activeMenu]?.items.map((item) => (
+                                    <a key={item.label} href={item.href} className="block">
+                                    {item.label}
                                     </a>
-
-                                    <a href="#" className="block">
-                                        tops
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        dresses
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        bottoms
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        outerwear
-                                    </a>
-
-                                    </div>
+                                ))}
 
                                 </div>
-                            )}
 
-                            {activeMenu === "womentees" && (
-                                <div className="space-y-8">
-
-                                    {/* HEADER */}
-                                    <div className="relative flex items-center justify-center">
-
-                                    <button
-                                        onClick={() => setActiveMenu("main")}
-                                        className="absolute left-0"
-                                    >
-                                        <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                    </button>
-
-                                    <h2 className="tracking-[0.2em]">
-                                        women's tees
-                                    </h2>
-
-                                    </div>
-
-                                    {/* LINKS */}
-                                    <div className="space-y-6">
-
-                                    <div className="border-b border-zinc-100 pb-4">
-                                        <span className="font-semibold tracking-wide">
-                                        tees
-                                        </span>
-                                    </div>
-
-                                    <a href="#" className="block">
-                                        All tees
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        tee bundles
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        tees & tanks
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        sweatshirts
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        bodysuits
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        tops
-                                    </a>
-
-                                    <a href="#" className="block">
-                                        tanks
-                                    </a>
-
-                                    </div>
-
-                                </div>
+                            </div>
                             )}
                         </>
                     )}
-                    {/* AUTH SECTION */}
-                    {/* <div className="mt-auto border-t border-zinc-200 pt-6 mt-8 space-y-3">
 
-                        <button className="w-full py-3 border text-sm font-medium">
-                            Sign In
-                        </button>
-
-                        <button className="w-full py-3 bg-black text-white text-sm font-medium">
-                            Sign Up
-                        </button>
-
-                    </div> */}
+                    {/* CONTACT (GLOBAL FOOTER LINK) */}
+                    <div className="mt-auto border-t border-zinc-200 pt-6">
+                    <a
+                        href="/contact"
+                        className="flex justify-between items-center text-sm uppercase"
+                        onClick={() => setMenuOpen(false)}
+                    >
+                        <span>Contact</span>
+                        <IoIosArrowForward className="text-zinc-500" />
+                    </a>
+                    </div>
                 </div>
             </div>
         )}
