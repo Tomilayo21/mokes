@@ -14,6 +14,7 @@ import AvatarMenu from "./AvatarMenu";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import { HiOutlineShoppingBag } from "react-icons/hi2"
+import SearchBar from "./Searchbar";
 
 
 export default function Navbar() {
@@ -88,8 +89,7 @@ export default function Navbar() {
 
             {/* Right - Cart */}
                 <div className="flex justify-end gap-2 items-center">
-                    <IoSearch className="w-4 h-4 text-sm hover:text-black/60 text-black transition"
-                    />
+                    <SearchBar />
                     {mounted &&
                         (user ? (
                             <>
@@ -156,8 +156,7 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
-                <IoSearch className="w-4 h-4 hover:text-black/60 text-black transition"
-                />
+                <SearchBar />
                 {mounted &&
                     (user ? (
                         <>

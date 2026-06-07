@@ -130,13 +130,21 @@ const AllProducts = () => {
       filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
 
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+
+    filtered = filtered.filter((p) => {
+      return (
+        p.name?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q) ||
+        p.subCategory?.toLowerCase().includes(q) ||
+        p.subcategory?.toLowerCase().includes(q) ||
+        p.brand?.toLowerCase().includes(q) ||
+        p.color?.toLowerCase().includes(q)
       );
-    }
+    });
+  }
 
     return filtered;
   }, [
@@ -163,6 +171,17 @@ const AllProducts = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
     router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.delete("search"); // remove search param
+    params.delete("page");   // optional: reset pagination too
+
+    const queryString = params.toString();
+
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
   };
 
   if (loading) {
@@ -202,6 +221,14 @@ const AllProducts = () => {
             displayCount={filteredProducts.length}
             totalCount={products.length}
           />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="text-sm mt-2 cursor-pointer text-gray-500 hover:text-black underline"
+            >
+              Clear search
+            </button>
+          )}
         </div>
         
         {/* Products / Empty State */}
