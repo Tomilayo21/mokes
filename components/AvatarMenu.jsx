@@ -199,7 +199,7 @@ export default function AvatarMenu() {
                 : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="flex-1 text-sm font-medium text-green-700 dark:text-green-300">
+            <p className="flex-1 text-sm font-normal text-black tracking-wide dark:text-black">
               Profile updated successfully!
             </p>
 
@@ -316,7 +316,7 @@ export default function AvatarMenu() {
                 : "translate-x-10 opacity-0"
             }`}
           >
-            <p className="flex-1 text-sm font-medium text-green-700 dark:text-green-300">
+            <p className="flex-1 text-sm font-normal text-black tracking-wide dark:text-black">
               Password changed successfully!
             </p>
 

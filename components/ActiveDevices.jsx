@@ -22,7 +22,7 @@ export default function ActiveDevices() {
       fetchSessions();
     }, []);
 
-    const handleLogout = async (token) => {
+  const handleLogout = async (token) => {
     const confirmLogout = await new Promise((resolve) => {
         toast((t) => (
         <div className="flex flex-col space-y-2 p-2">
@@ -61,7 +61,40 @@ export default function ActiveDevices() {
         return;
         }
 
-        toast.success("Device removed successfully!");
+        toast.custom(
+          (t) => (
+            <div
+              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
+                t.visible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-10 opacity-0"
+              }`}
+            >
+              <p className="flex-1 text-sm font-normal text-black tracking-wide dark:text-black">
+                Device successfully removed
+              </p>
+  
+              {/* Close */}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-gray-400 cursor-pointer hover:text-black transition"
+              >
+                ✕
+              </button>
+  
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+                <div
+                  className="h-full bg-[var(--sage)]"
+                  style={{
+                    animation: `toast-progress ${t.duration}ms linear forwards`,
+                  }}
+                />
+              </div>
+            </div>
+          ),
+          { duration: 3500, position: "top-right" }
+        );
 
         // 🔥 If user removed their own active device → force real logout
         if (token === session?.user?.currentToken) {
@@ -73,7 +106,7 @@ export default function ActiveDevices() {
     } catch (err) {
         toast.error("Failed to remove device");
     }
-    };
+  };
 
 
   if (status === "loading") return <p>Loading devices...</p>;

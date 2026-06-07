@@ -6,6 +6,7 @@ import { AppContextProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
 import Providers from "./provider";
 import { Toaster } from "react-hot-toast";
+import SessionTracker from "@/components/Admin/SessionTracker";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -35,6 +36,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>
+          <SessionTracker />
           <AppContextProvider>
             <AnnouncementBar />
             <Navbar />
