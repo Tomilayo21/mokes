@@ -9,12 +9,18 @@ export default function ActiveDevices() {
   const [sessions, setSessions] = useState([]);
 
   // Update sessions when session changes
-  useEffect(() => {
-    if (session?.user?.sessions) {
-      // Filter out sessions with missing OS or browser
-      setSessions(session.user.sessions.filter(s => s.os && s.browser));
-    }
-  }, [session]);
+    useEffect(() => {
+      const fetchSessions = async () => {
+        const res = await fetch("/api/user/sessions");
+        const data = await res.json();
+
+        if (res.ok) {
+          setSessions(data.sessions || []);
+        }
+      };
+
+      fetchSessions();
+    }, []);
 
     const handleLogout = async (token) => {
     const confirmLogout = await new Promise((resolve) => {
@@ -78,9 +84,9 @@ export default function ActiveDevices() {
   ).values()].sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
 
   return (
-    <div className="bg-gray-50 dark:bg-black border dark:border-white p-3 rounded-lg text-xs space-y-3">
+    <div className="bg-gray-50 dark:bg-gray-50 border dark:border-white p-3 rounded-sm text-xs space-y-3">
       <Toaster position="top-right" />
-      <p className="text-gray-700 dark:text-gray-300 font-medium mb-1">Active Devices</p>
+      <p className="text-gray-700 dark:text-gray-700 font-medium mb-1">Active Devices</p>
 
       {displaySessions.length > 0 ? (
         displaySessions.map((s, idx) => (

@@ -48,6 +48,10 @@ export default function AvatarMenu() {
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [passwordErrors, setPasswordErrors] = useState([]);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [viewerImage, setViewerImage] = useState(null);
+  const zoomPercent = Math.round(zoom * 100);
 
 
   useEffect(() => setMounted(true), []);
@@ -147,16 +151,32 @@ export default function AvatarMenu() {
         toast.custom(
           (t) => (
             <div
-              className={`max-w-md w-full bg-red-50 dark:bg-red-900 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
                 t.visible
                   ? "translate-x-0 opacity-100"
                   : "translate-x-10 opacity-0"
               }`}
             >
-              <XCircle className="text-red-500" size={20} />
-              <p className="text-sm font-medium text-red-700 dark:text-red-300">
+              <p className="flex-1 text-sm font-medium text-red-700 dark:text-red-300">
                 {errMsg}
               </p>
+              {/* Close */}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-gray-400 cursor-pointer hover:text-black transition"
+              >
+                ✕
+              </button>
+  
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+                <div
+                  className="h-full bg-[var(--sage)]"
+                  style={{
+                    animation: `toast-progress ${t.duration}ms linear forwards`,
+                  }}
+                />
+              </div>
             </div>
           ),
           { duration: 4000, position: "top-right" }
@@ -173,16 +193,33 @@ export default function AvatarMenu() {
       toast.custom(
         (t) => (
           <div
-            className={`max-w-md w-full bg-green-50 dark:bg-green-900 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
               t.visible
                 ? "translate-x-0 opacity-100"
                 : "translate-x-10 opacity-0"
             }`}
           >
-            <CheckCircle className="text-green-600" size={20} />
-            <p className="text-sm font-medium text-green-700 dark:text-green-300">
+            <p className="flex-1 text-sm font-medium text-green-700 dark:text-green-300">
               Profile updated successfully!
             </p>
+
+            {/* Close */}
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 cursor-pointer hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+              <div
+                className="h-full bg-[var(--sage)]"
+                style={{
+                  animation: `toast-progress ${t.duration}ms linear forwards`,
+                }}
+              />
+            </div>
           </div>
         ),
         { duration: 3500, position: "top-right" }
@@ -230,16 +267,33 @@ export default function AvatarMenu() {
         toast.custom(
           (t) => (
             <div
-              className={`max-w-md w-full bg-red-50 dark:bg-red-900 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
                 t.visible
                   ? "translate-x-0 opacity-100"
                   : "translate-x-10 opacity-0"
               }`}
             >
-              <XCircle className="text-red-500" size={20} />
-              <p className="text-sm font-medium text-red-700 dark:text-red-300">
+              <p className="flex-1 text-sm font-medium text-red-700 dark:text-red-300">
                 {errMsg}
               </p>
+
+              {/* Close */}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-gray-400 cursor-pointer hover:text-black transition"
+              >
+                ✕
+              </button>
+
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+                <div
+                  className="h-full bg-[var(--sage)]"
+                  style={{
+                    animation: `toast-progress ${t.duration}ms linear forwards`,
+                  }}
+                />
+              </div>
             </div>
           ),
           { duration: 4000, position: "top-right" }
@@ -256,16 +310,33 @@ export default function AvatarMenu() {
       toast.custom(
         (t) => (
           <div
-            className={`max-w-md w-full bg-green-50 dark:bg-green-900 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
               t.visible
                 ? "translate-x-0 opacity-100"
                 : "translate-x-10 opacity-0"
             }`}
           >
-            <CheckCircle className="text-green-600" size={20} />
-            <p className="text-sm font-medium text-green-700 dark:text-green-300">
+            <p className="flex-1 text-sm font-medium text-green-700 dark:text-green-300">
               Password changed successfully!
             </p>
+
+            {/* Close */}
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 cursor-pointer hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+              <div
+                className="h-full bg-[var(--sage)]"
+                style={{
+                  animation: `toast-progress ${t.duration}ms linear forwards`,
+                }}
+              />
+            </div>
           </div>
         ),
         { duration: 3500, position: "top-right" }
@@ -310,11 +381,14 @@ export default function AvatarMenu() {
         }`}
       >
         {user?.image ? (
-          <Image
-            src={user.image}
-            alt={user.name || "User"}
-            className="w-6 h-6 rounded-full object-cover"
-          />
+         <div className="relative w-6 h-6 cursor-pointer rounded-full overflow-hidden">
+            <Image
+              src={user.image}
+              alt={user.name || "User"}
+              fill
+              className="object-cover"
+            />
+          </div>
         ) : (
           <FaRegUser className="w-4 h-4 text-black" />
         )}
@@ -322,15 +396,18 @@ export default function AvatarMenu() {
 
       {/* ================= DESKTOP DROPDOWN ================= */}
       {desktopMenuOpen && (
-        <div className="hidden md:block absolute left-1/2 top-10 transform -translate-x-[66%] w-72 bg-gray-50 dark:bg-gray-50 rounded-md shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+        <div className="hidden md:block absolute left-1/2 top-10 transform -translate-x-[66%] w-72 bg-gray-50 dark:bg-gray-50 rounded-sm shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
           {/* Profile Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200 dark:border-gray-700">
             {user?.image ? (
-              <Image
-                src={user.image}
-                alt={user.name || "User"}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                <Image
+                  src={user.image}
+                  alt={user.name || "User"}
+                  fill
+                  className="object-cover"
+                />
+              </div>
             ) : (
               <div className="w-12 h-12 rounded-full border border-black flex items-center justify-center">
                 <User className="w-6 h-6 text-black" />
@@ -433,16 +510,19 @@ export default function AvatarMenu() {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="relative z-5000 w-full max-w-md mx-auto rounded-md border dark:border-black bg-gray-50 dark:bg-gray-50 shadow-2xl overflow-hidden">
+            <Dialog.Panel className="relative z-5000 w-full max-w-md mx-auto rounded-sm border dark:border-black bg-gray-50 dark:bg-gray-50 shadow-2xl overflow-hidden">
               {/* Profile Header */}
 
               <div className="flex items-center gap-3 px-5 py-4 border-b">
                 {user?.image ? (
-                  <Image
-                    src={user.image}
-                    alt={user.name || "User"}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    <Image
+                      src={user.image}
+                      alt={user.name || "User"}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="w-12 h-12 border border-black dark:border-black rounded-full bg-white flex items-center justify-center">
                     <User className="w-6 h-6 text-black" />
@@ -526,7 +606,7 @@ export default function AvatarMenu() {
 
         {/* Centered modal */}
         <div className="fixed inset-0 flex items-center justify-center px-4 sm:px-6">
-          <Dialog.Panel className="w-full max-w-3xl md:max-w-4xl max-h-[90vh] md:max-h-[80vh] rounded-2xl bg-white dark:bg-black shadow-2xl overflow-hidden flex flex-col md:flex-row">
+          <Dialog.Panel className="w-full max-w-3xl md:max-w-4xl max-h-[90vh] md:max-h-[80vh] rounded-sm bg-white dark:bg-white shadow-2xl overflow-hidden flex flex-col md:flex-row">
             
             {/* Sidebar */}
             <div className="flex md:flex-col w-full md:w-48 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
@@ -536,8 +616,8 @@ export default function AvatarMenu() {
                   onClick={() => setTab(t)}
                   className={`flex-1 md:flex-none text-center md:text-left px-3 py-2 font-medium border-b md:border-b-0 md:border-l md:first:border-l-0
                     ${tab === t
-                      ? "bg-gray-100 text-gray-600 dark:bg-gray-500/20 dark:text-gray-400"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
+                      ? "bg-gray-100 text-gray-600 dark:bg-gray-100 dark:text-gray-600"
+                      : "text-gray-700 dark:text-gray-700 hover:bg-gray-100 dark:hover:bg-neutral-100"
                     }`}
                 >
                   {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -553,11 +633,21 @@ export default function AvatarMenu() {
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="w-20 h-20 border dark:border-white rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                       {imagePreview ? (
-                        <Image
-                          src={imagePreview}
-                          alt="avatar"
-                          className="w-full h-full object-cover"
-                        />
+                        <div 
+                          className="relative w-full h-full rounded-full overflow-hidden cursor-pointer"
+                          onClick={() => {
+                            setViewerImage(user.image);
+                            setViewerOpen(true);
+                            setZoom(1);
+                          }}
+                          >
+                          <Image
+                            src={user.image}
+                            alt={imagePreview || "User"}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                       ) : (
                         <div className="bg-black w-full h-full flex items-center justify-center">
                           <User className="w-8 h-8 text-white" />
@@ -566,11 +656,11 @@ export default function AvatarMenu() {
                     </div>
 
                     <div className="flex-1 w-full">
-                      <label className="block font-thin text-black dark:text-white">
+                      <label className="block font-normal text-black dark:text-black">
                         Change avatar
                       </label>
                       <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <label className="inline-block cursor-pointer border dark:border-white bg-gray-50 dark:bg-black text-black dark:text-white text-sm px-4 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-black transition">
+                        <label className="inline-block cursor-pointer border dark:border-white bg-[var(--sage)] dark:bg-[var(--sage)] text-white dark:text-white text-sm px-4 py-2 rounded-md hover:bg-zinc-500 dark:hover:bg-zinc-500 transition">
                           Choose File
                           <input
                             type="file"
@@ -583,7 +673,7 @@ export default function AvatarMenu() {
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="font-thin text-red-600 hover:underline"
+                          className="font-normal text-red-600 hover:underline"
                         >
                           Remove
                         </button>
@@ -593,30 +683,30 @@ export default function AvatarMenu() {
 
                   {/* Name & Username */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="font-thin text-black dark:text-white w-full sm:w-1/3">
+                    <p className="font-normal text-black dark:text-black w-full sm:w-1/3">
                       Full Name
                     </p>
                     <input
                       value={localName}
                       onChange={(e) => setLocalName(e.target.value)}
                       className="w-full sm:w-2/3 px-2 py-1 rounded border border-gray-300 dark:border-gray-700
-                        bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-gray-500
+                        bg-white dark:bg-white text-gray-800 dark:text-gray-800
+                        placeholder-gray-400 dark:placeholder-gray-400
                         focus:outline-none focus:ring-2 focus:ring-white
                         transition-colors duration-300"
                     />
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="font-thin text-black dark:text-white w-full sm:w-1/3">
+                    <p className="font-normal text-black dark:text-black w-full sm:w-1/3">
                       Username
                     </p>
                     <input
                       value={localUsername}
                       onChange={(e) => setLocalUsername(e.target.value)}
                       className="w-full sm:w-2/3 px-2 py-1 rounded border border-gray-300 dark:border-gray-700
-                        bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-gray-500
+                        bg-white dark:bg-white text-gray-800 dark:text-gray-800
+                        placeholder-gray-400 dark:placeholder-gray-400
                         focus:outline-none focus:ring-2 focus:ring-white
                         transition-colors duration-300"
                     />
@@ -624,10 +714,10 @@ export default function AvatarMenu() {
 
                   {/* Email */}
                   <div>
-                    <p className="font-thin text-black dark:text-white">
+                    <p className="font-normal text-black dark:text-black">
                       Email Address
                     </p>
-                    <p className="text-gray-500 font-thin dark:text-gray-400 break-all text-sm">
+                    <p className="text-gray-500 font-normal dark:text-gray-400 break-all text-sm">
                       {user?.email}
                     </p>
                   </div>
@@ -637,7 +727,7 @@ export default function AvatarMenu() {
                     <button
                       onClick={handleSaveProfile}
                       disabled={savingProfile}
-                      className="bg-gray-600 text-sm text-white px-5 py-2 rounded-md cursor-pointer hover:bg-gray-700 transition"
+                      className="bg-gray-600 text-sm text-white px-5 py-2 rounded-sm cursor-pointer hover:bg-gray-700 transition"
                     >
                       {savingProfile ? "Saving..." : "Save changes"}
                     </button>
@@ -661,7 +751,7 @@ export default function AvatarMenu() {
 
                   {/* Password Section */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <p className="font-normal text-black dark:text-gray-200">Password</p>
+                    <p className="font-normal text-black dark:text-black">Password</p>
                     <button
                       className="text-sm text-gray-600 hover:underline"
                       onClick={() => setTab("password")}
@@ -681,8 +771,8 @@ export default function AvatarMenu() {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         className={`w-full px-3 py-2 font-normal rounded border 
-                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-neutral-900"}
-                          border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100
+                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-white"}
+                          border-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-800
                           placeholder-gray-400 dark:placeholder-gray-500 pr-10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-300`}
                       />
                       <button
@@ -710,9 +800,9 @@ export default function AvatarMenu() {
                           setPasswordErrors(checkPasswordRules(val));
                         }}
                         className={`w-full px-3 py-2 font-normal rounded border 
-                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-neutral-900"}
-                          border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 
-                          placeholder-gray-400 dark:placeholder-gray-500 pr-10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-300`}
+                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-white"}
+                          border-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-800
+                          placeholder-gray-400 dark:placeholder-gray-400 pr-10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-300`}
                       />
                       <button
                         type="button"
@@ -762,6 +852,126 @@ export default function AvatarMenu() {
           </div>
       </Dialog>
 
+      <Transition show={viewerOpen} as={Fragment}>
+        <Dialog
+          onClose={() => setViewerOpen(false)}
+          className="relative z-[100000]"
+        >
+          {/* Overlay */}
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/95" />
+          </Transition.Child>
+
+          {/* Center */}
+          <div className="fixed inset-0 flex items-center justify-center">
+            
+            <Dialog.Panel className="relative w-full h-full flex items-center justify-center">
+
+              {/* IMAGE WRAPPER (IMPORTANT FIX) */}
+              <div
+                className="transition-transform duration-150 select-none"
+                style={{
+                  transform: `scale(${zoom})`,
+                  touchAction: "none"
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={viewerImage}
+                  alt="preview"
+                  width={700}
+                  height={700}
+                  className="object-contain max-h-[90vh] max-w-[90vw] pointer-events-none"
+                />
+              </div>
+
+              {/* CLOSE BUTTON */}
+              <button
+                onClick={() => setViewerOpen(false)}
+                className="absolute top-5 right-5 cursor-pointer text-white text-3xl z-50"
+              >
+                ✕
+              </button>
+
+              {/* Zoom indicator (animated) */}
+              <div
+                className="absolute bottom-20 text-white/80 text-sm font-medium px-3 py-1 rounded bg-black/30 backdrop-blur-md transition-all duration-200"
+                style={{
+                  transform: "translateY(0px)",
+                }}
+              >
+                {zoomPercent}%
+              </div>
+              {/* CONTROLS (FIXED — NO CLOSE BUBBLE) */}
+              <div className="absolute bottom-8 flex gap-3 z-50">
+
+                {/* MINUS */}
+                <button
+                  type="button"
+                  disabled={zoom <= 1}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (zoom > 1) setZoom((z) => Math.max(1, +(z - 0.1).toFixed(2)));
+                  }}
+                  className={`px-4 py-2 rounded transition
+                    ${zoom <= 1
+                      ? "bg-white/5 text-white/30 cursor-not-allowed"
+                      : "bg-white/10 text-white hover:bg-white/20 cursor-pointer"
+                    }`}
+                >
+                  −
+                </button>
+
+                {/* PLUS */}
+                <button
+                  type="button"
+                  disabled={zoom >= 3}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (zoom < 3) setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)));
+                  }}
+                  className={`px-4 py-2 rounded transition
+                    ${zoom >= 3
+                      ? "bg-white/5 text-white/30 cursor-not-allowed"
+                      : "bg-white/10 text-white hover:bg-white/20 cursor-pointer"
+                    }`}
+                >
+                  +
+                </button>
+
+                {/* RESET */}
+                <button
+                  type="button"
+                  disabled={zoom === 1}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoom(1);
+                  }}
+                  className={`px-4 py-2 rounded transition
+                    ${zoom === 1
+                      ? "bg-white/5 text-white/30 cursor-not-allowed"
+                      : "bg-white/10 text-white hover:bg-white/20 cursor-pointer"
+                    }`}
+                >
+                  Reset
+                </button>
+
+              </div>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      </Transition>
 
     </div>
   );
