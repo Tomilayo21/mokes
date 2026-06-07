@@ -95,8 +95,13 @@ export default function ActiveDevices() {
             className="flex justify-between items-start border-b dark:border-gray-700 pb-2 last:border-b-0"
           >
             <div className="space-y-1">
-              <p className="text-gray-500 dark:text-gray-400">{s.os} • {s.browser}</p>
-              <p className="text-gray-500 dark:text-gray-400">{s.city}, {s.country}</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                {s.os || "Unknown OS"} • {s.browser || "Unknown Browser"}
+              </p>
+
+              <p className="text-gray-500 dark:text-gray-400">
+                {s.city && s.country ? `${s.city}, ${s.country}` : "Location unknown"}
+              </p>
               <p className="text-gray-500 dark:text-gray-400">
                 Last Active: {new Date(s.lastActive).toLocaleString()}
               </p>
