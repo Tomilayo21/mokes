@@ -450,24 +450,16 @@ export default function Navbar() {
                                 </Link>
                             ))}
 
+                            <Link href="/contact" className="block py-3">
+                                Contact us
+                            </Link>
+
                             </div>
                         </>
                         )}
 
                     </div>
                     ))}
-
-                    {/* CONTACT (GLOBAL FOOTER LINK) */}
-                    <div className="mt-auto border-t border-zinc-200 pt-6">
-                    <a
-                        href="/contact"
-                        className="flex justify-between items-center text-sm uppercase"
-                        onClick={() => setMenuOpen(false)}
-                    >
-                        <span>Contact</span>
-                        <IoIosArrowForward className="text-zinc-500" />
-                    </a>
-                    </div>
                 </div>
             </div>
         )}
