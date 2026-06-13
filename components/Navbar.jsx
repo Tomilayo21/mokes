@@ -382,86 +382,100 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
-                
-                {/* BACKDROP */}
-                <div
-                    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
+        <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
+
+            {/* BACKDROP */}
+            <div
+            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+                menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
+            }`}
+            onClick={() => setMenuOpen(false)}
+            />
+
+            {/* DRAWER */}
+            <div
+            className={`absolute top-0 left-0 w-[85%] h-full bg-white flex flex-col
+            transform transition-transform duration-300 ease-in-out
+            ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+            pointer-events-auto`}
+            >
+
+            {/* TOP TABS */}
+            <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-2 overflow-x-auto px-4 pt-6">
+                {tabs.map((tab) => (
+                <button
+                    key={tab}
+                    onClick={() => setGenderTab(tab)}
+                    className={`pb-2 uppercase transition whitespace-nowrap ${
+                    genderTab === tab
+                        ? "border-b border-black text-black"
+                        : "text-zinc-400"
                     }`}
-                    onClick={() => setMenuOpen(false)}
-                />
-
-                {/* DRAWER */}
-                <div
-                    className={`absolute top-0 left-0 w-[85%] justify-between h-full bg-white overflow-y-auto px-4 py-6 text-sm text-black uppercase flex flex-col
-                    transform transition-transform duration-300 ease-in-out
-                    ${menuOpen ? "translate-x-0" : "-translate-x-full"}
-                    pointer-events-auto`}
                 >
+                    {tab}
+                </button>
+                ))}
+            </div>
 
-                    {/* TOP TABS */}
-                    <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-6 overflow-x-auto">
-                    {tabs.map((tab) => (
-                        <button
-                        key={tab}
-                        onClick={() => setGenderTab(tab)}
-                        className={`pb-2 uppercase transition whitespace-nowrap ${
-                            genderTab === tab
-                            ? "border-b border-black text-black"
-                            : "text-zinc-400"
-                        }`}
+            {/* SCROLLABLE CONTENT */}
+            <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 text-sm text-black uppercase space-y-6">
+
+                {tabs.map((tab) => (
+                <div key={tab} className="space-y-6">
+
+                    {genderTab === tab && (
+                    <div className="space-y-2">
+
+                        <Link href="/" className="block py-3">Home</Link>
+
+                        <Link href="/shop" className="block py-3">Shop</Link>
+
+                        <Link href="/new-arrivals" className="block py-3">New Arrivals</Link>
+
+                        <Link href="/about" className="block py-3">About Us</Link>
+
+                        {(menuData[tab] || []).map((subcategory) => (
+                        <Link
+                            key={subcategory}
+                            href={`/collections/${createCollectionSlug(tab, subcategory)}`}
+                            onClick={() => setMenuOpen(false)}
+                            className="block py-3"
                         >
-                        {tab}
-                        </button>
-                    ))}
-                    </div>
+                            {subcategory}
+                        </Link>
+                        ))}
 
-                    {/* ================= MEN MENU ================= */}
-                    {tabs.map((tab) => (
-                    <div key={tab} className="space-y-6">
-
-                        {genderTab === tab && (
-                        <>
-                            {/* MAIN LINKS */}
-                            <div className="space-y-2">
-
-                            <Link href="/" className="block py-3">
-                                Home
-                            </Link>
-
-                            <Link href="/shop" className="block py-3">
-                                Shop
-                            </Link>
-
-                            <Link href="/new-arrivals" className="block py-3">
-                                New Arrivals
-                            </Link>
-
-                            {/* CATEGORY LIST (male/female/brand/kitchen) */}
-                            {(menuData[tab] || []).map((subcategory) => (
-                                <Link
-                                key={subcategory}
-                                href={`/collections/${createCollectionSlug(tab, subcategory)}`}
-                                onClick={() => setMenuOpen(false)}
-                                className="block py-3"
-                                >
-                                {subcategory}
-                                </Link>
-                            ))}
-
-                            <Link href="/contact" className="block py-3">
-                                Contact us
-                            </Link>
-
-                            </div>
-                        </>
-                        )}
+                        <Link href="/contact" className="block py-3">
+                        Contact us
+                        </Link>
 
                     </div>
-                    ))}
+                    )}
+
+                </div>
+                ))}
+
+            </div>
+
+            {/* MINI FOOTER LINKS */}
+            <div className="border-t border-zinc-200 pt-4 px-4">
+                <div className="flex items-center justify-between text-[11px] uppercase text-zinc-500 overflow-x-auto whitespace-nowrap gap-4">
+
+                <a href="/info/about" className="hover:text-black">About</a>
+
+                <a href="/info/shipping" className="hover:text-black">Shipping</a>
+
+                <a href="/info/returns" className="hover:text-black">Returns</a>
+
+                <a href="/info/privacy-policy" className="hover:text-black">Privacy</a>
+
+                <a href="/contact" className="hover:text-black">Contact</a>
+
                 </div>
             </div>
+
+            </div>
+        </div>
         )}
     </header>
   );

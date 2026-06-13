@@ -89,3 +89,7 @@ h1, h2, h3, h4 {
 .animate-toast-bounce {
   animation: toast-bounce 0.28s cubic-bezier(0.2, 1.2, 0.2, 1);
 }
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
