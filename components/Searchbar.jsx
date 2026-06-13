@@ -28,9 +28,16 @@ export default function SearchBar() {
 
         const { data } = await axios.get("/api/product/list");
 
-        setProducts(data.products || data || []);
+        console.log("API RESPONSE:", data);
+
+        const productsArray = Array.isArray(data?.products)
+          ? data.products
+          : [];
+
+        setProducts(productsArray);
       } catch (error) {
         console.log(error);
+        setProducts([]); // fallback safety
       } finally {
         setLoading(false);
       }
@@ -116,7 +123,7 @@ export default function SearchBar() {
 
     const results = [];
 
-    products.forEach((product) => {
+    (products || []).forEach((product) => {
       const searchableFields = [
         product?.name,
         product?.brand,
@@ -148,7 +155,7 @@ export default function SearchBar() {
   const popularSearches = useMemo(() => {
     const allFields = [];
 
-    products.forEach((product) => {
+    (products || []).forEach((product) => {
       [
         product?.brand,
         product?.category,

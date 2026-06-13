@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ShoppingCart, Menu, Handbag } from "lucide-react";
 import { HiMenuAlt3 } from "react-icons/hi"
 import { TfiClose } from "react-icons/tfi";
@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import { HiOutlineShoppingBag } from "react-icons/hi2"
 import SearchBar from "./Searchbar";
+import { IoChevronDown } from "react-icons/io5";
 
 
 export default function Navbar() {
@@ -24,12 +25,17 @@ export default function Navbar() {
   const { getCartCount } = useAppContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openCollections, setOpenCollections] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("main"); 
-  const [genderTab, setGenderTab] = useState("men");
+  const [genderTab, setGenderTab] = useState("male");
+  const tabs = ["male", "female", "brand", "kitchen"];
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
-  const [mobileStack, setMobileStack] = useState(null);
+  const [menuData, setMenuData] = useState({
+    male: [],
+    female: [],
+    brand: [],
+    kitchen: [],
+  });
+  const [megaMenu, setMegaMenu] = useState(null);
   
   useEffect(() => setMounted(true), []);
 
@@ -46,59 +52,85 @@ export default function Navbar() {
     else window.removeEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [showSignup, handleEsc]);
+  
 
-    const MENU = {
-    shop: {
-        label: "Shop",
-        href: "/shop",
-    },
-    newArrivals: {
-        label: "New Arrivals",
-        href: "/new-arrivals",
-    },
-    men: {
-        label: "Men",
-        sections: {
-        collections: {
-            label: "Collections",
-            items: [
-            { label: "Streetwear", href: "#" },
-            { label: "Essentials", href: "#" },
-            { label: "Accessories", href: "#" },
-            ],
-        },
-        tees: {
-            label: "Tees",
-            items: [
-            { label: "All Tees", href: "#" },
-            { label: "Bundles", href: "#" },
-            { label: "Polos", href: "#" },
-            ],
-        },
-        },
-    },
-    women: {
-        label: "Women",
-        sections: {
-        collections: {
-            label: "Collections",
-            items: [
-            { label: "Dresses", href: "#" },
-            { label: "Luxury Basics", href: "#" },
-            { label: "Bags", href: "#" },
-            ],
-        },
-        linen: {
-            label: "Linen",
-            items: [
-            { label: "All Linen", href: "#" },
-            { label: "Tops", href: "#" },
-            { label: "Dresses", href: "#" },
-            ],
-        },
-        },
-    },
+    const createCollectionSlug = (category, subcategory) => {
+    return `${category === "male" ? "males" : "females"}-${subcategory}`;
     };
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+            const res = await fetch("/api/product/list");
+
+            const data = await res.json();
+
+            console.log("API RESPONSE:", data);
+
+            // ✅ FIX
+            const products = data.products || [];
+
+            const grouped = products.reduce((acc, product) => {
+            const category = product.category?.trim().toLowerCase();
+            const subcategory = (product.subCategory || product.subcategory)
+                ?.trim()
+                .toLowerCase();
+
+            const brand = product.brand?.trim().toLowerCase();
+
+            // handle main categories
+            if (category && subcategory) {
+                if (!acc[category]) acc[category] = [];
+                if (!acc[category].includes(subcategory)) {
+                acc[category].push(subcategory);
+                }
+            }
+
+            // handle brands separately
+            if (brand) {
+                if (!acc.brand) acc.brand = [];
+                if (!acc.brand.includes(brand)) {
+                acc.brand.push(brand);
+                }
+            }
+
+            return acc;
+            }, {});
+
+            console.log("GROUPED:", grouped);
+
+            setMenuData({
+                male: grouped.male || [],
+                female: grouped.female || [],
+                brand: grouped.brand || [],
+                kitchen: grouped.kitchen || [],
+            });
+            } catch (error) {
+            console.log("FETCH ERROR:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    const megaMenuRef = useRef(null);
+
+    useEffect(() => {
+    function handleClickOutside(event) {
+        if (
+        megaMenuRef.current &&
+        !megaMenuRef.current.contains(event.target)
+        ) {
+        setMegaMenu(null);
+        }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+    }, []);
 
 
 
@@ -187,105 +219,164 @@ export default function Navbar() {
 
             {/* Desktop Layout */}
             <div className="hidden md:flex items-center justify-between h-full">
-
-            {/* Logo */}
-            <Link href="/" className="text-xl font-light tracking-tight uppercase">
-                <span className="text-[var(--sage)] tracking-[0.35em] group-hover:text-zinc-700 transition">
-                MOKÉS
-                </span>
-            </Link>
-
-            {/* Desktop Links */}
-            <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
-            <Link href={MENU.shop.href} className="hover:text-gray-800 text-black uppercase cursor-pointer">
-                {MENU.shop.label}
-            </Link>
-
-            <Link href={MENU.newArrivals.href} className="hover:text-gray-800 text-black uppercase cursor-pointer">
-                {MENU.newArrivals.label}
-            </Link>
-
-            {/* MEN DROPDOWN */}
-            <div className="relative group">
-                <button className="hover:text-gray-800 text-black uppercase cursor-pointer">{MENU.men.label}</button>
-
-                <div className="absolute left-0 top-full hidden group-hover:block bg-white border shadow-md p-6 w-[300px]">
-                {Object.values(MENU.men.sections).map((section) => (
-                    <div key={section.label} className="mb-4">
-                    <p className="font-normal mb-2 text-gray-700">{section.label}</p>
-
-                    {section.items.map((item) => (
-                        <Link key={item.label} href={item.href} className="block py-1 text-sm text-black hover:underline">
-                        {item.label}
-                        </Link>
-                    ))}
-                    </div>
-                ))}
-                </div>
-            </div>
-
-            {/* WOMEN DROPDOWN */}
-            <div className="relative group">
-                <button className="hover:text-gray-800 text-black uppercase cursor-pointer">{MENU.women.label}</button>
-
-                <div className="absolute left-0 top-full hidden group-hover:block bg-white border shadow-md p-6 w-[300px]">
-                {Object.values(MENU.women.sections).map((section) => (
-                    <div key={section.label} className="mb-4">
-                    <p className="font-normal mb-2 text-gray-700">{section.label}</p>
-
-                    {section.items.map((item) => (
-                        <Link key={item.label} href={item.href} className="block py-1 text-sm text-black hover:underline">
-                        {item.label}
-                        </Link>
-                    ))}
-                    </div>
-                ))}
-                </div>
-            </div>
-            </nav>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-                <SearchBar />
-                {mounted &&
-                    (user ? (
-                        <>
-                            <AvatarMenu/>
-                            {/* <p>Hi</p> */}
-                        </>
-                    ) :(
-                        <button
-                            onClick={() => router.push("/authentication")}
-                            className="flex items-center gap-2 hover:text-gray-50 transition"
-                        >
-                            <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/>   
-                        </button>
-                    ))
-                }
-                {/* <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/> */}
-                <Link href="/cart" className="relative inline-flex">
-                    <HiOutlineShoppingBag className="w-4 h-4 text-black hover:text-black/60 transition" />
-
-                    {getCartCount() > 0 && (
-                        <span
-                        className="
-                            absolute -top-2 -right-2
-                            min-w-[16px] h-4
-                            px-1
-                            flex items-center justify-center
-                            rounded-full
-                            bg-black text-white
-                            text-[10px] font-medium
-                            leading-none
-                        "
-                        >
-                        {getCartCount()}
-                        </span>
-                    )}
+                {/* Logo */}
+                <Link href="/" className="text-xl font-light tracking-tight uppercase">
+                    <span className="text-[var(--sage)] tracking-[0.35em] group-hover:text-zinc-700 transition">
+                    MOKÉS
+                    </span>
                 </Link>
 
+                {/* Desktop Links */}
+                <div className="relative static" ref={megaMenuRef}>
+                <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
 
-            </div>
+                    <Link href="/shop" className="hover:text-gray-800 text-black">
+                    Shop
+                    </Link>
+
+                    <Link href="/new-arrivals" className="hover:text-gray-800 text-black">
+                    New Arrivals
+                    </Link>
+
+                    {/* TRIGGER ITEMS */}
+                    {["male", "female", "brand", "kitchen"].map((item) => (
+                    <button
+                        key={item}
+                        onClick={() =>
+                        setMegaMenu((prev) => (prev === item ? null : item))
+                        }
+                        className={`flex items-center gap-1 uppercase cursor-pointer transition ${
+                        megaMenu === item
+                            ? "text-black"
+                            : "text-black hover:text-gray-800"
+                        }`}
+                    >
+                        {item}
+
+                        <IoChevronDown
+                        className={`transition-transform cursor-pointer duration-300 ${
+                            megaMenu === item ? "rotate-180" : ""
+                        }`}
+                        />
+                    </button>
+                    ))}
+                </nav>
+
+                {/* MEGA MENU PANEL */}
+                {megaMenu && (
+                    <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
+                    <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
+
+                        {/* MALE */}
+                        {megaMenu === "male" && (
+                        <div>
+                            {menuData.male?.map((item) => (
+                            <Link
+                                key={item}
+                                href={`/collections/male-${item}`}
+                                className="block py-1 text-md text-black hover:underline"
+                                onClick={() => setMegaMenu(null)}
+                            >
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </Link>
+                            ))}
+                        </div>
+                        )}
+
+                        {/* FEMALE */}
+                        {megaMenu === "female" && (
+                        <div>
+                            {menuData.female?.map((item) => (
+                            <Link
+                                key={item}
+                                href={`/collections/female-${item}`}
+                                className="block py-1 text-md text-black hover:underline"
+                                onClick={() => setMegaMenu(null)}
+                            >
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </Link>
+                            ))}
+                        </div>
+                        )}
+
+                        {/* BRANDS */}
+                        {megaMenu === "brand" && (
+                        <div>
+                            {menuData.brand?.map((item) => (
+                            <Link
+                                key={item}
+                                href={`/brands/${item}`}
+                                className="block py-1 text-md text-black hover:underline"
+                                onClick={() => setMegaMenu(null)}
+                            >
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </Link>
+                            ))}
+                        </div>
+                        )}
+
+                        {/* KITCHEN */}
+                        {megaMenu === "kitchen" && (
+                        <div>
+                            {menuData.kitchen?.map((item) => (
+                            <Link
+                                key={item}
+                                href={`/collections/kitchen-${item}`}
+                                className="block py-1 text-md text-black hover:underline"
+                                onClick={() => setMegaMenu(null)}
+                            >
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </Link>
+                            ))}
+                        </div>
+                        )}
+
+                    </div>
+                    </div>
+                )}
+                </div>
+
+                {/* Right Actions */}
+                <div className="flex items-center gap-2">
+                    <SearchBar />
+                    {mounted &&
+                        (user ? (
+                            <>
+                                <AvatarMenu/>
+                            </>
+                        ) :(
+                            <button
+                                onClick={() => router.push("/authentication")}
+                                className="flex items-center gap-2 hover:text-gray-50 transition"
+                            >
+                                <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/>   
+                            </button>
+                        ))
+                    }
+                    {/* <FaRegUser className="w-4 h-4 hover:text-black/60 text-black transition"/> */}
+                    <Link href="/cart" className="relative inline-flex">
+                        <HiOutlineShoppingBag className="w-4 h-4 text-black hover:text-black/60 transition" />
+
+                        {getCartCount() > 0 && (
+                            <span
+                            className="
+                                absolute -top-2 -right-2
+                                min-w-[16px] h-4
+                                px-1
+                                flex items-center justify-center
+                                rounded-full
+                                bg-black text-white
+                                text-[10px] font-medium
+                                leading-none
+                            "
+                            >
+                            {getCartCount()}
+                            </span>
+                        )}
+                    </Link>
+
+
+                </div>
             </div>
         </div>
 
@@ -310,190 +401,61 @@ export default function Navbar() {
                 >
 
                     {/* TOP TABS */}
-                    <div className="flex items-center gap-8 border-b border-zinc-200 pb-4 mb-6">
-
+                    <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-6 overflow-x-auto">
+                    {tabs.map((tab) => (
                         <button
-                            onClick={() => setGenderTab("men")}
-                            className={`pb-2 transition uppercase ${
-                            genderTab === "men"
-                                ? "border-b border-black text-black"
-                                : "text-zinc-400"
-                            }`}
+                        key={tab}
+                        onClick={() => setGenderTab(tab)}
+                        className={`pb-2 uppercase transition whitespace-nowrap ${
+                            genderTab === tab
+                            ? "border-b border-black text-black"
+                            : "text-zinc-400"
+                        }`}
                         >
-                            Men
+                        {tab}
                         </button>
-
-                        <button
-                            onClick={() => setGenderTab("women")}
-                            className={`pb-2 transition uppercase ${
-                            genderTab === "women"
-                                ? "border-b border-black text-black"
-                                : "text-zinc-400"
-                            }`}
-                        >
-                            Women
-                        </button>
-
+                    ))}
                     </div>
 
                     {/* ================= MEN MENU ================= */}
-                    {genderTab === "men" && (
+                    {tabs.map((tab) => (
+                    <div key={tab} className="space-y-6">
+
+                        {genderTab === tab && (
                         <>
-                            {/* MAIN MENU */}
-                            {activeMenu === "main" && genderTab === "men" && (
-                            <div className="space-y-6">
+                            {/* MAIN LINKS */}
+                            <div className="space-y-2">
 
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Home</span>
-                                </a>
+                            <Link href="/" className="block py-3">
+                                Home
+                            </Link>
 
-                                <a href={MENU.shop.href} className="flex justify-between items-center">
-                                <span>{MENU.shop.label}</span>
-                                </a>
+                            <Link href="/shop" className="block py-3">
+                                Shop
+                            </Link>
 
-                                <a href={MENU.newArrivals.href} className="flex justify-between items-center">
-                                <span>{MENU.newArrivals.label}</span>
-                                </a>
+                            <Link href="/new-arrivals" className="block py-3">
+                                New Arrivals
+                            </Link>
 
-                                {Object.entries(MENU.men.sections).map(([key, section]) => (
-                                <button
-                                    key={key}
-                                    onClick={() => setActiveMenu(key)}
-                                    className="flex justify-between items-center w-full"
+                            {/* CATEGORY LIST (male/female/brand/kitchen) */}
+                            {(menuData[tab] || []).map((subcategory) => (
+                                <Link
+                                key={subcategory}
+                                href={`/collections/${createCollectionSlug(tab, subcategory)}`}
+                                onClick={() => setMenuOpen(false)}
+                                className="block py-3"
                                 >
-                                    <span className="text-black tracking-wide uppercase">
-                                    {section.label}
-                                    </span>
-
-                                    <IoIosArrowForward className="text-zinc-500" />
-                                </button>
-                                ))}
-
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Pants</span>
-                                </a>
+                                {subcategory}
+                                </Link>
+                            ))}
 
                             </div>
-                            )}
-
-                            {/* MEN COLLECTIONS */}
-                            {genderTab === "men" && activeMenu !== "main" && (
-                            <div className="space-y-8">
-
-                                {/* HEADER (UNCHANGED UI) */}
-                                <div className="relative flex items-center justify-center">
-
-                                <button
-                                    onClick={() => setActiveMenu("main")}
-                                    className="absolute left-0"
-                                >
-                                    <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                </button>
-
-                                <h2 className="tracking-[0.2em]">
-                                    Men’s {MENU.men.sections[activeMenu]?.label}
-                                </h2>
-
-                                </div>
-
-                                {/* LINKS */}
-                                <div className="space-y-6">
-
-                                <div className="border-b border-zinc-100 pb-4">
-                                    <span className="font-semibold tracking-wide">
-                                    {MENU.men.sections[activeMenu]?.label}
-                                    </span>
-                                </div>
-
-                                {MENU.men.sections[activeMenu]?.items.map((item) => (
-                                    <a key={item.label} href={item.href} className="block">
-                                    {item.label}
-                                    </a>
-                                ))}
-
-                                </div>
-
-                            </div>
-                            )}
                         </>
-                    )}
+                        )}
 
-                    {/* ================= WOMEN MENU ================= */}
-                    {genderTab === "women" && (
-                        <>
-                            {/* MAIN MENU */}
-                            {activeMenu === "main" && genderTab === "women" && (
-                            <div className="space-y-6">
-
-                                <a href="#" className="flex justify-between items-center">
-                                <span>Home</span>
-                                </a>
-
-                                <a href={MENU.shop.href} className="flex justify-between items-center">
-                                <span>{MENU.shop.label}</span>
-                                </a>
-
-                                <a href={MENU.newArrivals.href} className="flex justify-between items-center">
-                                <span>{MENU.newArrivals.label}</span>
-                                </a>
-
-                                {Object.entries(MENU.women.sections).map(([key, section]) => (
-                                <button
-                                    key={key}
-                                    onClick={() => setActiveMenu(key)}
-                                    className="flex justify-between items-center w-full"
-                                >
-                                    <span className="text-black tracking-wide uppercase">
-                                    {section.label}
-                                    </span>
-
-                                    <IoIosArrowForward className="text-zinc-500" />
-                                </button>
-                                ))}
-
-
-                            </div>
-                            )}
-
-                            {/* WOMEN COLLECTIONS */}
-                            {genderTab === "women" && activeMenu !== "main" && (
-                            <div className="space-y-8">
-
-                                <div className="relative flex items-center justify-center">
-
-                                <button
-                                    onClick={() => setActiveMenu("main")}
-                                    className="absolute left-0"
-                                >
-                                    <IoIosArrowRoundForward className="rotate-180 text-xl text-zinc-500" />
-                                </button>
-
-                                <h2 className="tracking-[0.2em]">
-                                    Women’s {MENU.women.sections[activeMenu]?.label}
-                                </h2>
-
-                                </div>
-
-                                <div className="space-y-6">
-
-                                <div className="border-b border-zinc-100 pb-4">
-                                    <span className="font-semibold tracking-wide">
-                                    {MENU.women.sections[activeMenu]?.label}
-                                    </span>
-                                </div>
-
-                                {MENU.women.sections[activeMenu]?.items.map((item) => (
-                                    <a key={item.label} href={item.href} className="block">
-                                    {item.label}
-                                    </a>
-                                ))}
-
-                                </div>
-
-                            </div>
-                            )}
-                        </>
-                    )}
+                    </div>
+                    ))}
 
                     {/* CONTACT (GLOBAL FOOTER LINK) */}
                     <div className="mt-auto border-t border-zinc-200 pt-6">
