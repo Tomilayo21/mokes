@@ -355,6 +355,45 @@ const ProductListPanel = () => {
   );
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
+  const subcategoryMap = {
+    Male: [
+      "linen",
+      "cotton",
+      "watch",
+      "tees",
+      "sweaters",
+      "jackets",
+      "pants",
+      "accessories",
+    ],
+
+    Female: [
+      "linen",
+      "cotton",
+      "watch",
+      "tees",
+      "sweaters",
+      "jackets",
+      "pants",
+      "accessories",
+    ],
+
+    "home&gifts": [
+      "kitchen",
+      "dining",
+      "bedroom",
+      "bathroom",
+      "home-decor",
+      "wall-art",
+      "candles",
+      "vases",
+      "storage",
+      "gift-sets",
+      "personalized-gifts",
+      "seasonal-gifts",
+    ],
+  };
+
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between bg-gray-50">
 
@@ -848,31 +887,15 @@ const ProductListPanel = () => {
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
-                      <option value="" disabled>Select Subcategory</option>
+                      <option value="" disabled>
+                        Select Subcategory
+                      </option>
 
-                      {/* Clothing */}
-                      <option value="linen">Linen</option>
-                      <option value="cotton">Cotton</option>
-                      <option value="watch">Watch</option>
-                      <option value="tees">Tees</option>
-                      <option value="sweaters">Sweaters</option>
-                      <option value="jackets">Jackets</option>
-                      <option value="pants">Pants</option>
-                      <option value="accessories">Accessories</option>
-
-                      {/* Home & Gifts */}
-                      <option value="kitchen">Kitchen</option>
-                      <option value="dining">Dining</option>
-                      <option value="bedroom">Bedroom</option>
-                      <option value="bathroom">Bathroom</option>
-                      <option value="home-decor">Home Decor</option>
-                      <option value="wall-art">Wall Art</option>
-                      <option value="candles">Candles</option>
-                      <option value="vases">Vases</option>
-                      <option value="storage">Storage</option>
-                      <option value="gift-sets">Gift Sets</option>
-                      <option value="personalized-gifts">Personalized Gifts</option>
-                      <option value="seasonal-gifts">Seasonal Gifts</option>
+                      {(subcategoryMap[editableProduct.category] || []).map((item) => (
+                        <option key={item} value={item}>
+                          {item.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
