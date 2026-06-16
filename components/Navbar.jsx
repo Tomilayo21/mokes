@@ -29,7 +29,7 @@ export default function Navbar() {
   const tabs = [
     { key: "male", label: "Male" },
     { key: "female", label: "Female" },
-    { key: "brand", label: "Brand" },
+    { key: "brand", label: "Brands" },
     { key: "home&gifts", label: "Home & Gifts" },
     ];
   const [mounted, setMounted] = useState(false);
@@ -417,16 +417,16 @@ export default function Navbar() {
                                         Home
                                     </Link>
 
+                                    <Link href="/about" className="block py-3">
+                                        About Us
+                                    </Link>
+
                                     <Link href="/shop" className="block py-3">
                                         Shop
                                     </Link>
 
                                     <Link href="/new-arrivals" className="block py-3">
                                         New Arrivals
-                                    </Link>
-
-                                    <Link href="/about" className="block py-3">
-                                        About Us
                                     </Link>
 
                                     {/* CATEGORY LIST (male/female/brand/home&gifts) */}
