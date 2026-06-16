@@ -26,7 +26,12 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [genderTab, setGenderTab] = useState("male");
-  const tabs = ["male", "female", "brand", "home&gifts"];
+  const tabs = [
+    { key: "male", label: "Male" },
+    { key: "female", label: "Female" },
+    { key: "brand", label: "Brand" },
+    { key: "home&gifts", label: "Home & Gifts" },
+    ];
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [menuData, setMenuData] = useState({
@@ -261,21 +266,23 @@ export default function Navbar() {
                         </button>
                         ))} */}
 
-                        {["male", "female", "brand", "home&gifts"].map((item) => (
+                        {tabs.map((tab) => (
                         <button
-                            key={item}
+                            key={tab.key}
                             onClick={() =>
-                            setMegaMenu((prev) => (prev === item ? null : item))
+                            setMegaMenu((prev) => (prev === tab.key ? null : tab.key))
                             }
                             className={`flex items-center gap-1 uppercase cursor-pointer transition ${
-                            megaMenu === item ? "text-black" : "text-black hover:text-gray-800"
+                            megaMenu === tab.key
+                                ? "text-black"
+                                : "text-black hover:text-gray-800"
                             }`}
                         >
-                            {item === "home&gifts" ? "Home & Gifts" : item}
+                            {tab.label}
 
                             <IoChevronDown
-                            className={`transition-transform cursor-pointer duration-300 ${
-                                megaMenu === item ? "rotate-180" : ""
+                            className={`transition-transform duration-300 ${
+                                megaMenu === tab.key ? "rotate-180" : ""
                             }`}
                             />
                         </button>
@@ -287,69 +294,30 @@ export default function Navbar() {
                         <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
                         <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
 
-                            {/* MALE */}
-                            {megaMenu === "male" && (
-                            <div>
-                                {menuData.male?.map((item) => (
-                                <Link
-                                    key={item}
-                                    href={`/collections/male-${item}`}
-                                    className="block py-1 text-md text-black hover:underline"
-                                    onClick={() => setMegaMenu(null)}
-                                >
-                                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                                </Link>
-                                ))}
-                            </div>
-                            )}
+                        {megaMenu && (
+                            <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
 
-                            {/* FEMALE */}
-                            {megaMenu === "female" && (
-                            <div>
-                                {menuData.female?.map((item) => (
-                                <Link
-                                    key={item}
-                                    href={`/collections/female-${item}`}
-                                    className="block py-1 text-md text-black hover:underline"
-                                    onClick={() => setMegaMenu(null)}
-                                >
-                                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                                </Link>
-                                ))}
-                            </div>
-                            )}
+                                {(menuData[megaMenu] || []).map((item) => {
+                                const isBrand = megaMenu === "brand";
 
-                            {/* BRANDS */}
-                            {megaMenu === "brand" && (
-                            <div>
-                                {menuData.brand?.map((item) => (
-                                <Link
+                                return (
+                                    <Link
                                     key={item}
-                                    href={`/brands/${item}`}
+                                    href={
+                                        isBrand
+                                        ? `/brands/${item}`
+                                        : `/collections/${megaMenu}-${item}`
+                                    }
                                     className="block py-1 text-md text-black hover:underline"
                                     onClick={() => setMegaMenu(null)}
-                                >
+                                    >
                                     {item.charAt(0).toUpperCase() + item.slice(1)}
-                                </Link>
-                                ))}
-                            </div>
-                            )}
+                                    </Link>
+                                );
+                                })}
 
-                            {/* HOME & GIFTS */}
-                            {megaMenu === "home&gifts" && (
-                            <div>
-                                {menuData["home&gifts"]?.map((item) => (
-                                <Link
-                                    key={item}
-                                    href={`/collections/home-and-gifts-${item}`}
-                                    className="block py-1 text-md text-black hover:underline"
-                                    onClick={() => setMegaMenu(null)}
-                                >
-                                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                                </Link>
-                                ))}
                             </div>
-                            )}
+                        )}
 
                         </div>
                         </div>
@@ -424,24 +392,23 @@ export default function Navbar() {
                     <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-6 overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
-                        key={tab}
-                        onClick={() => setGenderTab(tab)}
-                        className={`pb-2 uppercase transition whitespace-nowrap ${
-                            genderTab === tab
-                            ? "border-b border-black text-black"
-                            : "text-zinc-400"
-                        }`}
+                            key={tab.key}
+                            onClick={() => setGenderTab(tab.key)}
+                            className={`pb-2 uppercase transition whitespace-nowrap ${
+                            genderTab === tab.key
+                                ? "border-b border-black text-black"
+                                : "text-zinc-400"
+                            }`}
                         >
-                        {tab}
+                            {tab.label}
                         </button>
                     ))}
                     </div>
 
                     {/* ================= MEN MENU ================= */}
                     {tabs.map((tab) => (
-                        <div key={tab} className="space-y-6">
-
-                            {genderTab === tab && (
+                        <div key={tab.key} className="space-y-6">
+                            {genderTab === tab.key && (
                             <>
                                 {/* MAIN LINKS */}
                                 <div className="space-y-2">
@@ -463,7 +430,7 @@ export default function Navbar() {
                                     </Link>
 
                                     {/* CATEGORY LIST (male/female/brand/home&gifts) */}
-                                    {(menuData[tab] || []).map((subcategory) => (
+                                    {(menuData[tab.key] || []).map((subcategory) => (
                                         <Link
                                         key={subcategory}
                                         href={`/collections/${createCollectionSlug(tab, subcategory)}`}
@@ -474,9 +441,9 @@ export default function Navbar() {
                                         </Link>
                                     ))}
 
-                                    <Link href="/contact" className="block py-3">
+                                    {/* <Link href="/contact" className="block py-3">
                                         Contact us
-                                    </Link>
+                                    </Link> */}
                                 
                                 </div>
                             </>
