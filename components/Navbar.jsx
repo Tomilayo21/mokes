@@ -26,14 +26,14 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [genderTab, setGenderTab] = useState("male");
-  const tabs = ["male", "female", "brand", "kitchen"];
+  const tabs = ["male", "female", "brand", "home&gifts"];
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [menuData, setMenuData] = useState({
     male: [],
     female: [],
     brand: [],
-    kitchen: [],
+    "home&gifts": [],
   });
   const [megaMenu, setMegaMenu] = useState(null);
   
@@ -103,7 +103,7 @@ export default function Navbar() {
                 male: grouped.male || [],
                 female: grouped.female || [],
                 brand: grouped.brand || [],
-                kitchen: grouped.kitchen || [],
+                "home&gifts": grouped["home&gifts"] || [],
             });
             } catch (error) {
             console.log("FETCH ERROR:", error);
@@ -228,112 +228,112 @@ export default function Navbar() {
 
                 {/* Desktop Links */}
                 <div className="relative static" ref={megaMenuRef}>
-                <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
+                    <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
 
-                    <Link href="/shop" className="hover:text-gray-800 text-black">
-                    Shop
-                    </Link>
+                        <Link href="/shop" className="hover:text-gray-800 text-black">
+                        Shop
+                        </Link>
 
-                    <Link href="/new-arrivals" className="hover:text-gray-800 text-black">
-                    New Arrivals
-                    </Link>
+                        <Link href="/new-arrivals" className="hover:text-gray-800 text-black">
+                        New Arrivals
+                        </Link>
 
-                    {/* TRIGGER ITEMS */}
-                    {["male", "female", "brand", "kitchen"].map((item) => (
-                    <button
-                        key={item}
-                        onClick={() =>
-                        setMegaMenu((prev) => (prev === item ? null : item))
-                        }
-                        className={`flex items-center gap-1 uppercase cursor-pointer transition ${
-                        megaMenu === item
-                            ? "text-black"
-                            : "text-black hover:text-gray-800"
-                        }`}
-                    >
-                        {item}
+                        {/* TRIGGER ITEMS */}
+                        {["male", "female", "brand", "home&gifts"].map((item) => (
+                        <button
+                            key={item}
+                            onClick={() =>
+                            setMegaMenu((prev) => (prev === item ? null : item))
+                            }
+                            className={`flex items-center gap-1 uppercase cursor-pointer transition ${
+                            megaMenu === item
+                                ? "text-black"
+                                : "text-black hover:text-gray-800"
+                            }`}
+                        >
+                            {item}
 
-                        <IoChevronDown
-                        className={`transition-transform cursor-pointer duration-300 ${
-                            megaMenu === item ? "rotate-180" : ""
-                        }`}
-                        />
-                    </button>
-                    ))}
-                </nav>
+                            <IoChevronDown
+                            className={`transition-transform cursor-pointer duration-300 ${
+                                megaMenu === item ? "rotate-180" : ""
+                            }`}
+                            />
+                        </button>
+                        ))}
+                    </nav>
 
-                {/* MEGA MENU PANEL */}
-                {megaMenu && (
-                    <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
-                    <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
+                    {/* MEGA MENU PANEL */}
+                    {megaMenu && (
+                        <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
+                        <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
 
-                        {/* MALE */}
-                        {megaMenu === "male" && (
-                        <div>
-                            {menuData.male?.map((item) => (
-                            <Link
-                                key={item}
-                                href={`/collections/male-${item}`}
-                                className="block py-1 text-md text-black hover:underline"
-                                onClick={() => setMegaMenu(null)}
-                            >
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </Link>
-                            ))}
+                            {/* MALE */}
+                            {megaMenu === "male" && (
+                            <div>
+                                {menuData.male?.map((item) => (
+                                <Link
+                                    key={item}
+                                    href={`/collections/male-${item}`}
+                                    className="block py-1 text-md text-black hover:underline"
+                                    onClick={() => setMegaMenu(null)}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </Link>
+                                ))}
+                            </div>
+                            )}
+
+                            {/* FEMALE */}
+                            {megaMenu === "female" && (
+                            <div>
+                                {menuData.female?.map((item) => (
+                                <Link
+                                    key={item}
+                                    href={`/collections/female-${item}`}
+                                    className="block py-1 text-md text-black hover:underline"
+                                    onClick={() => setMegaMenu(null)}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </Link>
+                                ))}
+                            </div>
+                            )}
+
+                            {/* BRANDS */}
+                            {megaMenu === "brand" && (
+                            <div>
+                                {menuData.brand?.map((item) => (
+                                <Link
+                                    key={item}
+                                    href={`/brands/${item}`}
+                                    className="block py-1 text-md text-black hover:underline"
+                                    onClick={() => setMegaMenu(null)}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </Link>
+                                ))}
+                            </div>
+                            )}
+
+                            {/* HOME & GIFTS */}
+                            {megaMenu === "home&gifts" && (
+                            <div>
+                                {menuData.home&gifts?.map((item) => (
+                                <Link
+                                    key={item}
+                                    href={`/collections/home-and-gifts-${item}`}
+                                    className="block py-1 text-md text-black hover:underline"
+                                    onClick={() => setMegaMenu(null)}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </Link>
+                                ))}
+                            </div>
+                            )}
+
                         </div>
-                        )}
-
-                        {/* FEMALE */}
-                        {megaMenu === "female" && (
-                        <div>
-                            {menuData.female?.map((item) => (
-                            <Link
-                                key={item}
-                                href={`/collections/female-${item}`}
-                                className="block py-1 text-md text-black hover:underline"
-                                onClick={() => setMegaMenu(null)}
-                            >
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </Link>
-                            ))}
                         </div>
-                        )}
-
-                        {/* BRANDS */}
-                        {megaMenu === "brand" && (
-                        <div>
-                            {menuData.brand?.map((item) => (
-                            <Link
-                                key={item}
-                                href={`/brands/${item}`}
-                                className="block py-1 text-md text-black hover:underline"
-                                onClick={() => setMegaMenu(null)}
-                            >
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </Link>
-                            ))}
-                        </div>
-                        )}
-
-                        {/* KITCHEN */}
-                        {megaMenu === "kitchen" && (
-                        <div>
-                            {menuData.kitchen?.map((item) => (
-                            <Link
-                                key={item}
-                                href={`/collections/kitchen-${item}`}
-                                className="block py-1 text-md text-black hover:underline"
-                                onClick={() => setMegaMenu(null)}
-                            >
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </Link>
-                            ))}
-                        </div>
-                        )}
-
-                    </div>
-                    </div>
-                )}
+                    )}
                 </div>
 
                 {/* Right Actions */}
@@ -382,100 +382,201 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-        <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
-
-            {/* BACKDROP */}
-            <div
-            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
-            }`}
-            onClick={() => setMenuOpen(false)}
-            />
-
-            {/* DRAWER */}
-            <div
-            className={`absolute top-0 left-0 w-[85%] h-full bg-white flex flex-col
-            transform transition-transform duration-300 ease-in-out
-            ${menuOpen ? "translate-x-0" : "-translate-x-full"}
-            pointer-events-auto`}
-            >
-
-            {/* TOP TABS */}
-            <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-2 overflow-x-auto px-4 pt-6">
-                {tabs.map((tab) => (
-                <button
-                    key={tab}
-                    onClick={() => setGenderTab(tab)}
-                    className={`pb-2 uppercase transition whitespace-nowrap ${
-                    genderTab === tab
-                        ? "border-b border-black text-black"
-                        : "text-zinc-400"
+            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
+                
+                {/* BACKDROP */}
+                <div
+                    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+                        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
                     }`}
+                    onClick={() => setMenuOpen(false)}
+                />
+
+                {/* DRAWER */}
+                <div
+                    className={`absolute top-0 left-0 w-[85%] justify-between h-full bg-white overflow-y-auto px-4 py-6 text-sm text-black uppercase flex flex-col
+                    transform transition-transform duration-300 ease-in-out
+                    ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+                    pointer-events-auto`}
                 >
-                    {tab}
-                </button>
-                ))}
-            </div>
 
-            {/* SCROLLABLE CONTENT */}
-            <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 text-sm text-black uppercase space-y-6">
-
-                {tabs.map((tab) => (
-                <div key={tab} className="space-y-6">
-
-                    {genderTab === tab && (
-                    <div className="space-y-2">
-
-                        <Link href="/" className="block py-3">Home</Link>
-
-                        <Link href="/shop" className="block py-3">Shop</Link>
-
-                        <Link href="/new-arrivals" className="block py-3">New Arrivals</Link>
-
-                        <Link href="/about" className="block py-3">About Us</Link>
-
-                        {(menuData[tab] || []).map((subcategory) => (
-                        <Link
-                            key={subcategory}
-                            href={`/collections/${createCollectionSlug(tab, subcategory)}`}
-                            onClick={() => setMenuOpen(false)}
-                            className="block py-3"
+                    {/* TOP TABS */}
+                    <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-6 overflow-x-auto">
+                    {tabs.map((tab) => (
+                        <button
+                        key={tab}
+                        onClick={() => setGenderTab(tab)}
+                        className={`pb-2 uppercase transition whitespace-nowrap ${
+                            genderTab === tab
+                            ? "border-b border-black text-black"
+                            : "text-zinc-400"
+                        }`}
                         >
-                            {subcategory}
-                        </Link>
-                        ))}
+                        {tab}
+                        </button>
+                    ))}
+                    </div>
 
-                        <Link href="/contact" className="block py-3">
-                        Contact us
-                        </Link>
+                    {/* ================= MEN MENU ================= */}
+                    {tabs.map((tab) => (
+                        <div key={tab} className="space-y-6">
+
+                            {genderTab === tab && (
+                            <>
+                                {/* MAIN LINKS */}
+                                <div className="space-y-2">
+
+                                    <Link href="/" className="block py-3">
+                                        Home
+                                    </Link>
+
+                                    <Link href="/shop" className="block py-3">
+                                        Shop
+                                    </Link>
+
+                                    <Link href="/new-arrivals" className="block py-3">
+                                        New Arrivals
+                                    </Link>
+
+                                    <Link href="/about" className="block py-3">
+                                        About Us
+                                    </Link>
+
+                                    {/* CATEGORY LIST (male/female/brand/home&gifts) */}
+                                    {(menuData[tab] || []).map((subcategory) => (
+                                        <Link
+                                        key={subcategory}
+                                        href={`/collections/${createCollectionSlug(tab, subcategory)}`}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="block py-3"
+                                        >
+                                        {subcategory}
+                                        </Link>
+                                    ))}
+
+                                    <Link href="/contact" className="block py-3">
+                                        Contact us
+                                    </Link>
+                                
+                                </div>
+                            </>
+                            )}
+
+                        </div>
+                    ))}
+
+                    {/* CONTACT (GLOBAL FOOTER LINK) */}
+                    <div className="mt-auto border-t border-zinc-200 pt-6">
+                        <a
+                            href="/contact"
+                            className="flex justify-between items-center text-sm uppercase"
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            <span>Contact</span>
+                            <IoIosArrowForward className="text-zinc-500" />
+                        </a>
+                    </div>
+
+
+                </div>
+            </div>
+        )}
+
+        {menuOpen && (
+            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
+
+                {/* BACKDROP */}
+                <div
+                className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+                    menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
+                }`}
+                onClick={() => setMenuOpen(false)}
+                />
+
+                {/* DRAWER */}
+                <div
+                className={`absolute top-0 left-0 w-[85%] h-full bg-white flex flex-col
+                transform transition-transform duration-300 ease-in-out
+                ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+                pointer-events-auto`}
+                >
+
+                {/* TOP TABS */}
+                <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-2 overflow-x-auto px-4 pt-6">
+                    {tabs.map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setGenderTab(tab)}
+                        className={`pb-2 uppercase transition whitespace-nowrap ${
+                        genderTab === tab
+                            ? "border-b border-black text-black"
+                            : "text-zinc-400"
+                        }`}
+                    >
+                        {tab}
+                    </button>
+                    ))}
+                </div>
+
+                {/* SCROLLABLE CONTENT */}
+                <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 text-sm text-black uppercase space-y-6">
+
+                    {tabs.map((tab) => (
+                    <div key={tab} className="space-y-6">
+
+                        {genderTab === tab && (
+                        <div className="space-y-2">
+
+                            <Link href="/" className="block py-3">Home</Link>
+
+                            <Link href="/shop" className="block py-3">Shop</Link>
+
+                            <Link href="/new-arrivals" className="block py-3">New Arrivals</Link>
+
+                            <Link href="/about" className="block py-3">About Us</Link>
+
+                            {(menuData[tab] || []).map((subcategory) => (
+                            <Link
+                                key={subcategory}
+                                href={`/collections/${createCollectionSlug(tab, subcategory)}`}
+                                onClick={() => setMenuOpen(false)}
+                                className="block py-3"
+                            >
+                                {subcategory}
+                            </Link>
+                            ))}
+
+                            <Link href="/contact" className="block py-3">
+                            Contact us
+                            </Link>
+
+                        </div>
+                        )}
 
                     </div>
-                    )}
+                    ))}
 
                 </div>
-                ))}
 
-            </div>
+                {/* MINI FOOTER LINKS */}
+                <div className="border-t border-zinc-200 pt-4 px-4">
+                    <div className="flex items-center justify-between text-[11px] uppercase text-zinc-500 overflow-x-auto whitespace-nowrap gap-4">
 
-            {/* MINI FOOTER LINKS */}
-            <div className="border-t border-zinc-200 pt-4 px-4">
-                <div className="flex items-center justify-between text-[11px] uppercase text-zinc-500 overflow-x-auto whitespace-nowrap gap-4">
+                    <a href="/info/about" className="hover:text-black">About</a>
 
-                <a href="/info/about" className="hover:text-black">About</a>
+                    <a href="/info/shipping" className="hover:text-black">Shipping</a>
 
-                <a href="/info/shipping" className="hover:text-black">Shipping</a>
+                    <a href="/info/returns" className="hover:text-black">Returns</a>
 
-                <a href="/info/returns" className="hover:text-black">Returns</a>
+                    <a href="/info/privacy-policy" className="hover:text-black">Privacy</a>
 
-                <a href="/info/privacy-policy" className="hover:text-black">Privacy</a>
+                    <a href="/contact" className="hover:text-black">Contact</a>
 
-                <a href="/contact" className="hover:text-black">Contact</a>
+                    </div>
+                </div>
 
                 </div>
             </div>
-
-            </div>
-        </div>
         )}
     </header>
   );

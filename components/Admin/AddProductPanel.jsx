@@ -315,29 +315,44 @@ const AddProduct = () => {
                   <option value="" disabled>Select Category</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
+                  <option value="home&gifts">Home and Gifts</option>
                 </select>
               </div>
 
-                {/* SubCategory */}
-              <div>
-                <label htmlFor="subcategory" className="text-sm font-medium text-gray-700">Subcategory</label>
-                <select
-                  id="subcategory"
-                  className="w-full mt-1 py-2.5 px-3 text-black rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                  onChange={(e) => setSubcategory(e.target.value)}
-                  value={subcategory}
-                >
-                  <option value="" disabled>Select Subcategory</option>
-                  <option value="Linen">Linen</option>
-                  <option value="Cotton">Cotton</option>
-                  <option value="Watch">Watch</option>
-                  <option value="Tees">Tees</option>
-                  <option value="Sweaters">Sweaters</option>
-                  <option value="Jackets">Jackets</option>
-                  <option value="Pants">Pants</option>
-                  <option value="Accessories">Accessories</option>
-                </select>
-              </div>
+              {/* SubCategory */}
+              <select
+                id="subcategory"
+                className="w-full mt-1 py-2.5 px-3 text-black rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                onChange={(e) => setSubcategory(e.target.value)}
+                value={subcategory}
+              >
+                <option value="" disabled>Select Subcategory</option>
+
+                {/* Clothing */}
+                <option value="linen">Linen</option>
+                <option value="cotton">Cotton</option>
+                <option value="watch">Watch</option>
+                <option value="tees">Tees</option>
+                <option value="sweaters">Sweaters</option>
+                <option value="jackets">Jackets</option>
+                <option value="pants">Pants</option>
+                <option value="accessories">Accessories</option>
+
+                {/* Home & Gifts */}
+                <option value="home&gifts">Home and Gifts</option>
+                <option value="kitchen">Kitchen</option>
+                <option value="dining">Dining</option>
+                <option value="bedroom">Bedroom</option>
+                <option value="bathroom">Bathroom</option>
+                <option value="home-decor">Home Decor</option>
+                <option value="wall-art">Wall Art</option>
+                <option value="candles">Candles</option>
+                <option value="vases">Vases</option>
+                <option value="storage">Storage</option>
+                <option value="gift-sets">Gift Sets</option>
+                <option value="personalized-gifts">Personalized Gifts</option>
+                <option value="seasonal-gifts">Seasonal Gifts</option>
+              </select>
 
               {/* Color */}
               <div>

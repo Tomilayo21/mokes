@@ -5,7 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
-
+import AddProductPanel from "@/components/Admin/AddProductPanel";
+import ProductListPanel from "@/components/Admin/ProductListPanel";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -285,6 +286,9 @@ const ContactPage = () => {
           </form>
         </div>
       </div>
+
+      <AddProductPanel/>
+      <ProductListPanel/>
 
       <Footer />
     </>

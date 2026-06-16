@@ -813,41 +813,69 @@ const ProductListPanel = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
                     <select
                       value={editableProduct.category}
                       onChange={(e) =>
-                        setEditableProduct({ ...editableProduct, category: e.target.value })
+                        setEditableProduct({
+                          ...editableProduct,
+                          category: e.target.value,
+                        })
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
                       <option value="" disabled>Select Category</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
+                      <option value="home&gifts">Home and Gifts</option>
                     </select>
                   </div>
 
                   {/* SubCategory */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">SubCategory</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      SubCategory
+                    </label>
                     <select
                       value={editableProduct.subcategory}
                       onChange={(e) =>
-                        setEditableProduct({ ...editableProduct, subcategory: e.target.value })
+                        setEditableProduct({
+                          ...editableProduct,
+                          subcategory: e.target.value,
+                        })
                       }
                       className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                     >
                       <option value="" disabled>Select Subcategory</option>
-                      <option value="Linen">Linen</option>
-                      <option value="Cotton">Cotton</option>
-                      <option value="Watch">Watch</option>
-                      <option value="Tees">Tees</option>
-                      <option value="Sweaters">Sweaters</option>
-                      <option value="Jackets">Jackets</option>
-                      <option value="Pants">Pants</option>
-                      <option value="Accessories">Accessories</option>
+
+                      {/* Clothing */}
+                      <option value="linen">Linen</option>
+                      <option value="cotton">Cotton</option>
+                      <option value="watch">Watch</option>
+                      <option value="tees">Tees</option>
+                      <option value="sweaters">Sweaters</option>
+                      <option value="jackets">Jackets</option>
+                      <option value="pants">Pants</option>
+                      <option value="accessories">Accessories</option>
+
+                      {/* Home & Gifts */}
+                      <option value="kitchen">Kitchen</option>
+                      <option value="dining">Dining</option>
+                      <option value="bedroom">Bedroom</option>
+                      <option value="bathroom">Bathroom</option>
+                      <option value="home-decor">Home Decor</option>
+                      <option value="wall-art">Wall Art</option>
+                      <option value="candles">Candles</option>
+                      <option value="vases">Vases</option>
+                      <option value="storage">Storage</option>
+                      <option value="gift-sets">Gift Sets</option>
+                      <option value="personalized-gifts">Personalized Gifts</option>
+                      <option value="seasonal-gifts">Seasonal Gifts</option>
                     </select>
                   </div>
+
                   {/* Brand */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
