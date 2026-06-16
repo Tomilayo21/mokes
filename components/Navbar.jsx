@@ -239,7 +239,7 @@ export default function Navbar() {
                         </Link>
 
                         {/* TRIGGER ITEMS */}
-                        {["male", "female", "brand", "home&gifts"].map((item) => (
+                        {/* {["male", "female", "brand", "home&gifts"].map((item) => (
                         <button
                             key={item}
                             onClick={() =>
@@ -252,6 +252,26 @@ export default function Navbar() {
                             }`}
                         >
                             {item}
+
+                            <IoChevronDown
+                            className={`transition-transform cursor-pointer duration-300 ${
+                                megaMenu === item ? "rotate-180" : ""
+                            }`}
+                            />
+                        </button>
+                        ))} */}
+
+                        {["male", "female", "brand", "home&gifts"].map((item) => (
+                        <button
+                            key={item}
+                            onClick={() =>
+                            setMegaMenu((prev) => (prev === item ? null : item))
+                            }
+                            className={`flex items-center gap-1 uppercase cursor-pointer transition ${
+                            megaMenu === item ? "text-black" : "text-black hover:text-gray-800"
+                            }`}
+                        >
+                            {item === "home&gifts" ? "Home & Gifts" : item}
 
                             <IoChevronDown
                             className={`transition-transform cursor-pointer duration-300 ${
