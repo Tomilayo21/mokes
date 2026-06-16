@@ -27,8 +27,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [genderTab, setGenderTab] = useState("male");
   const tabs = [
-    { key: "male", label: "Male" },
-    { key: "female", label: "Female" },
+    { key: "male", label: "Men" },
+    { key: "female", label: "Women" },
     { key: "brand", label: "Brands" },
     { key: "home&gifts", label: "Home & Gifts" },
     ];
