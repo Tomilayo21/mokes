@@ -23,14 +23,13 @@ export default function Navbar() {
   const user = status === "authenticated" ? session?.user : null;
   const router = useRouter();
   const { getCartCount } = useAppContext();
-
   const [menuOpen, setMenuOpen] = useState(false);
   const [genderTab, setGenderTab] = useState("male");
   const tabs = [
     { key: "male", label: "Men" },
     { key: "female", label: "Women" },
     { key: "brand", label: "Brands" },
-    { key: "home&gifts", label: "Home & Gifts" },
+    { key: "homegifts", label: "Home & Gifts" },
     ];
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -38,10 +37,17 @@ export default function Navbar() {
     male: [],
     female: [],
     brand: [],
-    "home&gifts": [],
+    homegifts: [],
   });
   const [megaMenu, setMegaMenu] = useState(null);
-  
+
+    const createSlug = (str) =>
+        str
+            ?.toLowerCase()
+            .trim()
+            .replace(/&/g, "and")
+            .replace(/\s+/g, "-");
+
   useEffect(() => setMounted(true), []);
 
 
@@ -58,9 +64,25 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [showSignup, handleEsc]);
   
+    const safeLower = (val) =>
+        typeof val === "string" ? val.toLowerCase() : "";
 
     const createCollectionSlug = (category, subcategory) => {
-    return `${category === "male" ? "males" : "females"}-${subcategory}`;
+    const cat = typeof category === "string"
+        ? category.toLowerCase()
+        : category?.key?.toLowerCase?.() || "";
+
+    const sub = typeof subcategory === "string"
+        ? subcategory.toLowerCase().replace(/\s+/g, "-")
+        : "";
+
+    // MEN / WOMEN → prefixed
+    if (cat === "male" || cat === "female") {
+        return `${cat}-${sub}`;
+    }
+
+    // BRANDS + HOME & GIFTS → FLAT (NO PREFIX)
+    return sub;
     };
 
     useEffect(() => {
@@ -75,32 +97,29 @@ export default function Navbar() {
             // ✅ FIX
             const products = data.products || [];
 
-            const grouped = products.reduce((acc, product) => {
-            const category = product.category?.trim().toLowerCase();
-            const subcategory = (product.subCategory || product.subcategory)
-                ?.trim()
-                .toLowerCase();
+                const grouped = products.reduce((acc, product) => {
+                const category = createSlug(product.category);
+                const subcategory = createSlug(
+                    product.subCategory || product.subcategory
+                );
+                const brand = createSlug(product.brand);
 
-            const brand = product.brand?.trim().toLowerCase();
-
-            // handle main categories
-            if (category && subcategory) {
-                if (!acc[category]) acc[category] = [];
-                if (!acc[category].includes(subcategory)) {
-                acc[category].push(subcategory);
+                if (category && subcategory) {
+                    if (!acc[category]) acc[category] = [];
+                    if (!acc[category].includes(subcategory)) {
+                    acc[category].push(subcategory);
+                    }
                 }
-            }
 
-            // handle brands separately
-            if (brand) {
-                if (!acc.brand) acc.brand = [];
-                if (!acc.brand.includes(brand)) {
-                acc.brand.push(brand);
+                if (brand) {
+                    if (!acc.brand) acc.brand = [];
+                    if (!acc.brand.includes(brand)) {
+                    acc.brand.push(brand);
+                    }
                 }
-            }
 
-            return acc;
-            }, {});
+                return acc;
+                }, {});
 
             console.log("GROUPED:", grouped);
 
@@ -108,7 +127,7 @@ export default function Navbar() {
                 male: grouped.male || [],
                 female: grouped.female || [],
                 brand: grouped.brand || [],
-                "home&gifts": grouped["home&gifts"] || [],
+                homegifts: grouped.homegifts || [],
             });
             } catch (error) {
             console.log("FETCH ERROR:", error);
@@ -121,21 +140,33 @@ export default function Navbar() {
     const megaMenuRef = useRef(null);
 
     useEffect(() => {
-    function handleClickOutside(event) {
-        if (
-        megaMenuRef.current &&
-        !megaMenuRef.current.contains(event.target)
-        ) {
-        setMegaMenu(null);
+        function handleClickOutside(event) {
+            if (
+            megaMenuRef.current &&
+            !megaMenuRef.current.contains(event.target)
+            ) {
+            setMegaMenu(null);
+            }
         }
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+    if (menuOpen) {
+        document.body.style.overflow = "hidden";
+    } else {
+        document.body.style.overflow = "auto";
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
+        document.body.style.overflow = "auto";
     };
-    }, []);
+    }, [menuOpen]);
 
 
 
@@ -244,28 +275,6 @@ export default function Navbar() {
                         </Link>
 
                         {/* TRIGGER ITEMS */}
-                        {/* {["male", "female", "brand", "home&gifts"].map((item) => (
-                        <button
-                            key={item}
-                            onClick={() =>
-                            setMegaMenu((prev) => (prev === item ? null : item))
-                            }
-                            className={`flex items-center gap-1 uppercase cursor-pointer transition ${
-                            megaMenu === item
-                                ? "text-black"
-                                : "text-black hover:text-gray-800"
-                            }`}
-                        >
-                            {item}
-
-                            <IoChevronDown
-                            className={`transition-transform cursor-pointer duration-300 ${
-                                megaMenu === item ? "rotate-180" : ""
-                            }`}
-                            />
-                        </button>
-                        ))} */}
-
                         {tabs.map((tab) => (
                         <button
                             key={tab.key}
@@ -289,39 +298,38 @@ export default function Navbar() {
                         ))}
                     </nav>
 
-                    {/* MEGA MENU PANEL */}
-                    {megaMenu && (
-                        <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
-                        <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
+                {/* MEGA MENU PANEL */}
+                {megaMenu && (
+                    <div className="absolute left-0 top-full w-screen bg-white border-t shadow-lg z-50">
+                        <div className="max-w-7xl mx-auto px-10 py-10">
 
-                        {megaMenu && (
-                            <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-4 gap-10">
+                        <div className="flex flex-col gap-3">
+                        {(menuData[megaMenu] || []).map((item) => {
+                        const isBrand = megaMenu === "brand";
 
-                                {(menuData[megaMenu] || []).map((item) => {
-                                const isBrand = megaMenu === "brand";
-
-                                return (
-                                    <Link
-                                    key={item}
-                                    href={
-                                        isBrand
-                                        ? `/brands/${item}`
-                                        : `/collections/${megaMenu}-${item}`
-                                    }
-                                    className="block py-1 text-md text-black hover:underline"
-                                    onClick={() => setMegaMenu(null)}
-                                    >
-                                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                                    </Link>
-                                );
-                                })}
-
-                            </div>
-                        )}
+                        return (
+                        <Link
+                            key={item}
+                            href={
+                            megaMenu === "male" || megaMenu === "female"
+                                ? `/collections/${megaMenu}-${item}`
+                                : `/collections/${item}`
+                            }
+                            className="text-md text-black hover:underline"
+                            onClick={() => setMegaMenu(null)}
+                        >
+                            {item
+                                .split("-")
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(" ")}
+                            </Link>
+                        );
+                        })}
+                        </div>
 
                         </div>
-                        </div>
-                    )}
+                    </div>
+                )}
                 </div>
 
                 {/* Right Actions */}
@@ -370,87 +378,68 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50 pointer-events-none">
+            <div className="md:hidden fixed top-16 left-0 w-full h-[calc(100vh-4rem)] z-50">
                 
                 {/* BACKDROP */}
                 <div
-                    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                        menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
-                    }`}
+                    className={`
+                        absolute inset-0 bg-black/40 transition-opacity duration-300
+                        ${menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+                    `}
                     onClick={() => setMenuOpen(false)}
                 />
 
                 {/* DRAWER */}
-                <div
-                    className={`absolute top-0 left-0 w-[85%] justify-between h-full bg-white overflow-y-auto px-4 py-6 text-sm text-black uppercase flex flex-col
-                    transform transition-transform duration-300 ease-in-out
-                    ${menuOpen ? "translate-x-0" : "-translate-x-full"}
-                    pointer-events-auto`}
-                >
+                    <div
+                        className={`
+                            absolute top-0 left-0 w-[85%] h-full bg-white
+                            flex flex-col
+                            z-10
+                            transform transition-transform duration-300 ease-in-out
+                            ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+                        `}
+                    >
 
                     {/* TOP TABS */}
-                    <div className="flex items-center gap-4 border-b border-zinc-200 pb-4 mb-6 overflow-x-auto">
-                    {tabs.map((tab) => (
-                        <button
+                    <div className="shrink-0 flex items-center gap-4 border-b border-zinc-200 px-4 py-4 overflow-x-auto">
+                        {tabs.map((tab) => (
+                            <button
                             key={tab.key}
                             onClick={() => setGenderTab(tab.key)}
-                            className={`pb-2 uppercase transition whitespace-nowrap ${
-                            genderTab === tab.key
+                            className={`pb-2 uppercase whitespace-nowrap transition ${
+                                genderTab === tab.key
                                 ? "border-b border-black text-black"
                                 : "text-zinc-400"
                             }`}
-                        >
+                            >
                             {tab.label}
-                        </button>
-                    ))}
+                            </button>
+                        ))}
                     </div>
 
                     {/* ================= MEN MENU ================= */}
-                    {tabs.map((tab) => (
-                        <div key={tab.key} className="space-y-6">
-                            {genderTab === tab.key && (
-                            <>
-                                {/* MAIN LINKS */}
-                                <div className="space-y-2">
+                    <div className="flex-1 text-black no-scrollbar min-h-0 overflow-y-auto px-4 py-6 text-sm uppercase space-y-2">
 
-                                    <Link href="/" className="block py-3">
-                                        Home
-                                    </Link>
+                    <Link href="/" className="block py-3">Home</Link>
+                    <Link href="/about" className="block py-3">About Us</Link>
+                    <Link href="/shop" className="block py-3">Shop</Link>
+                    <Link href="/new-arrivals" className="block py-3">New Arrivals</Link>
 
-                                    <Link href="/about" className="block py-3">
-                                        About Us
-                                    </Link>
-
-                                    <Link href="/shop" className="block py-3">
-                                        Shop
-                                    </Link>
-
-                                    <Link href="/new-arrivals" className="block py-3">
-                                        New Arrivals
-                                    </Link>
-
-                                    {/* CATEGORY LIST (male/female/brand/home&gifts) */}
-                                    {(menuData[tab.key] || []).map((subcategory) => (
-                                        <Link
-                                        key={subcategory}
-                                        href={`/collections/${createCollectionSlug(tab, subcategory)}`}
-                                        onClick={() => setMenuOpen(false)}
-                                        className="block py-3"
-                                        >
-                                        {subcategory}
-                                        </Link>
-                                    ))}
-
-                                    {/* <Link href="/contact" className="block py-3">
-                                        Contact us
-                                    </Link> */}
-                                
-                                </div>
-                            </>
-                            )}
-
-                        </div>
+                    {(menuData[genderTab] || []).map((subcategory) => (
+                        <Link
+                        key={subcategory}
+                        href={
+                            genderTab === "male" || genderTab === "female"
+                            ? `/collections/${genderTab}-${subcategory}`
+                            : `/collections/${subcategory}`
+                        }
+                        onClick={() => setMenuOpen(false)}
+                        className="block py-3"
+                        >
+                        {subcategory}
+                        </Link>
                     ))}
+                    </div>
 
                     {/* CONTACT (GLOBAL FOOTER LINK) */}
                     <div className="mt-auto border-t border-zinc-200 pt-6">

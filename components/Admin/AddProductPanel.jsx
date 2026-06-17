@@ -181,7 +181,7 @@ const AddProduct = () => {
       "accessories",
     ],
 
-    "home&gifts": [
+    "homegifts": [
       "kitchen",
       "dining",
       "bedroom",
@@ -353,7 +353,7 @@ const AddProduct = () => {
                   <option value="" disabled>Select Category</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
-                  <option value="home&gifts">Home and Gifts</option>
+                  <option value="homegifts">Home and Gifts</option>
                 </select>
               </div>
 
