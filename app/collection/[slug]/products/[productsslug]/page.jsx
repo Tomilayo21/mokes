@@ -1,3 +1,4 @@
+//app\collections\[slug]\products\[productsslug]\page.jsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -17,10 +18,11 @@ import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 export default function ProductPage() {
   const { data: session, status } = useSession();
-  const { id } = useParams();
+  const { productsslug } = useParams();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const from = searchParams.get("from");
   const { addToCart } = useAppContext();
   const currency = "₦";
   const [products, setProducts] = useState([]);
@@ -35,17 +37,16 @@ export default function ProductPage() {
   const [canScroll, setCanScroll] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false); 
   const [activeIndex, setActiveIndex] = useState(0);
+  
+const collectionPart = goBackPath.includes("/collections/")
+  ? goBackPath.split("/collections/")[1]
+  : "";
 
-  const scrollLeft = () => {
-    const el = thumbRef.current;
-    if (!el) return;
+const label = collectionPart
+  ? collectionPart.replace(/-/g, " ")
+  : "collection";
 
-    el.scrollBy({
-      left: -200,
-      behavior: "smooth",
-    });
-  };
-
+  
   const scrollRight = () => {
     const el = thumbRef.current;
     if (!el) return;
@@ -62,7 +63,7 @@ export default function ProductPage() {
         setLoading(true);
 
         const [productRes, listRes] = await Promise.all([
-          fetch(`/api/product/${id}`),
+          fetch(`/api/product/${productsslug}`),
           fetch("/api/product/list"),
         ]);
 
@@ -92,21 +93,21 @@ export default function ProductPage() {
       }
     };
 
-    if (id) fetchData();
-  }, [id]);
+    if (productsslug) fetchData();
+  }, [productsslug]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!productsslug) return;
     if (!Array.isArray(products) || products.length === 0) return;
 
     const product = products.find(
-      (p) => p.slug?.toLowerCase() === id?.toLowerCase()
+      (p) => p.slug?.toLowerCase() === productsslug?.toLowerCase()
     );
 
     if (product) {
       setProductData(product);
     }
-  }, [id, products]);
+  }, [productsslug, products]);
 
 
   // Add to Cart 
@@ -352,7 +353,7 @@ export default function ProductPage() {
     );
   }, [productData]);
   
-  if (!id) return null; 
+  if (!productsslug) return null; 
 
   if (!productData && products.length > 0) {
     return (
@@ -585,6 +586,15 @@ export default function ProductPage() {
 
               </section>
             )}
+
+            <Link
+            href={goBackPath}
+            className="text-sm text-gray-500 hover:text-black flex items-center gap-1"
+            >
+            <ArrowLeft size={16} />
+            Go back to {label}
+            </Link>
+
           </div>
         {/* </div> */}
       </div>

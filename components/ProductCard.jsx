@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Heart, AlertTriangle } from "lucide-react";
@@ -11,6 +11,7 @@ import { Heart, AlertTriangle } from "lucide-react";
 const ProductCard = ({ product, currency }) => {
   if (product.visible === false) return null;
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession(); 
   const user = session?.user;
   const [loading, setLoading] = useState(false);
@@ -122,10 +123,18 @@ const ProductCard = ({ product, currency }) => {
 
   // ------------------ Navigation ------------------
   const handleCardClick = () => {
-    router.push(`/collection/${product.slug}`);
+    const collectionPath = pathname.split("/products")[0];
+
+    let targetRoute = `/collections/all/products/${product.slug}`;
+
+    if (collectionPath.startsWith("/collections/")) {
+      targetRoute = `${collectionPath}/products/${product.slug}`;
+      targetRoute += `?from=${encodeURIComponent(collectionPath)}`;
+    }
+
+    router.push(targetRoute);
     scrollTo(0, 0);
   };
-
 
   const toTitleCase = (str = "") => {
     return str
@@ -172,52 +181,52 @@ const ProductCard = ({ product, currency }) => {
         </div>
       </div>
 
-        {/* === Details Section === */}
-        <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
+      {/* === Details Section === */}
+      <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
 
-        <h3 className="text-lg md:text-xl font-light text-black tracking-wide">
-          {product.brand?.toUpperCase()} |{" "}
-          {toTitleCase(product.name)} |{" "}
-          {toTitleCase(product.color)}
-        </h3>
+      <h3 className="text-lg md:text-xl font-light text-black tracking-wide">
+        {product.brand?.toUpperCase()} |{" "}
+        {toTitleCase(product.name)} |{" "}
+        {toTitleCase(product.color)}
+      </h3>
 
-        <p className="text-base text-gray-600">
-            {currency}
-            {Number(product.offerPrice).toLocaleString()}
-        </p>
+      <p className="text-base text-gray-600">
+          {currency}
+          {Number(product.offerPrice).toLocaleString()}
+      </p>
 
-        {availableSizes.length > 0 ? (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {availableSizes.map((item) => (
-              <button
-                key={item.size}
-                className="px-3 py-1 border rounded-lg text-sm"
-              >
-                {item.size}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        {/* ✅ CENTER BUTTON WRAPPER */}
-        {/* <div className="flex justify-center w-full mt-4">
+      {availableSizes.length > 0 ? (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {availableSizes.map((item) => (
             <button
-            onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart();
-            }}
-            disabled={product.stock === 0}
-            className={`w-full py-3 py-4 border flex items-center justify-center text-sm transition-colors
-                ${
-                product.stock === 0
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "hover:bg-gray-50 text-black"
-                }`}
+              key={item.size}
+              className="px-3 py-1 border rounded-lg text-sm"
             >
-            {product.stock === 0 ? "Sold Out" : "Add to Cart"}
+              {item.size}
             </button>
-        </div> */}
-
+          ))}
         </div>
+      ) : null}
+      {/* ✅ CENTER BUTTON WRAPPER */}
+      {/* <div className="flex justify-center w-full mt-4">
+          <button
+          onClick={(e) => {
+              e.stopPropagation();
+              handleAddToCart();
+          }}
+          disabled={product.stock === 0}
+          className={`w-full py-3 py-4 border flex items-center justify-center text-sm transition-colors
+              ${
+              product.stock === 0
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "hover:bg-gray-50 text-black"
+              }`}
+          >
+          {product.stock === 0 ? "Sold Out" : "Add to Cart"}
+          </button>
+      </div> */}
+
+      </div>
     </div>
 
   );

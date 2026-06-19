@@ -159,7 +159,7 @@ export default function SubCatFilter({
                     className={`${triggerClasses} w-auto min-w-[12rem] flex items-center justify-between`}
                   >
                     <span className="text-gray-500 text-xs capitalize">
-                      {searchParams.get("color") || "All collections"}
+                      {searchParams.get("color") || "All colors"}
                     </span>
 
                     <Select.Icon>

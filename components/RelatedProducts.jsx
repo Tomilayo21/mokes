@@ -114,7 +114,24 @@ const ProductCard = ({ product }) => {
   };
 
   const handleCardClick = () => {
-    router.push(`/collection/${product.slug}`);
+    const fromCollection = pathname.startsWith("/collections/")
+      ? pathname.split("/products")[0] // clean base collection
+      : null;
+
+    let targetRoute;
+
+    if (pathname.startsWith("/collections/")) {
+      const base = pathname.split("/products")[0];
+      targetRoute = `${base}/products/${product.slug}`;
+    } else {
+      targetRoute = `/collections/all/products/${product.slug}`;
+    }
+
+    if (fromCollection) {
+      targetRoute += `?from=${encodeURIComponent(fromCollection)}`;
+    }
+
+    router.push(targetRoute);
     scrollTo(0, 0);
   };
 

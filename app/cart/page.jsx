@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { ShoppingCart, PackageX } from "lucide-react";
-// import OrderSummary from "@/components/OrderSummary";
+import OrderSummary from "@/components/OrderSummary";
 import Navbar from "@/components/Navbar";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
@@ -371,7 +371,7 @@ const Cart = () => {
             </div>
 
             {/* Order Summary */}
-            {/* <OrderSummary /> */}
+            <OrderSummary />
           </div>
         )}
 

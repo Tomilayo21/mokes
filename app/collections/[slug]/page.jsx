@@ -1,3 +1,4 @@
+//app\collections\[slug]\page.jsx
 "use client";
 
 import { Suspense, useMemo, useEffect, useState } from "react";
@@ -267,7 +268,7 @@ const AllProducts = () => {
             {paginatedProducts.map((product, index) => (
               <ProductCard key={index} product={product} currency={currency} />
             ))}
-            {/* <AddProductPanel /> */}
+            {/* <AddProductPanel />  */}
           </div>
         )}
 

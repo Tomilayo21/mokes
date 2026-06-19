@@ -251,7 +251,7 @@ const AllProducts = () => {
               "
             >
             {paginatedProducts.map((product, index) => (
-              <ProductCard key={index} product={product} currency={currency} />
+              <ProductCard key={index} product={product} currency={currency} collectionSlug={slug}/>
             ))}
           </div>
         )}
