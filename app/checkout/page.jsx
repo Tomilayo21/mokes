@@ -333,18 +333,37 @@ const pickupLocations = [
   }, [showPickupModal]);
 
   useEffect(() => {
-    const data = sessionStorage.getItem("checkoutData");
+    const stored = sessionStorage.getItem("checkoutData");
 
-    if (!data) {
-      console.log("No checkoutData in sessionStorage");
+    if (stored) {
+      setCheckoutData(JSON.parse(stored));
       return;
     }
 
-    try {
-      setCheckoutData(JSON.parse(data));
-    } catch (err) {
-      console.error("Invalid checkoutData:", err);
-    }
+    // fallback: build from cart API or context
+    const buildFromCart = async () => {
+      try {
+        const res = await axios.get("/api/cart"); // or reuse AppContext API
+        const cart = res.data;
+
+        if (!cart || !cart.items) return;
+
+        const subtotal = cart.items.reduce((sum, item) => {
+          return sum + item.price * item.quantity;
+        }, 0);
+
+        setCheckoutData({
+          cartItems: cart.items,
+          subtotal,
+          total: subtotal,
+          currency: "₦",
+        });
+      } catch (err) {
+        console.log("No cart fallback available");
+      }
+    };
+
+    buildFromCart();
   }, []);
 
   const enrichedSelectedPickup = (() => {

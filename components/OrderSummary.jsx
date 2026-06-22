@@ -19,21 +19,18 @@ const paymentMethods = [
 
 const OrderSummary = () => {
   const { currency, cartItems, getCartCount, getCartAmount } = useAppContext();
-    const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const router = useRouter();
-
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('stripe');
-
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
-
   const [editingAddress, setEditingAddress] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -41,7 +38,6 @@ const OrderSummary = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [products, setProducts] = useState([]);
-
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -122,7 +118,6 @@ const OrderSummary = () => {
     router.push("/checkout");
   };
 
-
   const fetchRates = async () => {
     if (!selectedAddress) return toast.error("Select address first");
     setLoadingRates(true); setRateError("");
@@ -150,9 +145,7 @@ const OrderSummary = () => {
     } finally {
       setBookingShipment(false);
     }
-  };
-
-  
+  };  
 
   return (
     <div className="w-full md:w-full bg-white p-4 md:p-6">
@@ -227,57 +220,69 @@ const OrderSummary = () => {
         </div>
 
         {/* CLEAN SUMMARY (SHOPIFY STYLE) */}
-        <div className="space-y-3 text-sm text-gray-700">
+        {!isLoggedIn ? (
+          <div className="text-center py-6 border border-dashed rounded-md bg-gray-50">
+            <LogIn className="mx-auto mb-2 text-gray-500" />
+            <p className="text-sm text-gray-600">
+              Login to view your order summary
+            </p>
 
-          {/* SUBTOTAL (includes items only) */}
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>
-              {currency}
-              {cartAmount.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
+            <button
+              onClick={() => router.push("/authentication")}
+              className="mt-3 text-sm font-medium text-gray-900 hover:underline"
+            >
+              Login
+            </button>
           </div>
+        ) : (
+          <>
+            <div className="space-y-3 text-sm text-gray-700">
 
-          {/* VAT (hidden from clutter but included in total) */}
-          <div className="flex justify-between">
-            <span>Tax (7.5%)</span>
-            <span>
-              {currency}
-              {vat.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-
-          {/* SHIPPING */}
-          <div className="flex justify-between">
-            <span>Shipping</span>
-            <span>
-              {shippingFee > 0
-                ? `${currency}${shippingFee.toLocaleString(undefined, {
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>
+                  {currency}
+                  {cartAmount.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                  })}`
-                : "—"}
-            </span>
-          </div>
-        </div>
+                  })}
+                </span>
+              </div>
 
-        <hr className="border-gray-200 dark:border-gray-700 my-3" />
+              <div className="flex justify-between">
+                <span>Tax (7.5%)</span>
+                <span>
+                  {currency}
+                  {vat.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
 
-        {/* TOTAL (with currency label like your example) */}
-        <div className="space-y-1">
-          <div className="flex justify-between font-semibold text-base text-gray-900">
-            <span>Total</span>
-            <span>
-              {currency}
-              {total.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-        </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>
+                  {shippingFee > 0
+                    ? `${currency}${shippingFee.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}`
+                    : "—"}
+                </span>
+              </div>
+            </div>
+
+            <hr className="border-gray-200 my-3" />
+
+            <div className="flex justify-between font-semibold text-base text-gray-900">
+              <span>Total</span>
+              <span>
+                {currency}
+                {total.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
     </div>

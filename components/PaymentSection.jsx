@@ -46,9 +46,9 @@ export default function PaymentSection({
 
           {/* LOGOS */}
           <div className="flex items-center gap-2">
-            <img src="/cards/visa.png" className="h-5" />
-            <img src="/cards/mastercard.png" className="h-5" />
-            <img src="/cards/amex.png" className="h-5" />
+            <img src="/cards/Visa.png" className="h-5" />
+            <img src="/cards/Mastercard.jpeg" className="h-5" />
+            <img src="/cards/Amex.png" className="h-5" />
           </div>
         </label>
 
