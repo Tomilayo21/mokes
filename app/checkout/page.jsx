@@ -104,7 +104,12 @@ const pickupLocations = [
 
   useEffect(() => {
     const data = sessionStorage.getItem("checkoutData");
-    if (data) setCheckoutData(JSON.parse(data));
+
+    console.log("checkoutData from sessionStorage:", data);
+
+    if (data) {
+      setCheckoutData(JSON.parse(data));
+    }
   }, []);
 
   useEffect(() => {

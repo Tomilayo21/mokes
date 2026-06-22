@@ -575,7 +575,7 @@ const Cart = () => {
             </div>
           </div>
         )}
-
+<OrderSummary/>
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="mt-8 px-4 md:mt-12">
