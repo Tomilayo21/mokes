@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ShoppingCart, PackageX } from "lucide-react";
 import OrderSummary from "@/components/OrderSummary";
 import Navbar from "@/components/Navbar";
@@ -17,7 +17,9 @@ const Cart = () => {
     cartItems,
     updateCartQuantity,
     getCartCount,
+    getCartAmount,
   } = useAppContext();
+
 
   const currency = "₦";
   const [products, setProducts] = useState([]);
@@ -61,6 +63,23 @@ const Cart = () => {
   }, [cartItems]);
 
   const cartCount = getCartCount();
+
+  const subtotal = React.useMemo(() => {
+    let total = 0;
+
+    if (!products.length) return 0;
+
+    for (const itemId in cartItems) {
+      const product = products.find((p) => p._id === itemId);
+      if (!product) continue;
+
+      for (const size in cartItems[itemId]) {
+        total += (Number(product.offerPrice) || 0) * cartItems[itemId][size];
+      }
+    }
+
+    return Math.round(total * 100) / 100;
+  }, [cartItems, products]);
   
   const toTitleCase = (str = "") => {
     return str
@@ -182,9 +201,9 @@ const Cart = () => {
   return (
     <>
       <Navbar />
-      <div className="px-8 md:px-8 lg:px-8 pt-10 mt-8 mb-20">
+      <div className="px-8 md:px-8 lg:px-8 pt-10 lg:px-8 py-16 mt-8 mb-20">
         {/* Header */}
-        <div className="relative mb-8 border-b border-gray-200 pb-6">
+        <div className="relative mb-8 pb-6">
           <div className="flex flex-col items-center text-center">
             <h2 className="text-2xl md:text-3xl font-normal text-gray-900 tracking-tight">
               Shopping Bag
@@ -224,154 +243,212 @@ const Cart = () => {
           <div className="flex flex-col md:flex-row gap-10">
             {/* Cart Items */}
             <div className="flex-1 relative">
-               {!loading && cartCount > 0 && (
+               {/* {!loading && cartCount > 0 && (
                   <p className="absolute right-0 -top-8 text-lg px-4 md:text-xl font-medium text-gray-700">
                     {cartCount} {cartCount === 1 ? "Item" : "Items"}
                   </p>
-                )}
+                )} */}
 
-              <div className="space-y-6">
-                {Object.keys(cartItems).flatMap((itemId) => {
-                  const product = products.find((p) => p._id === itemId);
+              <div className="space-y-6 px-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead className="border-b border-gray-300">
+                      <tr className="text-left text-sm uppercase tracking-wide text-gray-500">
+                        
+                        {!loading && cartCount > 0 && (
+                          <th className="py-4 font-medium">
+                           {cartCount === 1 ? "Product" : "Products"}
+                        </th>
 
-                  // ✅ prevent crash if product not found
-                  if (!product) return [];
+                        )}
+                        <th className="py-4 font-medium text-center">Price</th>
+                        <th className="py-4 font-medium text-center">Quantity</th>
+                        <th className="py-4 font-medium text-right">Total</th>
+                      </tr>
+                    </thead>
 
-                  return Object.entries(cartItems[itemId]).map(([size, quantity]) => {
-                    // ✅ safe size match (case-insensitive)
-                    const sizeData = product?.sizes?.find(
-                      (s) =>
-                        String(s.size).toLowerCase() === String(size).toLowerCase()
-                    );
+                    <tbody>
+                      {Object.keys(cartItems).flatMap((itemId) => {
+                        const product = products.find((p) => p._id === itemId);
+                        if (!product) return [];
 
-                    // ✅ final stock value (ONLY rely on size stock)
-                    const sizeStock = Number(sizeData?.stock ?? 0);
+                        return Object.entries(cartItems[itemId]).map(
+                          ([size, quantity]) => {
+                            const sizeData = product?.sizes?.find(
+                              (s) =>
+                                String(s.size).toLowerCase() ===
+                                String(size).toLowerCase()
+                            );
 
-                    const currentQuantity = quantity;
-                    const isSoldOut = sizeStock === 0;
+                            const sizeStock = Number(sizeData?.stock ?? 0);
+                            const isSoldOut = sizeStock === 0;
 
-                    return (
-                      <div
-                        key={`${itemId}-${size}`}
-                        className="flex flex-col md:flex-row items-center gap-6 bg-white p-4 border-b border-gray-200 last:border-b-0"
+                            return (
+                              <tr
+                                key={`${itemId}-${size}`}
+                                className="border-b border-gray-200 align-top"
+                              >
+                                {/* PRODUCT */}
+                                <td className="py-6">
+                                  <div className="flex gap-4">
+                                    <img
+                                      src={product.image?.[0]}
+                                      alt={product.name}
+                                      className="w-24 h-28 object-cover bg-gray-50"
+                                    />
+
+                                    <div>
+                                      <h3 className="text-sm md:text-base font-medium text-black">
+                                        {product.brand?.toUpperCase()} | {product.name}
+                                      </h3>
+
+                                      <p className="text-gray-500 text-sm mt-1">
+                                        Color: {product.color}
+                                      </p>
+
+                                      <p className="text-gray-500 text-sm">
+                                        Size: {size}
+                                      </p>
+
+                                      <button
+                                        onClick={() =>
+                                          updateCartQuantity(product._id, size, 0)
+                                        }
+                                        className="text-sm mt-3 underline text-gray-600"
+                                      >
+                                        Remove
+                                      </button>
+
+                                      {isSoldOut && (
+                                        <p className="text-red-500 mt-2 text-sm">
+                                          Sold Out
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* PRICE */}
+                                <td className="text-center text-black py-6">
+                                  {currency}
+                                  {Number(product.offerPrice).toLocaleString()}
+                                </td>
+
+                                {/* QUANTITY */}
+                                <td className="py-6">
+                                  <div className="flex justify-center">
+                                    <div className="flex border">
+                                      <button
+                                        onClick={() =>
+                                          updateCartQuantity(
+                                            product._id,
+                                            size,
+                                            quantity - 1
+                                          )
+                                        }
+                                        disabled={quantity <= 1}
+                                        className="
+                                          px-3 py-1
+                                          text-black
+                                          font-semibold
+                                          transition
+                                          disabled:text-gray-400
+                                          disabled:bg-gray-100
+                                          disabled:cursor-not-allowed
+                                        "
+                                      >
+                                        −
+                                      </button>
+
+                                      <input
+                                        value={quantity}
+                                        readOnly
+                                        className="w-12 text-center border-x border-y text-black font-medium"
+                                      />
+
+                                    <button
+                                      onClick={() => {
+                                        if (!isSoldOut && quantity < sizeStock) {
+                                          updateCartQuantity(
+                                            product._id,
+                                            size,
+                                            quantity + 1
+                                          );
+                                        }
+                                      }}
+                                      disabled={isSoldOut || quantity >= sizeStock}
+                                      className="
+                                        px-3 py-1
+                                        text-black
+                                        font-semibold
+                                        transition
+                                        disabled:text-gray-400
+                                        disabled:bg-gray-100
+                                        disabled:cursor-not-allowed
+                                      "
+                                    >
+                                      +
+                                    </button>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* TOTAL */}
+                                <td className="text-right text-black py-6 font-medium">
+                                  {currency}
+                                  {(
+                                    Number(product.offerPrice) * quantity
+                                  ).toLocaleString()}
+                                </td>
+                              </tr>
+                            );
+                          }
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* CART FOOTER */}
+                  <div className="mt-8 pt-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+
+                      {/* LEFT */}
+                      <button
+                        onClick={() => router.push("/collections/all")}
+                        className="flex items-center gap-2 text-gray-700 hover:text-black transition"
                       >
-                        {/* IMAGE */}
-                        <div className="flex-shrink-0">
-                          <img
-                            src={product.image?.[0]}
-                            alt={product.name}
-                            className="w-28 h-28 object-contain bg-gray-50 p-2"
-                          />
+                        <IoIosArrowRoundBack className="w-5 h-5 text-gray-400" />
+                        Continue Shopping
+                      </button>
+
+                      {/* RIGHT */}
+                      <div className="w-full md:w-[380px] bg-gray-50 p-5 border rounded-sm">
+                        
+                        <div className="flex justify-between mb-2">
+                          <span className="text-gray-700">Subtotal</span>
+                          <span className="font-semibold text-black">
+                            {currency}
+                            {subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
                         </div>
 
-                        {/* DETAILS */}
-                        <div className="flex flex-1 flex-col md:flex-row justify-between items-start md:items-center w-full">
-                          <div>
-                            <h3 className="text-lg md:text-xl font-light text-black">
-                              {product.brand?.toUpperCase()} | {product.name} | {product.color}
-                            </h3>
+                        <p className="text-xs text-gray-500 mb-4">
+                          Tax included and shipping calculated at checkout
+                        </p>
 
-                            <p className="text-gray-500 mt-1">
-                              {currency}
-                              {Number(product.offerPrice).toLocaleString()}
-                            </p>
-
-                            <p className="text-sm text-gray-500 italic">Size: {size}</p>
-
-                            <button
-                              onClick={() =>
-                                updateCartQuantity(product._id, size, 0)
-                              }
-                              className="text-sm text-[var(--sage)] mt-2 hover:underline cursor-pointer"
-                            >
-                              Remove
-                            </button>
-                          </div>
-
-                          {/* CONTROLS */}
-                          <div className="flex flex-col gap-2 mt-4 md:mt-0">
-
-                            {/* SOLD OUT LABEL */}
-                            {isSoldOut && (
-                              <p className="text-red-500 font-normal">
-                                Sold Out
-                              </p>
-                            )}
-
-                            {/* CONTROLS ALWAYS SHOWN (but disabled logically if needed) */}
-                            <div className="flex items-center gap-2">
-
-                              {/* MINUS (always allowed) */}
-                              <button
-                                onClick={() =>
-                                  updateCartQuantity(
-                                    product._id,
-                                    size,
-                                    currentQuantity - 1
-                                  )
-                                }
-                                disabled={currentQuantity <= 1}
-                                className="px-3 py-1 border text-black rounded-sm hover:bg-gray-100 disabled:opacity-50"
-                              >
-                                −
-                              </button>
-
-                              {/* INPUT */}
-                              <input
-                                type="number"
-                                value={currentQuantity}
-                                onChange={(e) => {
-                                  const value = Number(e.target.value);
-
-                                  if (value > 0) {
-                                    updateCartQuantity(product._id, size, value);
-                                  }
-                                }}
-                                className="w-12 border text-center text-black rounded-sm"
-                              />
-
-                              {/* PLUS (blocked if sold out OR reached stock) */}
-                              <button
-                                onClick={() => {
-                                  if (!isSoldOut && currentQuantity < sizeStock) {
-                                    updateCartQuantity(
-                                      product._id,
-                                      size,
-                                      currentQuantity + 1
-                                    );
-                                  }
-                                }}
-                                disabled={isSoldOut || currentQuantity >= sizeStock}
-                                className="px-3 py-1 border text-black rounded-sm hover:bg-gray-100 disabled:opacity-50"
-                              >
-                                +
-                              </button>
-                            </div>
-
-                            {/* PRICE */}
-                            <p className="text-lg font-medium text-gray-800">
-                              {currency}
-                              {(product.offerPrice * currentQuantity).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
+                        <button
+                          onClick={() => router.push("/checkout")}
+                          className="w-full bg-black hover:bg-neutral-900 cursor-pointer text-white py-3 text-sm uppercase tracking-wide hover:opacity-90 transition"
+                        >
+                          Proceed to Checkout
+                        </button>
                       </div>
-                    );
-                  });
-                })}
 
-                <button
-                  onClick={() => router.push("/collections/all")}
-                  className="group flex items-center gap-2 text-gray-800 hover:underline mt-4 cursor-pointer"
-                >
-                  <IoIosArrowRoundBack className="w-6 h-6 text-gray-300 origin-left transition-all duration-300 group-hover:scale-x-125 group-hover:translate-x-1" />
-                  Continue Shopping
-                </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Order Summary */}
-            <OrderSummary />
           </div>
         )}
 
