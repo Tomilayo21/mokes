@@ -243,110 +243,136 @@ const Cart = () => {
           <div className="flex flex-col md:flex-row gap-10">
             {/* Cart Items */}
             <div className="flex-1 relative">
-               {/* {!loading && cartCount > 0 && (
-                  <p className="absolute right-0 -top-8 text-lg px-4 md:text-xl font-medium text-gray-700">
-                    {cartCount} {cartCount === 1 ? "Item" : "Items"}
-                  </p>
-                )} */}
 
               <div className="space-y-6 px-4">
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead className="border-b border-gray-300">
-                      <tr className="text-left text-sm uppercase tracking-wide text-gray-500">
-                        
-                        {!loading && cartCount > 0 && (
-                          <th className="py-4 font-medium">
-                           {cartCount === 1 ? "Product" : "Products"}
-                        </th>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full table-fixed border-collapse">
+                      <thead className="border-b border-gray-300">
+                        <tr className="text-left text-sm uppercase tracking-wide text-gray-500">
+                          
+                          {!loading && cartCount > 0 && (
+                            <th className="py-4 font-medium">
+                            {cartCount === 1 ? "Product" : "Products"}
+                          </th>
 
-                        )}
-                        <th className="py-4 font-medium text-center">Price</th>
-                        <th className="py-4 font-medium text-center">Quantity</th>
-                        <th className="py-4 font-medium text-right">Total</th>
-                      </tr>
-                    </thead>
+                          )}
+                          <th className="py-4 font-medium text-center">Price</th>
+                          <th className="py-4 font-medium text-center">Quantity</th>
+                          <th className="py-4 font-medium text-right">Total</th>
+                        </tr>
+                      </thead>
 
-                    <tbody>
-                      {Object.keys(cartItems).flatMap((itemId) => {
-                        const product = products.find((p) => p._id === itemId);
-                        if (!product) return [];
+                      <tbody>
+                        {Object.keys(cartItems).flatMap((itemId) => {
+                          const product = products.find((p) => p._id === itemId);
+                          if (!product) return [];
 
-                        return Object.entries(cartItems[itemId]).map(
-                          ([size, quantity]) => {
-                            const sizeData = product?.sizes?.find(
-                              (s) =>
-                                String(s.size).toLowerCase() ===
-                                String(size).toLowerCase()
-                            );
+                          return Object.entries(cartItems[itemId]).map(
+                            ([size, quantity]) => {
+                              const sizeData = product?.sizes?.find(
+                                (s) =>
+                                  String(s.size).toLowerCase() ===
+                                  String(size).toLowerCase()
+                              );
 
-                            const sizeStock = Number(sizeData?.stock ?? 0);
-                            const isSoldOut = sizeStock === 0;
+                              const sizeStock = Number(sizeData?.stock ?? 0);
+                              const isSoldOut = sizeStock === 0;
 
-                            return (
-                              <tr
-                                key={`${itemId}-${size}`}
-                                className="border-b border-gray-200 align-top"
-                              >
-                                {/* PRODUCT */}
-                                <td className="py-6">
-                                  <div className="flex gap-4">
-                                    <img
-                                      src={product.image?.[0]}
-                                      alt={product.name}
-                                      className="w-24 h-28 object-cover bg-gray-50"
-                                    />
+                              return (
+                                <tr
+                                  key={`${itemId}-${size}`}
+                                  className="border-b border-gray-200 align-top"
+                                >
+                                  {/* PRODUCT */}
+                                  <td className="py-6">
+                                    <div className="flex gap-4 min-w-0">
+                                      <img
+                                        src={product.image?.[0]}
+                                        alt={product.name}
+                                        className="w-20 h-24 flex-shrink-0 object-cover bg-gray-50"
+                                      />
 
-                                    <div>
-                                      <h3 className="text-sm md:text-base font-medium text-black">
-                                        {product.brand?.toUpperCase()} | {product.name}
-                                      </h3>
+                                      <div>
+                                        <h3 className="text-sm md:text-base font-medium text-black">
+                                          {product.brand?.toUpperCase()} | {product.name}
+                                        </h3>
 
-                                      <p className="text-gray-500 text-sm mt-1">
-                                        Color: {product.color}
-                                      </p>
-
-                                      <p className="text-gray-500 text-sm">
-                                        Size: {size}
-                                      </p>
-
-                                      <button
-                                        onClick={() =>
-                                          updateCartQuantity(product._id, size, 0)
-                                        }
-                                        className="text-sm mt-3 underline text-gray-600"
-                                      >
-                                        Remove
-                                      </button>
-
-                                      {isSoldOut && (
-                                        <p className="text-red-500 mt-2 text-sm">
-                                          Sold Out
+                                        <p className="text-gray-500 text-sm mt-1">
+                                          Color: {product.color}
                                         </p>
-                                      )}
+
+                                        <p className="text-gray-500 text-sm">
+                                          Size: {size}
+                                        </p>
+
+                                        <button
+                                          onClick={() =>
+                                            updateCartQuantity(product._id, size, 0)
+                                          }
+                                          className="text-sm mt-3 underline text-gray-600"
+                                        >
+                                          Remove
+                                        </button>
+
+                                        {isSoldOut && (
+                                          <p className="text-red-500 mt-2 text-sm">
+                                            Sold Out
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
+                                  </td>
 
-                                {/* PRICE */}
-                                <td className="text-center text-black py-6">
-                                  {currency}
-                                  {Number(product.offerPrice).toLocaleString()}
-                                </td>
+                                  {/* PRICE */}
+                                  <td className="text-center text-black py-6">
+                                    {currency}
+                                    {Number(product.offerPrice).toLocaleString()}
+                                  </td>
 
-                                {/* QUANTITY */}
-                                <td className="py-6">
-                                  <div className="flex justify-center">
-                                    <div className="flex border">
+                                  {/* QUANTITY */}
+                                  <td className="py-6">
+                                    <div className="flex justify-center">
+                                      <div className="flex border">
+                                        <button
+                                          onClick={() =>
+                                            updateCartQuantity(
+                                              product._id,
+                                              size,
+                                              quantity - 1
+                                            )
+                                          }
+                                          disabled={quantity <= 1}
+                                          className="
+                                            px-3 py-1
+                                            text-black
+                                            font-semibold
+                                            transition
+                                            disabled:text-gray-400
+                                            disabled:bg-gray-100
+                                            disabled:cursor-not-allowed
+                                          "
+                                        >
+                                          −
+                                        </button>
+
+                                        <input
+                                          value={quantity}
+                                          readOnly
+                                          className="w-12 text-center border-x border-y text-black font-medium"
+                                        />
+
                                       <button
-                                        onClick={() =>
-                                          updateCartQuantity(
-                                            product._id,
-                                            size,
-                                            quantity - 1
-                                          )
-                                        }
-                                        disabled={quantity <= 1}
+                                        onClick={() => {
+                                          if (!isSoldOut && quantity < sizeStock) {
+                                            updateCartQuantity(
+                                              product._id,
+                                              size,
+                                              quantity + 1
+                                            );
+                                          }
+                                        }}
+                                        disabled={isSoldOut || quantity >= sizeStock}
                                         className="
                                           px-3 py-1
                                           text-black
@@ -357,57 +383,155 @@ const Cart = () => {
                                           disabled:cursor-not-allowed
                                         "
                                       >
-                                        −
+                                        +
                                       </button>
-
-                                      <input
-                                        value={quantity}
-                                        readOnly
-                                        className="w-12 text-center border-x border-y text-black font-medium"
-                                      />
-
-                                    <button
-                                      onClick={() => {
-                                        if (!isSoldOut && quantity < sizeStock) {
-                                          updateCartQuantity(
-                                            product._id,
-                                            size,
-                                            quantity + 1
-                                          );
-                                        }
-                                      }}
-                                      disabled={isSoldOut || quantity >= sizeStock}
-                                      className="
-                                        px-3 py-1
-                                        text-black
-                                        font-semibold
-                                        transition
-                                        disabled:text-gray-400
-                                        disabled:bg-gray-100
-                                        disabled:cursor-not-allowed
-                                      "
-                                    >
-                                      +
-                                    </button>
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
+                                  </td>
 
-                                {/* TOTAL */}
-                                <td className="text-right text-black py-6 font-medium">
-                                  {currency}
-                                  {(
-                                    Number(product.offerPrice) * quantity
-                                  ).toLocaleString()}
-                                </td>
-                              </tr>
-                            );
-                          }
+                                  {/* TOTAL */}
+                                  <td className="text-right text-black py-6 font-medium">
+                                    {currency}
+                                    {(
+                                      Number(product.offerPrice) * quantity
+                                    ).toLocaleString()}
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* MOBILE CARDS */}
+                  <div className="md:hidden space-y-4">
+                    {Object.keys(cartItems).flatMap((itemId) => {
+                      const product = products.find((p) => p._id === itemId);
+                      if (!product) return [];
+
+                      return Object.entries(cartItems[itemId]).map(([size, quantity]) => {
+                        const sizeData = product?.sizes?.find(
+                          (s) =>
+                            String(s.size).toLowerCase() === String(size).toLowerCase()
                         );
-                      })}
-                    </tbody>
-                  </table>
 
+                        const sizeStock = Number(sizeData?.stock ?? 0);
+                        const isSoldOut = sizeStock === 0;
+
+                        return (
+                          <div
+                            key={`${itemId}-${size}`}
+                            className="border rounded-lg p-4 bg-white hover:shadow-sm"
+                          >
+                            {/* TOP SECTION */}
+                            <div className="flex gap-4">
+                              <img
+                                src={product.image?.[0]}
+                                className="w-20 h-24 object-cover bg-gray-50 flex-shrink-0"
+                              />
+
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-medium text-black">
+                                  {product.brand?.toUpperCase()} | {product.name}
+                                </h3>
+
+                                <p className="text-gray-500 text-xs mt-1">
+                                  Size: {size}
+                                </p>
+
+                                <p className="text-gray-500 text-xs">
+                                  Color: {product.color}
+                                </p>
+
+                                {isSoldOut && (
+                                  <p className="text-red-500 text-xs mt-1">
+                                    Sold Out
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* PRICE + TOTAL */}
+                            <div className="flex justify-between mt-4 text-sm">
+                              <span className="text-gray-600">Price</span>
+                              <span className="text-black font-medium">
+                                {currency}{Number(product.offerPrice).toLocaleString()}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between mt-2 text-sm">
+                              <span className="text-gray-600">Total</span>
+                              <span className="text-black font-semibold">
+                                {currency}
+                                {(Number(product.offerPrice) * quantity).toLocaleString()}
+                              </span>
+                            </div>
+
+                            {/* QUANTITY */}
+                            <div className="flex items-center justify-between mt-4">
+                              <span className="text-gray-600 text-sm">Qty</span>
+
+                              <div className="flex border rounded">
+                                <button
+                                  onClick={() =>
+                                    updateCartQuantity(product._id, size, quantity - 1)
+                                  }
+                                  disabled={quantity <= 1}
+                                  className="
+                                    px-3 py-1
+                                    text-black
+                                    font-semibold
+                                    transition
+                                    disabled:text-gray-400
+                                    disabled:bg-gray-100
+                                    disabled:cursor-not-allowed
+                                  "
+                                >
+                                  −
+                                </button>
+
+                                <input
+                                  value={quantity}
+                                  readOnly
+                                  className="w-12 text-center border-x border-y text-black font-medium"
+                                />
+
+                                <button
+                                  onClick={() => {
+                                    if (!isSoldOut && quantity < sizeStock) {
+                                      updateCartQuantity(product._id, size, quantity + 1);
+                                    }
+                                  }}
+                                  disabled={isSoldOut || quantity >= sizeStock}
+                                  className="
+                                    px-3 py-1
+                                    text-black
+                                    font-semibold
+                                    transition
+                                    disabled:text-gray-400
+                                    disabled:bg-gray-100
+                                    disabled:cursor-not-allowed
+                                  "
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* REMOVE */}
+                            <button
+                              onClick={() => updateCartQuantity(product._id, size, 0)}
+                              className="mt-4 text-sm text-red-500 underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        );
+                      });
+                    })}
+                  </div>
                   {/* CART FOOTER */}
                   <div className="mt-8 pt-6">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">

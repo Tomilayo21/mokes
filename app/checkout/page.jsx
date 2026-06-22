@@ -168,14 +168,14 @@ const pickupLocations = [
 
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!navigator.geolocation) return;
+
     navigator.geolocation.getCurrentPosition((pos) => {
-      const userLoc = {
+      setUserLocation({
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
-      };
-
-      setUserLocation(userLoc);
-      setActiveLocation(userLoc); 
+      });
     });
   }, []);
 
@@ -377,10 +377,6 @@ const pickupLocations = [
       setSelectedAddress(res.data.addresses?.[0] || null);
     }
   };
-
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this address?")) return;
