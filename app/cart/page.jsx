@@ -561,7 +561,21 @@ const Cart = () => {
                         </p>
 
                         <button
-                          onClick={() => router.push("/checkout")}
+                          onClick={() => {
+                            const checkoutData = {
+                              cartItems,
+                              subtotal,
+                              currency,
+                              total: subtotal, // or add shipping later
+                            };
+
+                            sessionStorage.setItem(
+                              "checkoutData",
+                              JSON.stringify(checkoutData)
+                            );
+
+                            router.push("/checkout");
+                          }}
                           className="w-full bg-black hover:bg-neutral-900 cursor-pointer text-white py-3 text-sm uppercase tracking-wide hover:opacity-90 transition"
                         >
                           Proceed to Checkout
@@ -575,7 +589,7 @@ const Cart = () => {
             </div>
           </div>
         )}
-<OrderSummary/>
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="mt-8 px-4 md:mt-12">

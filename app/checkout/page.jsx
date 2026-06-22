@@ -333,11 +333,17 @@ const pickupLocations = [
   }, [showPickupModal]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("selectedPickup");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setSelectedPickup(parsed);
-      setTempPickup(parsed);
+    const data = sessionStorage.getItem("checkoutData");
+
+    if (!data) {
+      console.log("No checkoutData in sessionStorage");
+      return;
+    }
+
+    try {
+      setCheckoutData(JSON.parse(data));
+    } catch (err) {
+      console.error("Invalid checkoutData:", err);
     }
   }, []);
 
@@ -598,7 +604,13 @@ const pickupLocations = [
     }
   };
   
-  if (!checkoutData) return <div className="mt-32 text-black">Loading checkout...</div>;
+  if (checkoutData === null) {
+    return (
+      <div className="mt-32 text-black text-center">
+        No checkout data found. Please go back to cart and try again.
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-8">
