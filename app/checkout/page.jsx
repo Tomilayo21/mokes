@@ -596,425 +596,422 @@ const pickupLocations = [
   if (!checkoutData) return <div>Loading checkout...</div>;
 
   return (
-    // <div className="max-w-6xl mx-auto px-8">
-    //   <div className="flex flex-col md:flex-row max-w-6xl mx-auto py-10">
+    <div className="max-w-6xl mx-auto px-8">
+      <div className="flex flex-col md:flex-row max-w-6xl mx-auto py-10">
 
-    //     {/* LEFT - ADDRESS */}
-    //     <div className="w-full md:w-1/2 pr-6 min-w-0">
+        {/* LEFT - ADDRESS */}
+        <div className="w-full md:w-1/2 pr-6 min-w-0">
 
-    //       {/* MOBILE ORDER SUMMARY */}
-    //       <div className="w-full md:hidden">
-    //         <div className="-mx-4 w-auto border rounded-none bg-white overflow-hidden">
+          {/* MOBILE ORDER SUMMARY */}
+          <div className="w-full md:hidden">
+            <div className="-mx-4 w-auto border rounded-none bg-white overflow-hidden">
               
-    //           {/* <button
-    //             onClick={() => setShowMobileSummary(!showMobileSummary)}
-    //             className="w-full px-4 py-4 flex justify-between items-center"
-    //           >
-    //             <span className="font-medium text-gray-700">
-    //               Order Summary
-    //             </span>
+              {/* <button
+                onClick={() => setShowMobileSummary(!showMobileSummary)}
+                className="w-full px-4 py-4 flex justify-between items-center"
+              >
+                <span className="font-medium text-gray-700">
+                  Order Summary
+                </span>
 
-    //             <span
-    //               className={`text-xl transition-transform duration-300 ${
-    //                 showMobileSummary ? "rotate-90" : "rotate-0"
-    //               }`}
-    //             >
-    //               &gt;
-    //             </span>
-    //           </button> */}
+                <span
+                  className={`text-xl transition-transform duration-300 ${
+                    showMobileSummary ? "rotate-90" : "rotate-0"
+                  }`}
+                >
+                  &gt;
+                </span>
+              </button> */}
 
-    //         <button
-    //           onClick={() => setShowMobileSummary(!showMobileSummary)}
-    //           className="w-full px-4 py-4 flex items-center justify-between"
-    //         >
-    //           {/* LEFT SIDE */}
-    //           <div className="flex items-center gap-2">
-    //             <span className="font-medium text-gray-700">
-    //               Order Summary
-    //             </span>
+            <button
+              onClick={() => setShowMobileSummary(!showMobileSummary)}
+              className="w-full px-4 py-4 flex items-center justify-between"
+            >
+              {/* LEFT SIDE */}
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-700">
+                  Order Summary
+                </span>
 
-    //             <span
-    //               className={`text-xl transition-transform duration-300 ${
-    //                 showMobileSummary ? "rotate-90" : "rotate-0"
-    //               }`}
-    //             >
-    //               &gt;
-    //             </span>
-    //           </div>
+                <span
+                  className={`text-xl transition-transform duration-300 ${
+                    showMobileSummary ? "rotate-90" : "rotate-0"
+                  }`}
+                >
+                  &gt;
+                </span>
+              </div>
 
-    //           {/* RIGHT SIDE (TOTAL) */}
-    //           <span className="text-sm font-semibold text-gray-900">
-    //             ₦{checkoutData?.total || 0}
-    //           </span>
-    //         </button>
-    //           <div
-    //             className={`transition-all duration-300 overflow-hidden ${
-    //               showMobileSummary
-    //                 ? "max-h-[1200px] opacity-100"
-    //                 : "max-h-0 opacity-0"
-    //             }`}
-    //           >
-    //             <div className="border-t p-4">
-    //               <OrderSummary
-    //                 checkoutData={checkoutData}
-    //                 selectedAddress={selectedAddress}
-    //               />
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </div>
+              {/* RIGHT SIDE (TOTAL) */}
+              <span className="text-sm font-semibold text-gray-900">
+                ₦{checkoutData?.total || 0}
+              </span>
+            </button>
+              <div
+                className={`transition-all duration-300 overflow-hidden ${
+                  showMobileSummary
+                    ? "max-h-[1200px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="border-t p-4">
+                  <OrderSummary
+                    checkoutData={checkoutData}
+                    selectedAddress={selectedAddress}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
-    //       <div className="mb-4 pt-4 space-y-3">
+          <div className="mb-4 pt-4 space-y-3">
 
-    //         <p className="text-lg font-medium text-gray-700 mt-4">
-    //           Contact
-    //         </p>
+            <p className="text-lg font-medium text-gray-700 mt-4">
+              Contact
+            </p>
 
-    //         {/* EMAIL INPUT */}
-    //         <input
-    //           type="email"
-    //           placeholder="Email"
-    //           className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
-    //         />
+            {/* EMAIL INPUT */}
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+            />
 
-    //         {/* CHECKBOX ROW */}
-    //         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-    //           <input
-    //             type="checkbox"
-    //             className="accent-black w-4 h-4"
-    //           />
+            {/* CHECKBOX ROW */}
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                className="accent-black w-4 h-4"
+              />
 
-    //           <span>Email me with news and offers</span>
-    //         </label>
+              <span>Email me with news and offers</span>
+            </label>
 
-    //       </div>
+          </div>
 
-    //       {/* SUMMARY ROW (LIKE CONTACT / EMAIL HEADER STYLE) */}
-    //       <div className="bg-white">
+          {/* SUMMARY ROW (LIKE CONTACT / EMAIL HEADER STYLE) */}
+          <div className="bg-white">
             
-    //         {/* TOP SUMMARY (always visible) */}
-    //         <div className="flex mb-4 justify-between items-center">
-    //           <div>
-    //             <p className="text-lg font-medium text-gray-700 mt-8">
-    //               Shipping Details
-    //             </p>
-    //           </div>
-    //           <button
-    //             onClick={() => setShowAddressDetails(!showAddressDetails)}
-    //             className="text-sm text-orange-600 font-medium"
-    //           >
-    //             {showAddressDetails ? "Hide" : "View"}
-    //           </button>
-    //         </div>
+            {/* TOP SUMMARY (always visible) */}
+            <div className="flex mb-4 justify-between items-center">
+              <div>
+                <p className="text-lg font-medium text-gray-700 mt-8">
+                  Shipping Details
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAddressDetails(!showAddressDetails)}
+                className="text-sm text-orange-600 font-medium"
+              >
+                {showAddressDetails ? "Hide" : "View"}
+              </button>
+            </div>
 
-    //         {/* COLLAPSIBLE DETAILS */}
-    //         {showAddressDetails && (
-    //           <div className="border-t bg-gray-50 p-5 space-y-4">
+            {/* COLLAPSIBLE DETAILS */}
+            {showAddressDetails && (
+              <div className="border-t bg-gray-50 p-5 space-y-4">
 
-    //             {/* HEADER */}
-    //             <div className="flex justify-between items-start">
-    //               <p className="text-xs text-gray-500 uppercase tracking-wide">
-    //                 {userAddresses?.length
-    //                   ? userAddresses.length > 1
-    //                     ? "Shipping Addresses"
-    //                     : "Shipping Address"
-    //                   : "Shipping Address"}
-    //               </p>
-    //             </div>
+                {/* HEADER */}
+                <div className="flex justify-between items-start">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    {userAddresses?.length
+                      ? userAddresses.length > 1
+                        ? "Shipping Addresses"
+                        : "Shipping Address"
+                      : "Shipping Address"}
+                  </p>
+                </div>
 
-    //             {/* EMPTY STATE */}
-    //             {(!userAddresses || userAddresses.length === 0) ? (
-    //               <div className="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-center">
-    //                 <p className="text-sm font-medium text-gray-700">
-    //                   No shipping address found
-    //                 </p>
-    //                 <p className="text-xs text-gray-500 mt-1">
-    //                   Add a delivery address to continue checkout
-    //                 </p>
+                {/* EMPTY STATE */}
+                {(!userAddresses || userAddresses.length === 0) ? (
+                  <div className="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <p className="text-sm font-medium text-gray-700">
+                      No shipping address found
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Add a delivery address to continue checkout
+                    </p>
 
-    //               </div>
-    //             ) : (
-    //               <>
-    //                 {/* ADDRESS LIST */}
-    //                 <div className="space-y-4">
-    //                   {userAddresses.map((addr, index) => {
-    //                     const isOpen = selectedAddress?._id === addr._id;
+                  </div>
+                ) : (
+                  <>
+                    {/* ADDRESS LIST */}
+                    <div className="space-y-4">
+                      {userAddresses.map((addr, index) => {
+                        const isOpen = selectedAddress?._id === addr._id;
 
-    //                     return (
-    //                       <div
-    //                         key={addr._id}
-    //                         className={`bg-white border rounded-lg p-4 transition ${
-    //                           isOpen ? "border-black" : "border-gray-200"
-    //                         }`}
-    //                       >
-    //                         {/* HEADER ROW */}
-    //                         <div className="flex justify-between items-center mb-3">
-    //                           <p className="text-sm font-medium text-black">
-    //                             Shipping Address {index + 1}
-    //                           </p>
+                        return (
+                          <div
+                            key={addr._id}
+                            className={`bg-white border rounded-lg p-4 transition ${
+                              isOpen ? "border-black" : "border-gray-200"
+                            }`}
+                          >
+                            {/* HEADER ROW */}
+                            <div className="flex justify-between items-center mb-3">
+                              <p className="text-sm font-medium text-black">
+                                Shipping Address {index + 1}
+                              </p>
 
-    //                           <div className="flex items-center gap-3">
-    //                             <button
-    //                               onClick={() =>
-    //                                 setSelectedAddress(isOpen ? null : addr)
-    //                               }
-    //                               className="text-sm text-orange-600 font-medium"
-    //                             >
-    //                               {isOpen ? "Hide" : "Show"}
-    //                             </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() =>
+                                    setSelectedAddress(isOpen ? null : addr)
+                                  }
+                                  className="text-sm text-orange-600 font-medium"
+                                >
+                                  {isOpen ? "Hide" : "Show"}
+                                </button>
 
-    //                             <button
-    //                               onClick={(e) => {
-    //                                 e.stopPropagation();
-    //                                 setEditingAddress(addr);
-    //                                 setShowEditModal(true);
-    //                               }}
-    //                               className="text-sm text-blue-600 font-medium"
-    //                             >
-    //                               Edit
-    //                             </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingAddress(addr);
+                                    setShowEditModal(true);
+                                  }}
+                                  className="text-sm text-blue-600 font-medium"
+                                >
+                                  Edit
+                                </button>
 
-    //                             <button
-    //                               onClick={() => handleDelete(addr._id)}
-    //                               className="text-sm text-red-600 font-medium"
-    //                             >
-    //                               Delete
-    //                             </button>
-    //                           </div>
-    //                         </div>
+                                <button
+                                  onClick={() => handleDelete(addr._id)}
+                                  className="text-sm text-red-600 font-medium"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
 
-    //                         {/* CONTENT */}
-    //                         {isOpen && (
-    //                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    //                             <div>
-    //                               <p className="text-xs text-gray-700">Address</p>
-    //                               <p className="text-sm font-medium text-gray-400">{addr.area}</p>
-    //                             </div>
+                            {/* CONTENT */}
+                            {isOpen && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-xs text-gray-700">Address</p>
+                                  <p className="text-sm font-medium text-gray-400">{addr.area}</p>
+                                </div>
 
-    //                             <div>
-    //                               <p className="text-xs text-gray-700">City</p>
-    //                               <p className="text-sm font-medium text-gray-400">{addr.city}</p>
-    //                             </div>
+                                <div>
+                                  <p className="text-xs text-gray-700">City</p>
+                                  <p className="text-sm font-medium text-gray-400">{addr.city}</p>
+                                </div>
 
-    //                             <div>
-    //                               <p className="text-xs text-gray-700">State</p>
-    //                               <p className="text-sm font-medium text-gray-400">{addr.state}</p>
-    //                             </div>
+                                <div>
+                                  <p className="text-xs text-gray-700">State</p>
+                                  <p className="text-sm font-medium text-gray-400">{addr.state}</p>
+                                </div>
 
-    //                             <div>
-    //                               <p className="text-xs text-gray-700">Country</p>
-    //                               <p className="text-sm font-medium text-gray-400">{addr.country}</p>
-    //                             </div>
+                                <div>
+                                  <p className="text-xs text-gray-700">Country</p>
+                                  <p className="text-sm font-medium text-gray-400">{addr.country}</p>
+                                </div>
 
-    //                             <div>
-    //                               <p className="text-xs text-gray-700">Phone Number</p>
-    //                               <p className="text-sm font-medium text-gray-500">
-    //                                 {addr.phoneNumber}
-    //                               </p>
-    //                             </div>
-    //                           </div>
-    //                         )}
-    //                       </div>
-    //                     );
-    //                   })}
-    //                 </div>
-    //               </>
-    //             )}
+                                <div>
+                                  <p className="text-xs text-gray-700">Phone Number</p>
+                                  <p className="text-sm font-medium text-gray-500">
+                                    {addr.phoneNumber}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
-    //             {/* DELIVERY NOTE */}
-    //             <div className="flex items-start gap-2 pt-2 border-t">
-    //               <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
-    //               <p className="text-xs text-gray-500 leading-relaxed">
-    //                 Estimated delivery will be calculated based on this location
-    //               </p>
-    //             </div>
+                {/* DELIVERY NOTE */}
+                <div className="flex items-start gap-2 pt-2 border-t">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Estimated delivery will be calculated based on this location
+                  </p>
+                </div>
 
-    //           </div>
-    //         )}
-    //       </div>  
+              </div>
+            )}
+          </div>  
 
-    //       <div className="w-full space-y-4 sm:space-y-6">
+          <div className="w-full space-y-4 sm:space-y-6">
 
-    //         {/* DELIVERY METHOD */}
-    //         <div className="w-full">
-    //           <h2 className="text-base sm:text-lg font-medium text-gray-700 mt-4 sm:mt-8 mb-2">
-    //             Delivery Method
-    //           </h2>
+            {/* DELIVERY METHOD */}
+            <div className="w-full">
+              <h2 className="text-base sm:text-lg font-medium text-gray-700 mt-4 sm:mt-8 mb-2">
+                Delivery Method
+              </h2>
 
-    //           <p className="text-xs sm:text-sm text-gray-500 mb-3">
-    //             Choose how you want your order delivered
-    //           </p>
+              <p className="text-xs sm:text-sm text-gray-500 mb-3">
+                Choose how you want your order delivered
+              </p>
 
-    //           <div className="grid grid-cols-1 sm:grid-cols-2 border rounded-xl overflow-hidden w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 border rounded-xl overflow-hidden w-full">
                 
-    //             <button
-    //               onClick={() => setDeliveryMethod("ship")}
-    //               className={`py-3 px-4 text-sm sm:text-base font-medium cursor-pointer transition ${
-    //                 deliveryMethod === "ship"
-    //                   ? "bg-black text-white"
-    //                   : "text-black bg-white"
-    //               }`}
-    //             >
-    //               Ship
-    //             </button>
+                <button
+                  onClick={() => setDeliveryMethod("ship")}
+                  className={`py-3 px-4 text-sm sm:text-base font-medium cursor-pointer transition ${
+                    deliveryMethod === "ship"
+                      ? "bg-black text-white"
+                      : "text-black bg-white"
+                  }`}
+                >
+                  Ship
+                </button>
 
-    //             <button
-    //               onClick={() => setDeliveryMethod("pickup")}
-    //               className={`py-3 px-4 text-sm sm:text-base font-medium cursor-pointer transition ${
-    //                 deliveryMethod === "pickup"
-    //                   ? "bg-black text-white"
-    //                   : "text-black bg-white"
-    //               }`}
-    //             >
-    //               Pickup
-    //             </button>
-    //           </div>
-    //         </div>
+                <button
+                  onClick={() => setDeliveryMethod("pickup")}
+                  className={`py-3 px-4 text-sm sm:text-base font-medium cursor-pointer transition ${
+                    deliveryMethod === "pickup"
+                      ? "bg-black text-white"
+                      : "text-black bg-white"
+                  }`}
+                >
+                  Pickup
+                </button>
+              </div>
+            </div>
 
-    //         {/* SHIP / PICKUP FORM */}
-    //         <div className="w-full min-w-0 overflow-hidden">
+            {/* SHIP / PICKUP FORM */}
+            <div className="w-full min-w-0 overflow-hidden">
 
-    //           {/* Ship */}
-    //           <div className={deliveryMethod === "ship" ? "block w-full" : "hidden"}>
-    //             <AddAddressInline
-    //               onSuccess={() => {
-    //                 fetchAddresses();
-    //               }}
-    //             />
-    //           </div>
+              {/* Ship */}
+              <div className={deliveryMethod === "ship" ? "block w-full" : "hidden"}>
+                <AddAddressInline
+                  onSuccess={() => {
+                    fetchAddresses();
+                  }}
+                />
+              </div>
 
-    //           {/* Pickup */}
-    //           <div className={deliveryMethod === "pickup" ? "block w-full" : "hidden"}>
-    //             <div className="mt-4 w-full min-w-0 overflow-x-auto">
-    //               {deliveryMethod === "pickup" && (
-    //                 <div className="w-full">
-    //                   {/* reuse expanded pickup block here */}
-    //                 </div>
-    //               )}
-    //             </div>
-    //           </div>
+              {/* Pickup */}
+              <div className={deliveryMethod === "pickup" ? "block w-full" : "hidden"}>
+                <div className="mt-4 w-full min-w-0 overflow-x-auto">
+                  {deliveryMethod === "pickup" && (
+                    <div className="w-full">
+                      {/* reuse expanded pickup block here */}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-    //         </div>
-    //       </div>
+            </div>
+          </div>
 
-    //       {deliveryMethod === "pickup" && enrichedSelectedPickup && (
-    //         <div className="w-full space-y-6 bg-white">
+          {deliveryMethod === "pickup" && enrichedSelectedPickup && (
+            <div className="w-full space-y-6 bg-white">
 
-    //           <h3 className="text-sm text-gray-500 mb-3">
-    //             The closest location with your item
-    //           </h3>
+              <h3 className="text-sm text-gray-500 mb-3">
+                The closest location with your item
+              </h3>
 
-    //           {/* MAIN LOCATION CARD (EXPANDED) */}
-    //           <div className="border border-gray-200 rounded-xl p-5 space-y-3">
+              {/* MAIN LOCATION CARD (EXPANDED) */}
+              <div className="border border-gray-200 rounded-xl p-5 space-y-3">
 
-    //             <div className="flex items-start justify-between">
-    //               <div>
-    //                 <p className="text-md font-medium text-gray-700">
-    //                   {enrichedSelectedPickup.name}
-    //                 </p>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-md font-medium text-gray-700">
+                      {enrichedSelectedPickup.name}
+                    </p>
 
-    //                 <p className="text-sm text-gray-500">
-    //                   {enrichedSelectedPickup?.eta}
-    //                 </p>
-    //               </div>
+                    <p className="text-sm text-gray-500">
+                      {enrichedSelectedPickup?.eta}
+                    </p>
+                  </div>
 
-    //               <span className="text-sm font-medium text-green-600">
-    //                 {enrichedSelectedPickup.price}
-    //               </span>
-    //             </div>
+                  <span className="text-sm font-medium text-green-600">
+                    {enrichedSelectedPickup.price}
+                  </span>
+                </div>
 
-    //             <p className="text-sm text-gray-600 leading-relaxed">
-    //               {enrichedSelectedPickup.address}
-    //             </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {enrichedSelectedPickup.address}
+                </p>
 
-    //             <div className="pt-2 text-sm text-gray-500 border-t">
-    //               Usually ready in 24 hours
-    //             </div>
-    //           </div>
+                <div className="pt-2 text-sm text-gray-500 border-t">
+                  Usually ready in 24 hours
+                </div>
+              </div>
 
-    //           {/* SECOND LOCATION INFO (if you want comparison style) */}
-    //           <div className="border border-gray-200 rounded-xl p-5 space-y-2">
-    //             <p className="text-md font-medium text-gray-700">
-    //               More pickup locations available
-    //             </p>
+              {/* SECOND LOCATION INFO (if you want comparison style) */}
+              <div className="border border-gray-200 rounded-xl p-5 space-y-2">
+                <p className="text-md font-medium text-gray-700">
+                  More pickup locations available
+                </p>
 
-    //             <p className="text-sm text-gray-500">
-    //               We found additional stores that may have your item in stock.
-    //             </p>
+                <p className="text-sm text-gray-500">
+                  We found additional stores that may have your item in stock.
+                </p>
 
-    //             <button
-    //               onClick={() => setShowPickupModal(true)}
-    //               className="text-sm text-orange-600 font-medium"
-    //             >
-    //               View all locations →
-    //             </button>
-    //           </div>
+                <button
+                  onClick={() => setShowPickupModal(true)}
+                  className="text-sm text-orange-600 font-medium"
+                >
+                  View all locations →
+                </button>
+              </div>
 
-    //         </div>
-    //       )}
+            </div>
+          )}
 
-    //       <PickupModal
-    //         showPickupModal={showPickupModal}
-    //         setShowPickupModal={setShowPickupModal}
-    //         showMapModal={showMapModal}
-    //         setShowMapModal={setShowMapModal}
-    //         searchQuery={searchQuery}
-    //         setSearchQuery={setSearchQuery}
-    //         suggestions={suggestions}
-    //         setSuggestions={setSuggestions}
-    //         fetchSuggestions={fetchSuggestions}
-    //         handleSearchClick={handleSearchClick}
-    //         pickupLocations={pickupLocations}
-    //         tempPickup={tempPickup}
-    //         setTempPickup={setTempPickup}
-    //         selectedPickup={selectedPickup}
-    //         setSelectedPickup={setSelectedPickup}
-    //         getDeliveryPromise={getDeliveryPromise}
-    //         activeLocation={activeLocation}
-    //         setActiveLocation={setActiveLocation}
-    //         getDistanceKm={getDistanceKm}
-    //         pickupStores={pickupStores}
-    //         setPickupStores={setPickupStores}
-    //         userLocation={userLocation}
-    //       />
+          <PickupModal
+            showPickupModal={showPickupModal}
+            setShowPickupModal={setShowPickupModal}
+            showMapModal={showMapModal}
+            setShowMapModal={setShowMapModal}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            suggestions={suggestions}
+            setSuggestions={setSuggestions}
+            fetchSuggestions={fetchSuggestions}
+            handleSearchClick={handleSearchClick}
+            pickupLocations={pickupLocations}
+            tempPickup={tempPickup}
+            setTempPickup={setTempPickup}
+            selectedPickup={selectedPickup}
+            setSelectedPickup={setSelectedPickup}
+            getDeliveryPromise={getDeliveryPromise}
+            activeLocation={activeLocation}
+            setActiveLocation={setActiveLocation}
+            getDistanceKm={getDistanceKm}
+            pickupStores={pickupStores}
+            setPickupStores={setPickupStores}
+            userLocation={userLocation}
+          />
 
-    //       <PaymentSection
-    //         paymentMethod={paymentMethod}
-    //         setPaymentMethod={setPaymentMethod}
-    //         useShippingAsBilling={useShippingAsBilling}
-    //         setUseShippingAsBilling={setUseShippingAsBilling}
-    //         saveInfo={saveInfo}
-    //         setSaveInfo={setSaveInfo}
-    //         handlePayment={handlePayment}
+          <PaymentSection
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
+            useShippingAsBilling={useShippingAsBilling}
+            setUseShippingAsBilling={setUseShippingAsBilling}
+            saveInfo={saveInfo}
+            setSaveInfo={setSaveInfo}
+            handlePayment={handlePayment}
             
-    //       />
-    //     </div>
+          />
+        </div>
 
-    //     <div className="hidden md:block w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+        <div className="hidden md:block w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
 
 
-    //     {/* DESKTOP ORDER SUMMARY */}
-    //     <div className="hidden md:block md:w-1/2 pl-6 md:sticky md:top-10 h-fit">
-    //       <OrderSummary
-    //         checkoutData={checkoutData}
-    //         selectedAddress={selectedAddress}
-    //       />
-    //     </div>
-    //   </div>
+        {/* DESKTOP ORDER SUMMARY */}
+        <div className="hidden md:block md:w-1/2 pl-6 md:sticky md:top-10 h-fit">
+          <OrderSummary
+            checkoutData={checkoutData}
+            selectedAddress={selectedAddress}
+          />
+        </div>
+      </div>
 
-    //   {/* EDIT MODAL (reuse yours) */}
-    //   <EditAddressModal
-    //     open={showEditModal}
-    //     editingAddress={editingAddress}
-    //     onClose={() => setShowEditModal(false)}
-    //     onSuccess={(updated) => {
-    //       fetchAddresses();
-    //       setSelectedAddress(updated);
-    //     }}
-    //   />
-    // </div>
-    <div className="mt-32 text-black">
-      <h1>Checkout page</h1>
+      {/* EDIT MODAL (reuse yours) */}
+      <EditAddressModal
+        open={showEditModal}
+        editingAddress={editingAddress}
+        onClose={() => setShowEditModal(false)}
+        onSuccess={(updated) => {
+          fetchAddresses();
+          setSelectedAddress(updated);
+        }}
+      />
     </div>
   );
 }
