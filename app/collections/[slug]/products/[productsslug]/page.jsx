@@ -18,7 +18,7 @@ import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 export default function ProductPage() {
   const { data: session, status } = useSession();
-  const { productsslug } = useParams();
+const { slug, productsslug } = useParams();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

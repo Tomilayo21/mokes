@@ -124,6 +124,23 @@ const pickupLocations = [
     fetchAddresses();
   }, []);
 
+  const formatDriveTime = (distanceKm, speedKmh = 40) => {
+    const totalMinutes = (distanceKm / speedKmh) * 60;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round(totalMinutes % 60);
+
+    if (hours < 1) {
+      return `${minutes} mins`;
+    }
+
+    if (minutes === 0) {
+      return `${hours} hr`;
+    }
+
+    return `${hours} hr ${minutes} mins`;
+  };
+
   const calculateScore = (store, userLocation, userPostcode) => {
     const distance = getDistanceKm(
       userLocation.lat,
@@ -155,7 +172,7 @@ const pickupLocations = [
       ...store,
       distance,
       score,
-      eta: `${Math.round((distance / 40) * 60)} min drive`,
+      eta: formatDriveTime(distance),
     };
   };
   const filterByRadius = (stores, userLocation, radiusKm) => {
@@ -267,7 +284,7 @@ const pickupLocations = [
           distance,
           score,
           price: "Free",
-          eta: `${Math.round((distance / 40) * 60)} min drive`,
+          eta: formatDriveTime(distance),
         };
       })
       .sort((a, b) => a.score - b.score);
@@ -395,7 +412,7 @@ const pickupLocations = [
       price: "Free",
       address: base.address || "Pickup store location",
       distance,
-      eta: distance ? `${Math.round((distance / 40) * 60)} min drive` : "ETA unavailable",
+      eta: distance ? formatDriveTime(distance) : "ETA unavailable",
     };
   })();
 
@@ -622,6 +639,8 @@ const pickupLocations = [
       setProcessing(false);
     }
   };
+
+  const distance = enrichedSelectedPickup?.distance;
   
   if (checkoutData === null) {
     return (
@@ -949,8 +968,8 @@ const pickupLocations = [
                       {enrichedSelectedPickup.name}
                     </p>
 
-                    <p className="text-sm text-gray-500">
-                      {enrichedSelectedPickup?.eta}
+                    <p className="text-sm text-green-600">
+                      {distance != null ? `🚗 ${formatDriveTime(distance)}` : ""}
                     </p>
                   </div>
 

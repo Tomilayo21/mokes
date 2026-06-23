@@ -160,6 +160,21 @@ export default function AddAddressInline({ onSuccess }) {
           />
         </div>
 
+        {/* COUNTRY */}
+        <select
+          value={address.country}
+          onChange={handleCountryChange}
+          className="w-full min-w-0 max-w-full box-border h-12 appearance-none text-black px-3 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+        >
+          <option value="">Select Country</option>
+
+          {countryList.map((country) => (
+            <option key={country.isoCode} value={country.isoCode}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+
         {/* ZIP */}
         <input
           className="w-full min-w-0 box-border max-w-full text-black px-3 py-3 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"

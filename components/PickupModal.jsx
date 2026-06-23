@@ -30,6 +30,17 @@ export default function PickupModal({
   setPickupStores,
   userLocation,  
 }) {
+    const formatDriveTime = (distanceKm, speedKmh = 40) => {
+    const totalMinutes = (distanceKm / speedKmh) * 60;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round(totalMinutes % 60);
+
+    if (hours < 1) return `${minutes} mins`;
+    if (minutes === 0) return `${hours} hr`;
+
+    return `${hours} hr ${minutes} mins`;
+    };
 
     const handleSearch = (location) => {
     if (!location || !location.lat || !location.lng) return;
@@ -50,12 +61,12 @@ export default function PickupModal({
         store.priority * 3 +
         store.processingTimeHours * 0.2;
 
-        const etaMinutes = Math.round((distance / 40) * 60);
+        const eta = formatDriveTime(distance);
 
         return {
         ...store,
         distance,
-        eta: `${etaMinutes} min drive`,
+        eta,
         score,
         };
     })
@@ -331,7 +342,7 @@ export default function PickupModal({
 
                             {/* ETA */}
                             <p className="text-sm text-green-600">
-                                {location.eta || (distance ? getDeliveryPromise({ distance }) : "")}
+                                {distance ? `🚗 ${formatDriveTime(distance)}` : ""}
                             </p>
 
                             {/* Distance */}
