@@ -18,6 +18,7 @@ import { useAppContext } from "@/context/AppContext";
 import { PackageSearch, ChevronLeft, ChevronRight, Frown, ListFilter, SlidersHorizontal } from "lucide-react";
 import ProductSlider from "@/components/ProductSlider";
 import AddProductPanel from "@/components/Admin/AddProductPanel";
+import Loading from "@/components/Loading";
 
 const PRODUCTS_PER_PAGE = 25;
 
@@ -199,7 +200,7 @@ const AllProducts = () => {
   };
 
 
-  if (!productData) return <Loading type="product" />;
+  if (loading) return <Loading type="products" />;
 
   return (
     <>

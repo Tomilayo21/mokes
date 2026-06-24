@@ -122,19 +122,29 @@ const ProductCard = ({ product, currency }) => {
   };
 
   // ------------------ Navigation ------------------
-  const handleCardClick = () => {
+const handleCardClick = () => {
+  let targetRoute;
+
+  // Special case: user is on /collections/all
+  if (pathname === "/collections/all") {
+    targetRoute = `/collection/${product.slug}`;
+  } 
+  // Already inside another collection route
+  else if (pathname.startsWith("/collections/")) {
     const collectionPath = pathname.split("/products")[0];
 
-    let targetRoute = `/collections/all/products/${product.slug}`;
+    targetRoute =
+      `${collectionPath}/products/${product.slug}` +
+      `?from=${encodeURIComponent(collectionPath)}`;
+  } 
+  // Fallback (non-collection routes)
+  else {
+    targetRoute = `/collections/all/products/${product.slug}`;
+  }
 
-    if (collectionPath.startsWith("/collections/")) {
-      targetRoute = `${collectionPath}/products/${product.slug}`;
-      targetRoute += `?from=${encodeURIComponent(collectionPath)}`;
-    }
-
-    router.push(targetRoute);
-    scrollTo(0, 0);
-  };
+  router.push(targetRoute);
+  scrollTo(0, 0);
+};
 
   const toTitleCase = (str = "") => {
     return str

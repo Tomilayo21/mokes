@@ -15,7 +15,7 @@ import Filter from "@/components/Filter";
 import { useAppContext } from "@/context/AppContext";
 import { PackageSearch, ChevronLeft, ChevronRight, Frown, ListFilter, SlidersHorizontal } from "lucide-react";
 import ProductSlider from "@/components/ProductSlider";
-
+import Loading from "@/components/Loading";
 const PRODUCTS_PER_PAGE = 25;
 
 export default function Page() {
@@ -184,23 +184,10 @@ const AllProducts = () => {
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        {/* <ProductSlider /> */}
-        <div className="w-full flex justify-center items-center h-96 text-lg text-gray-600">
-          Please wait...
-        </div>
-        <Footer />
-      </>
-    );
-  }
+  if (loading) return <Loading type="products" />;
 
   return (
     <>
-      {/* <Navbar /> */}
-      {/* <ProductSlider /> */}
       <div className="flex flex-col items-start px-4 md:px-8 mt-10 lg:px-8 pt-8">
         {/* Header */}
         <div className="w-full flex items-center justify-center border-b pb-6">

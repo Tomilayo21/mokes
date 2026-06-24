@@ -11,10 +11,16 @@ const Loading = ({ type = "default" }) => {
         return <DashboardSkeleton />;
       case "product":
         return <ProductSkeleton />;
+      case "products":
+        return <ProductsSkeleton />;
       case "table":
         return <TableSkeleton />;
       case "cart":
         return <CartSkeleton />;
+      case "brand":
+        return <BrandSkeleton />;
+      case "homeProducts":
+        return <HomeProductsSkeleton />;
       default:
         return <DefaultSkeleton />;
     }
@@ -85,7 +91,7 @@ const DashboardSkeleton = () => (
 );
 
 const ProductSkeleton = () => (
-  <div className="flex flex-col bg-white mt-12 text-black dark:bg-white dark:text-black min-h-screen text-black dark:bg-white dark:text-black min-h-screen">
+  <div className="flex flex-col bg-white mt-16 text-black dark:bg-white dark:text-black min-h-screen text-black dark:bg-white dark:text-black min-h-screen">
     <div className="px-4 md:px-16 lg:px-32 space-y-8">
       {/* TOP SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
@@ -104,10 +110,12 @@ const ProductSkeleton = () => (
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex flex-col space-y-5">
+        <div className="flex flex-col mt-2 space-y-5">
 
           {/* title */}
           <SkeletonBox className="h-8 w-full md:w-3/4" />
+          <SkeletonBox className="h-8 w-full md:w-3/4" />
+
 
           {/* price */}
           <div className="flex gap-3">
@@ -116,8 +124,8 @@ const ProductSkeleton = () => (
           </div>
 
           {/* size selector */}
-          <div className="space-y-2">
-            <SkeletonBox className="h-12 w-full" />
+          <div className="space-y-2 mt-8 md:mt-18 mb-6 w-full">
+            {/* <SkeletonBox className="h-12 w-full" /> */}
             <div className="grid grid-cols-4 gap-2">
               <SkeletonBox className="h-10 w-full" />
               <SkeletonBox className="h-10 w-full" />
@@ -159,14 +167,6 @@ const TableSkeleton = () => (
     {[...Array(6)].map((_, i) => (
       <SkeletonBox key={i} className="h-12 w-full" />
     ))}
-  </div>
-);
-
-const DefaultSkeleton = () => (
-  <div className="space-y-3">
-    <SkeletonBox className="h-6 w-1/3" />
-    <SkeletonBox className="h-4 w-full" />
-    <SkeletonBox className="h-4 w-5/6" />
   </div>
 );
 
@@ -302,5 +302,165 @@ const CartSkeleton = () => {
     </>
   );
 };
+
+const ProductsSkeleton = () => {
+  return (
+    <div className="w-full">
+      <div className="flex flex-col items-start px-4 md:px-8 mt-10 lg:px-8 pt-8">
+
+        {/* HEADER */}
+        <div className="w-full flex items-center justify-center border-b pb-6">
+          <div className="text-center">
+            <SkeletonBox className="h-5 w-28 mx-auto" />
+          </div>
+        </div>
+
+        {/* FILTER SECTION */}
+        <div className="mt-6 w-full bg-white p-4 border rounded-sm space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <SkeletonBox className="h-10 w-28" />
+            <SkeletonBox className="h-10 w-28" />
+            <SkeletonBox className="h-10 w-28" />
+            <SkeletonBox className="h-10 w-28 hidden md:block" />
+          </div>
+
+          <div className="flex justify-between items-center">
+            <SkeletonBox className="h-4 w-40" />
+            <SkeletonBox className="h-4 w-24" />
+          </div>
+        </div>
+
+        {/* PRODUCT GRID */}
+        <div
+          className="
+            mt-12 pb-14 w-full grid grid-cols-2
+            sm:grid-cols-3 lg:grid-cols-4
+            gap-y-4 gap-x-4 sm:gap-6 lg:gap-8
+            max-w-7xl
+          "
+        >
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="space-y-3">
+              {/* image */}
+              <SkeletonBox className="w-full aspect-[3/4] rounded-md" />
+
+              {/* brand/title */}
+              <SkeletonBox className="h-4 w-3/4" />
+
+              {/* description */}
+              <SkeletonBox className="h-3 w-1/2" />
+
+              {/* price */}
+              <div className="flex gap-2">
+                <SkeletonBox className="h-4 w-16" />
+                <SkeletonBox className="h-4 w-12" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* PAGINATION */}
+        <div className="w-full flex justify-center mt-12 mb-16">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white shadow border">
+            <SkeletonBox className="h-8 w-16" />
+            <SkeletonBox className="h-8 w-8" />
+            <SkeletonBox className="h-8 w-8" />
+            <SkeletonBox className="h-8 w-8" />
+            <SkeletonBox className="h-8 w-16" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BrandSkeleton = () => {
+  return (
+    <div className="flex flex-col mt-24 items-center w-full">
+      {/* TOP HEADER */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full flex justify-center">
+        <div className="text-center">
+          <SkeletonBox className="h-5 w-72 md:w-96 mx-auto" />
+          <SkeletonBox className="h-4 w-52 md:w-64 mx-auto mt-3" />
+        </div>
+      </div>
+
+      {/* TITLE */}
+      <div className="mt-20 w-full max-w-6xl">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 w-full flex justify-center">
+          <SkeletonBox className="h-6 w-32" />
+        </div>
+
+        {/* BRAND GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 px-4">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="relative overflow-hidden shadow-lg bg-white"
+            >
+              {/* Image */}
+              <SkeletonBox className="w-full h-[420px] md:h-[500px] rounded-none" />
+
+              {/* Overlay brand text */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <SkeletonBox className="h-10 w-40 bg-white/30 rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HomeProductsSkeleton = () => {
+  return (
+    <div className="flex flex-col items-center mt-24 mb-24 px-4 w-full">
+      {/* HEADER */}
+      <div className="text-center">
+        <SkeletonBox className="h-5 w-52 mx-auto" />
+        <SkeletonBox className="h-4 w-64 mx-auto mt-3" />
+      </div>
+
+      {/* SECTION TITLE */}
+      <div className="mt-8 text-center">
+        <SkeletonBox className="h-5 w-48 mx-auto" />
+      </div>
+
+      {/* PRODUCT GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-4 gap-x-4 sm:gap-6 lg:gap-8 px-4 sm:px-6 md:px-12 lg:px-20 mt-12 w-full max-w-7xl">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="space-y-3">
+            {/* Product image */}
+            <SkeletonBox className="w-full aspect-[3/4] rounded-md" />
+
+            {/* Product name */}
+            <SkeletonBox className="h-4 w-3/4" />
+
+            {/* Subtitle / brand */}
+            <SkeletonBox className="h-3 w-1/2" />
+
+            {/* Price */}
+            <div className="flex gap-2">
+              <SkeletonBox className="h-4 w-20" />
+              <SkeletonBox className="h-4 w-14" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* LOAD MORE BUTTON */}
+      <SkeletonBox className="h-10 w-36 rounded mt-12" />
+    </div>
+  );
+};
+
+const DefaultSkeleton = () => (
+  <div className="space-y-3">
+    <SkeletonBox className="h-6 w-1/3" />
+    <SkeletonBox className="h-4 w-full" />
+    <SkeletonBox className="h-4 w-5/6" />
+  </div>
+);
 
 export default Loading;

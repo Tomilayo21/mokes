@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Loading from "@/components/Loading";
 
 const FeaturedProduct = () => {
   const [brands, setBrands] = useState([]);
@@ -52,6 +53,8 @@ const FeaturedProduct = () => {
     fetchTopBrands();
   }, []);
 
+  // if (loading) return <Loading type="brand" />;
+
   return (
     <div className="flex flex-col mt-24 items-center">
       {/* HEADER */}
@@ -81,7 +84,7 @@ const FeaturedProduct = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 px-4">
           {loading ? (
             <p className="text-center col-span-2 text-gray-500">
-              Loading brands...
+              
             </p>
           ) : (
             brands.map((brand, i) => (

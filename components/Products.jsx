@@ -6,6 +6,8 @@ import useSWR from "swr";
 import ProductCard from "./ProductCard";
 import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/Loading";
+
 
 const fetcher = (url) => fetch(url).then(res => res.json());
 
@@ -17,6 +19,10 @@ const Products = () => {
 
   const [visibleCount, setVisibleCount] = useState(10);
   
+  // if (isLoading) {
+  //   return <Loading type="homeProducts" />;
+  // }
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
