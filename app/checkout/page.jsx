@@ -102,77 +102,72 @@ const pickupLocations = [
   const [showMobileSummary, setShowMobileSummary] = useState(false);
   const router = useRouter();
 
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const loadCheckout = async () => {
-    setLoadingCheckout(true);
-    setCheckoutError(false);
+    const loadCheckout = async () => {
+      setLoadingCheckout(true);
+      setCheckoutError(false);
 
-    try {
-      let data = null;
+      try {
+        let data = null;
 
-      // 1. PRIORITY: sessionStorage (MOST RELIABLE FOR REFRESH)
-      if (typeof window !== "undefined") {
-        const stored = sessionStorage.getItem("checkoutData");
-        if (stored) {
-          data = JSON.parse(stored);
+        // 1. SESSION STORAGE FIRST (mobile fix)
+        if (typeof window !== "undefined") {
+          const stored = sessionStorage.getItem("checkoutData");
+          if (stored) {
+            data = JSON.parse(stored);
+          }
         }
-      }
 
-      // 2. FALLBACK: API ONLY IF NO STORAGE
-      if (!data) {
-        try {
+        // 2. API FALLBACK (only if needed)
+        if (!data) {
           const res = await axios.get("/api/cart", {
             withCredentials: true,
           });
 
-          const cart = res.data;
+          const rawCartItems = res.data?.cartItems || {};
+          const items = Object.values(rawCartItems);
 
-          if (cart?.items?.length) {
-            const subtotal = cart.items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0
-            );
-
-            data = {
-              cartItems: cart.items,
-              subtotal,
-              total: subtotal,
-              currency: "₦",
-            };
-
-            // store it for refresh survival
-            sessionStorage.setItem("checkoutData", JSON.stringify(data));
+          if (!items.length) {
+            setCheckoutError(true);
+            setCheckoutData(null);
+            return;
           }
-        } catch (err) {
-          console.error("Cart API failed:", err);
+
+          const subtotal = items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          );
+
+          data = {
+            cartItems: rawCartItems,
+            items,
+            subtotal,
+            total: subtotal,
+            currency: "₦",
+          };
+
+          sessionStorage.setItem("checkoutData", JSON.stringify(data));
         }
+
+        if (!isMounted) return;
+
+        setCheckoutData(data);
+      } catch (err) {
+        console.error("Checkout load failed:", err);
+        if (isMounted) setCheckoutError(true);
+      } finally {
+        if (isMounted) setLoadingCheckout(false);
       }
+    };
 
-      if (!isMounted) return;
+    loadCheckout();
 
-      if (!data) {
-        setCheckoutError(true);
-        setCheckoutData(null);
-        return;
-      }
-
-      setCheckoutData(data);
-    } catch (err) {
-      console.error("Checkout load failed:", err);
-      if (isMounted) setCheckoutError(true);
-    } finally {
-      if (isMounted) setLoadingCheckout(false);
-    }
-  };
-
-  loadCheckout();
-
-  return () => {
-    isMounted = false;
-  };
-}, []);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAddresses = async () => {

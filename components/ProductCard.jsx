@@ -122,26 +122,26 @@ const ProductCard = ({ product, currency }) => {
   };
 
   // ------------------ Navigation ------------------
-const handleCardClick = () => {
-  let targetRoute;
+  const handleCardClick = () => {
+    let targetRoute;
 
-  const collectionPath = pathname.split("/products")[0];
-  const isCollectionsRoute = pathname.startsWith("/collections/");
-  const isAllCollection =
-    collectionPath === "/collections/all" ||
-    pathname === "/collections/all";
+    const collectionPath = pathname.split("/products")[0];
+    const isCollectionsRoute = pathname.startsWith("/collections/");
+    const isAllCollection =
+      collectionPath === "/collections/all" ||
+      pathname === "/collections/all";
 
-  if (isCollectionsRoute && !isAllCollection) {
-    targetRoute =
-      `${collectionPath}/products/${product.slug}` +
-      `?from=${encodeURIComponent(collectionPath)}`;
-  } else {
-    targetRoute = `/collection/${product.slug}`;
-  }
+    if (isCollectionsRoute && !isAllCollection) {
+      targetRoute =
+        `${collectionPath}/products/${product.slug}` +
+        `?from=${encodeURIComponent(collectionPath)}`;
+    } else {
+      targetRoute = `/collection/${product.slug}`;
+    }
 
-  router.push(targetRoute);
-  scrollTo(0, 0);
-};
+    router.push(targetRoute);
+    scrollTo(0, 0);
+  };
 
   const toTitleCase = (str = "") => {
     return str
