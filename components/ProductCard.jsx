@@ -125,21 +125,18 @@ const ProductCard = ({ product, currency }) => {
 const handleCardClick = () => {
   let targetRoute;
 
-  // Special case: user is on /collections/all
-  if (pathname === "/collections/all") {
-    targetRoute = `/collection/${product.slug}`;
-  } 
-  // Already inside another collection route
-  else if (pathname.startsWith("/collections/")) {
-    const collectionPath = pathname.split("/products")[0];
+  const collectionPath = pathname.split("/products")[0];
+  const isCollectionsRoute = pathname.startsWith("/collections/");
+  const isAllCollection =
+    collectionPath === "/collections/all" ||
+    pathname === "/collections/all";
 
+  if (isCollectionsRoute && !isAllCollection) {
     targetRoute =
       `${collectionPath}/products/${product.slug}` +
       `?from=${encodeURIComponent(collectionPath)}`;
-  } 
-  // Fallback (non-collection routes)
-  else {
-    targetRoute = `/collections/all/products/${product.slug}`;
+  } else {
+    targetRoute = `/collection/${product.slug}`;
   }
 
   router.push(targetRoute);
