@@ -374,7 +374,7 @@ const { slug, productsslug } = useParams();
     );
   }
 
-  if (!productData) return <Loading />;
+  if (!productData) return <Loading type="product" />;
 
   return (
     <>

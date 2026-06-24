@@ -199,18 +199,7 @@ const AllProducts = () => {
   };
 
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        {/* <ProductSlider /> */}
-        <div className="w-full flex justify-center items-center h-96 text-lg text-gray-600">
-          Please wait...
-        </div>
-        <Footer />
-      </>
-    );
-  }
+  if (!productData) return <Loading type="product" />;
 
   return (
     <>
