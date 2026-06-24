@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 
 const FeaturedProduct = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const fetchTopBrands = async () => {
     try {
@@ -53,6 +55,12 @@ const FeaturedProduct = () => {
     fetchTopBrands();
   }, []);
 
+  const handleBrandClick = (brandName) => {
+    router.push(
+      `/collections/all?brand=${encodeURIComponent(brandName)}`
+    );
+  };
+
   // if (loading) return <Loading type="brand" />;
 
   return (
@@ -90,7 +98,8 @@ const FeaturedProduct = () => {
             brands.map((brand, i) => (
               <div
                 key={i}
-                className="relative group overflow-hidden shadow-lg bg-white"
+                onClick={() => handleBrandClick(brand.name)}
+                className="relative group overflow-hidden shadow-lg bg-white cursor-pointer"
               >
                 <Image
                   src={brand.image}

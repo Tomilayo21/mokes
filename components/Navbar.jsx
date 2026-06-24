@@ -266,12 +266,8 @@ export default function Navbar() {
                 <div className="relative static" ref={megaMenuRef}>
                     <nav className="flex items-center gap-8 text-sm uppercase tracking-widest">
 
-                        <Link href="/shop" className="hover:text-gray-800 text-black">
+                        <Link href="/collections/all" className="hover:text-gray-800 text-black">
                         Shop
-                        </Link>
-
-                        <Link href="/new-arrivals" className="hover:text-gray-800 text-black">
-                        New Arrivals
                         </Link>
 
                         {/* TRIGGER ITEMS */}
@@ -422,9 +418,8 @@ export default function Navbar() {
 
                     <Link href="/" className="block py-3">Home</Link>
                     <Link href="/about" className="block py-3">About Us</Link>
-                    <Link href="/shop" className="block py-3">Shop</Link>
-                    <Link href="/new-arrivals" className="block py-3">New Arrivals</Link>
-
+                    <Link href="/collections/all" className="block py-3">Shop</Link>
+                
                     {(menuData[genderTab] || []).map((subcategory) => (
                         <Link
                         key={subcategory}

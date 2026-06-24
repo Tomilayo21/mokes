@@ -77,10 +77,16 @@ const AllProducts = () => {
     let filtered = Array.isArray(products) ? [...products] : [];
 
     if (type) filtered = filtered.filter((p) => p.type === type);
-    if (brand)
-      filtered = filtered.filter(
-        (p) => p.brand?.toLowerCase() === brand.toLowerCase()
-      );
+    if (brand) {
+      filtered = filtered.filter((p) => {
+        const productBrand =
+          typeof p.brand === "string"
+            ? p.brand
+            : p.brand?.name;
+
+        return productBrand?.toLowerCase() === brand.toLowerCase();
+      });
+    }
 
     // ✅ unified filter (category + subcategory + color + name)
     if (category) {

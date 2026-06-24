@@ -103,13 +103,41 @@ const pickupLocations = [
   const router = useRouter();
 
   useEffect(() => {
-    const data = sessionStorage.getItem("checkoutData");
+    const loadCheckout = async () => {
+      try {
+        const stored = sessionStorage.getItem("checkoutData");
 
-    console.log("checkoutData from sessionStorage:", data);
+        if (stored) {
+          setCheckoutData(JSON.parse(stored));
+          return;
+        }
 
-    if (data) {
-      setCheckoutData(JSON.parse(data));
-    }
+        const res = await axios.get("/api/cart");
+        const cart = res.data;
+
+        if (!cart?.items?.length) {
+          setCheckoutData(null);
+          return;
+        }
+
+        const subtotal = cart.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+
+        setCheckoutData({
+          cartItems: cart.items,
+          subtotal,
+          total: subtotal,
+          currency: "₦",
+        });
+      } catch (error) {
+        console.error(error);
+        setCheckoutData(null);
+      }
+    };
+
+    loadCheckout();
   }, []);
 
   useEffect(() => {
@@ -348,40 +376,6 @@ const pickupLocations = [
       setTempPickup(selectedPickup);
     }
   }, [showPickupModal]);
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem("checkoutData");
-
-    if (stored) {
-      setCheckoutData(JSON.parse(stored));
-      return;
-    }
-
-    // fallback: build from cart API or context
-    const buildFromCart = async () => {
-      try {
-        const res = await axios.get("/api/cart"); // or reuse AppContext API
-        const cart = res.data;
-
-        if (!cart || !cart.items) return;
-
-        const subtotal = cart.items.reduce((sum, item) => {
-          return sum + item.price * item.quantity;
-        }, 0);
-
-        setCheckoutData({
-          cartItems: cart.items,
-          subtotal,
-          total: subtotal,
-          currency: "₦",
-        });
-      } catch (err) {
-        console.log("No cart fallback available");
-      }
-    };
-
-    buildFromCart();
-  }, []);
 
   const enrichedSelectedPickup = (() => {
     if (!selectedPickup) return null;
