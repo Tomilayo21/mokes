@@ -14,6 +14,7 @@ import PaymentSection from "@/components/PaymentSection";
 
 export default function CheckoutPage() {
   const [checkoutData, setCheckoutData] = useState(null);
+  const [loadingCheckout, setLoadingCheckout] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [userAddresses, setUserAddresses] = useState([]);
   const [showAddressDetails, setShowAddressDetails] = useState(false);
@@ -105,35 +106,43 @@ const pickupLocations = [
   useEffect(() => {
     const loadCheckout = async () => {
       try {
-        const stored = sessionStorage.getItem("checkoutData");
+        setLoadingCheckout(true);
 
-        if (stored) {
-          setCheckoutData(JSON.parse(stored));
-          return;
-        }
+        let data = null;
 
+        // 1. Try API FIRST (more reliable than sessionStorage)
         const res = await axios.get("/api/cart");
         const cart = res.data;
 
-        if (!cart?.items?.length) {
-          setCheckoutData(null);
-          return;
+        if (cart?.items?.length) {
+          const subtotal = cart.items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          );
+
+          data = {
+            cartItems: cart.items,
+            subtotal,
+            total: subtotal,
+            currency: "₦",
+          };
         }
 
-        const subtotal = cart.items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
+        // 2. Fallback to sessionStorage (optional cache)
+        const stored = typeof window !== "undefined"
+          ? sessionStorage.getItem("checkoutData")
+          : null;
 
-        setCheckoutData({
-          cartItems: cart.items,
-          subtotal,
-          total: subtotal,
-          currency: "₦",
-        });
-      } catch (error) {
-        console.error(error);
+        if (!data && stored) {
+          data = JSON.parse(stored);
+        }
+
+        setCheckoutData(data);
+      } catch (err) {
+        console.error(err);
         setCheckoutData(null);
+      } finally {
+        setLoadingCheckout(false);
       }
     };
 
@@ -215,7 +224,6 @@ const pickupLocations = [
       return distance <= radiusKm;
     });
   };
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -636,7 +644,11 @@ const pickupLocations = [
 
   const distance = enrichedSelectedPickup?.distance;
   
-  if (checkoutData === null) {
+  if (loadingCheckout) {
+    return <div className="mt-32 text-center">Loading checkout...</div>;
+  }
+  
+  if (!checkoutData) {
     return (
       <div className="mt-32 text-black text-center">
         No checkout data found. Please go back to cart and try again.
