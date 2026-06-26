@@ -1,10 +1,10 @@
 //Both Paystack and Stripe
-import { inngest } from "@/config/inngest";
 import Clothing from "@/models/Clothing";
 import User from "@/models/User";
 import MokesOrder from "@/models/MokesOrder";
 import connectDB from "@/config/db";
-import { getAuth } from "@clerk/nextjs/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -34,8 +34,9 @@ export async function POST(request) {
     } 
     // 🔹 Paystack + client flow
     else {
-      const { userId: authUserId } = getAuth(request);
-      if (!authUserId) {
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user?.id) {
         return NextResponse.json(
           { success: false, message: "Unauthorized" },
           { status: 401 }
@@ -45,10 +46,11 @@ export async function POST(request) {
       const body = await request.json();
       console.log("[CLIENT_ORDER_BODY]", body);
 
-      userId = authUserId;
+      userId = session.user.id;
       address = body.address;
       items = body.items;
-      paymentMethod = body.paymentMethod || (source === "paystack" ? "Paystack" : "Manual");
+      paymentMethod =
+        body.paymentMethod || (source === "paystack" ? "Paystack" : "Manual");
     }
 
     // 🔹 Normalize items: convert { productId: qty } → array
@@ -102,9 +104,6 @@ export async function POST(request) {
     });
 
     console.log("[ORDER_CREATE_SUCCESS] Order ID:", order._id);
-
-    // 🔹 Fire Inngest event for async handling
-    await inngest.send({ name: "order/created", data: order.toObject() });
 
     // 🔹 Clear cart
     const user = await User.findById(userId);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import connectDB from "@/config/db";
-import Order from "@/models/Order";
+import MokesOrder from "@/models/MokesOrder";
 
 export async function POST(req) {
   try {
@@ -28,7 +28,7 @@ export async function POST(req) {
       const data = event.data;
 
       // Find order by referenceId (schema field)
-      const order = await Order.findOne({ referenceId: data.reference });
+      const order = await MokesOrder.findOne({ referenceId: data.reference });
 
       if (!order) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
