@@ -427,7 +427,7 @@ export default function AvatarMenu() {
             {mounted && user ? (
               <>
                 <Link
-                  href="/my-orders"
+                  href="\my-orders"
                   onClick={() => setMobileMenuOpen(false)}
                   className="gap-3 px-5 py-3 text-black hover:bg-gray-50 dark:text-black dark:hover:text-black dark:hover:bg-white transition font-normal cursor-pointer"
                 >

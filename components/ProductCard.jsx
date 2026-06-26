@@ -202,7 +202,7 @@ const ProductCard = ({ product, currency }) => {
           {Number(product.offerPrice).toLocaleString()}
       </p>
 
-      {availableSizes.length > 0 ? (
+      {/* {availableSizes.length > 0 ? (
         <div className="flex flex-wrap gap-2 mt-2">
           {availableSizes.map((item) => (
             <button
@@ -213,7 +213,7 @@ const ProductCard = ({ product, currency }) => {
             </button>
           ))}
         </div>
-      ) : null}
+      ) : null} */}
       {/* ✅ CENTER BUTTON WRAPPER */}
       {/* <div className="flex justify-center w-full mt-4">
           <button

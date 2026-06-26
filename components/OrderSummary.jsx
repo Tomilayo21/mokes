@@ -98,26 +98,6 @@ const OrderSummary = () => {
   const [showBreakdown, setShowBreakdown] = useState(false);
 
 
-  const handleProceedToCheckout = () => {
-    if (!selectedAddress) {
-      toast.error("Select address");
-      return;
-    }
-
-    sessionStorage.setItem(
-      "checkoutData",
-      JSON.stringify({
-        address: selectedAddress,
-        paymentMethod: selectedMethod,
-        shipping: selectedRate,
-        total,
-        cartItems,
-      })
-    );
-
-    router.push("/checkout");
-  };
-
   const fetchRates = async () => {
     if (!selectedAddress) return toast.error("Select address first");
     setLoadingRates(true); setRateError("");
@@ -153,25 +133,6 @@ const OrderSummary = () => {
         Order Summary
       </h2>
       <hr className="hidden md:block border-gray-200 dark:border-gray-700 my-4 md:my-5" />
-
-      <div className="space-y-4 md:space-y-6">
-        
-        {/* Payment button */}
-        {/* // <button onClick={handlePayment} disabled={processing || getCartCount() === 0} className={`w-full py-3 mt-4 md:mt-5 rounded-lg text-white font-medium transition ${processing || getCartCount() === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700 shadow-md"}`}>
-        //   {processing ? "Processing..." : `Pay ${currency}${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-        // </button> */}
-
-        {/* <button
-          onClick={handleProceedToCheckout}
-          disabled={processing || getCartCount() === 0}
-          className={`w-full py-3 rounded-lg text-white font-medium ${
-            processing ? "bg-gray-400" : "bg-orange-600 hover:bg-orange-700"
-          }`}
-        >
-          Proceed to Checkout
-        </button>
-                 */}
-      </div>
 
       {/* ORDER SUMMARY STYLE BREAKDOWN */}
       <div className="p-4 bg-white space-y-4">

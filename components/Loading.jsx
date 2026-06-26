@@ -21,6 +21,8 @@ const Loading = ({ type = "default" }) => {
         return <BrandSkeleton />;
       case "homeProducts":
         return <HomeProductsSkeleton />;
+      case "orders":
+        return <OrdersSkeleton />;
       default:
         return <DefaultSkeleton />;
     }
@@ -451,6 +453,98 @@ const HomeProductsSkeleton = () => {
 
       {/* LOAD MORE BUTTON */}
       <SkeletonBox className="h-10 w-36 rounded mt-12" />
+    </div>
+  );
+};
+
+const OrdersSkeleton = () => {
+  return (
+    <div className="w-full pt-12 px-6 md:px-16 lg:px-32 space-y-8">
+
+      {/* PAGE HEADER */}
+      <div className="text-center space-y-2">
+        <SkeletonBox className="h-7 w-48 mx-auto" />
+        <SkeletonBox className="h-4 w-72 mx-auto" />
+      </div>
+
+      {/* ORDER CARDS */}
+      <div className="space-y-6">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="border rounded-sm bg-white overflow-hidden"
+          >
+
+            {/* HEADER */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-5 border-b">
+              <div className="space-y-2">
+                <SkeletonBox className="h-3 w-40" />
+                <SkeletonBox className="h-3 w-56" />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <SkeletonBox className="h-6 w-24 rounded-full" />
+                <SkeletonBox className="h-6 w-20" />
+              </div>
+            </div>
+
+            {/* PRODUCT STRIP */}
+            <div className="p-5">
+              <div className="flex gap-3 overflow-hidden">
+                {[...Array(4)].map((_, j) => (
+                  <SkeletonBox
+                    key={j}
+                    className="w-16 h-16 rounded-lg"
+                  />
+                ))}
+
+                <SkeletonBox className="w-16 h-16 rounded-lg" />
+              </div>
+
+              <SkeletonBox className="h-4 w-40 mt-4" />
+            </div>
+
+            {/* DETAILS GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-5 pb-5">
+              <div className="space-y-2">
+                <SkeletonBox className="h-4 w-24" />
+                <SkeletonBox className="h-3 w-full" />
+                <SkeletonBox className="h-3 w-3/4" />
+              </div>
+
+              <div className="space-y-2">
+                <SkeletonBox className="h-4 w-24" />
+                <SkeletonBox className="h-3 w-full" />
+                <SkeletonBox className="h-3 w-2/3" />
+              </div>
+
+              <div className="space-y-2">
+                <SkeletonBox className="h-4 w-24" />
+                <SkeletonBox className="h-3 w-full" />
+                <SkeletonBox className="h-3 w-1/2" />
+              </div>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex gap-3 px-5 pb-5 pt-3 border-t bg-gray-50">
+              <SkeletonBox className="h-9 w-40" />
+              <SkeletonBox className="h-9 w-32" />
+              <SkeletonBox className="h-9 w-36" />
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-center gap-2 pt-4">
+        <SkeletonBox className="h-9 w-20" />
+        <SkeletonBox className="h-9 w-9" />
+        <SkeletonBox className="h-9 w-9" />
+        <SkeletonBox className="h-9 w-9" />
+        <SkeletonBox className="h-9 w-20" />
+      </div>
+
     </div>
   );
 };

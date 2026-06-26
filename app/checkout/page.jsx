@@ -575,7 +575,11 @@ const pickupLocations = [
 
       // 🔹 STRIPE
       if (method === "stripe") {
-        const { data } = await axios.post("/api/checkout/stripe", payload);
+        const { data } = await axios.post("/api/checkout/stripe", {
+          items: checkoutData.cartItems,
+          address: selectedAddress,
+          deliveryMethod,
+        });
 
         if (!data?.url) throw new Error("Stripe URL missing");
 
@@ -594,8 +598,18 @@ const pickupLocations = [
 
       // 🔹 PAYSTACK
       if (method === "paystack") {
-        const { data } = await axios.post("/api/checkout/paystack", payload);
-
+        const flattenItems = Object.entries(checkoutData.cartItems).reduce(
+        (acc, [productId, sizes]) => {
+          const totalQty = Object.values(sizes).reduce((a, b) => a + b, 0);
+          acc[productId] = totalQty;
+          return acc;
+        },
+        {}
+      );
+        const { data } = await axios.post("/api/checkout/paystack", {
+        items: flattenItems,
+        address: selectedAddress,
+      });
         if (!data?.authorizationUrl) throw new Error("Paystack init failed");
 
         sessionStorage.setItem(
@@ -664,13 +678,13 @@ const pickupLocations = [
 
   const distance = enrichedSelectedPickup?.distance;
   
-if (loadingCheckout) {
-  return (
-    <div className="mt-32 text-center text-black">
-      Loading checkout...
-    </div>
-  );
-}
+  if (loadingCheckout) {
+    return (
+      <div className="mt-32 text-center text-black">
+        Loading checkout...
+      </div>
+    );
+  }
 
 if (checkoutError || !checkoutData) {
   return (

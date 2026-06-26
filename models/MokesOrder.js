@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 function generateOrderId() {
-  const prefix = "CUS-";
+  const prefix = "MOKÉS-";
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const randomString = [...Array(12)]
     .map(() => chars.charAt(Math.floor(Math.random() * chars.length)))
@@ -9,7 +9,7 @@ function generateOrderId() {
   return prefix + randomString;
 }
 
-const orderSchema = new mongoose.Schema({
+const mokesOrderSchema = new mongoose.Schema({
   orderId: {
     type: String,
     unique: true,
@@ -19,7 +19,7 @@ const orderSchema = new mongoose.Schema({
 
   items: [
     {
-      product: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'product' },
+      product: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'clothing' },
       quantity: { type: Number, required: true, min: 1 },
       price: { type: Number, required: true },
     },
@@ -73,5 +73,5 @@ const orderSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
-export default Order;
+const MokesOrder = mongoose.models.MokesOrder || mongoose.model('MokesOrder', mokesOrderSchema);
+export default MokesOrder;
