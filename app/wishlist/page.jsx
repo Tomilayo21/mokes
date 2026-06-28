@@ -57,11 +57,57 @@ export default function FavoritesPage() {
   const removeFavorite = async (productId) => {
     const previousFavorites = favorites;
 
-    try {
-      mutate(
-        favorites.filter(
-          (f) => f.productId?._id !== productId
+    // helper toast
+    const showToast = (message, type = "success") => {
+      toast.custom(
+        (t) => (
+          <div
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
+              t.visible
+                ? "animate-toast-bounce opacity-100"
+                : "translate-x-10 opacity-0"
+            }`}
+          >
+            <p
+              className={`flex-1 text-sm font-medium ${
+                type === "success" ? "text-green-800" : "text-red-800"
+              }`}
+            >
+              {message}
+            </p>
+
+            {/* Close */}
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 cursor-pointer hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+              <div
+                className={`h-full ${
+                  type === "success" ? "bg-[var(--sage)]" : "bg-red-500"
+                }`}
+                style={{
+                  animation: `toast-progress ${t.duration}ms linear forwards`,
+                }}
+              />
+            </div>
+          </div>
         ),
+        {
+          duration: 4000,
+          position: "top-right",
+        }
+      );
+    };
+
+    try {
+      // optimistic update
+      mutate(
+        favorites.filter((f) => f.productId?._id !== productId),
         false
       );
 
@@ -77,10 +123,10 @@ export default function FavoritesPage() {
 
       await mutate();
 
-      toast.success("Updated wishlist");
+      showToast("Removed from wishlist", "success");
     } catch (err) {
       mutate(previousFavorites, false);
-      toast.error("Failed to update");
+      showToast("Failed to update wishlist", "error");
     }
   };
 

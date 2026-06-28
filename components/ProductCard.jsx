@@ -61,18 +61,48 @@ const ProductCard = ({ product, currency }) => {
   // ------------------ Toggle Favorite ------------------
   const toggleFavorite = async (e) => {
     e.stopPropagation();
-    if (!user) {
+
+    // helper toast (reusable inside this function)
+    const showToast = (message, type = "success", icon = null) => {
       toast.custom(
         (t) => (
           <div
-            className={`max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 border-l-4 border-red-500 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
+              t.visible
+                ? "animate-toast-bounce opacity-100"
+                : "translate-x-10 opacity-0"
             }`}
           >
-            <AlertTriangle className="text-red-500 shrink-0" size={20} />
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Please login to add items to wishlist
+            {/* Optional icon */}
+            {icon && <div className="shrink-0">{icon}</div>}
+
+            <p
+              className={`flex-1 text-sm font-medium ${
+                type === "success" ? "text-zinc-800" : "text-red-800"
+              }`}
+            >
+              {message}
             </p>
+
+            {/* Close */}
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 cursor-pointer hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            {/* Progress bar */}
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+              <div
+                className={`h-full ${
+                  type === "success" ? "bg-[var(--sage)]" : "bg-red-500"
+                }`}
+                style={{
+                  animation: `toast-progress ${t.duration}ms linear forwards`,
+                }}
+              />
+            </div>
           </div>
         ),
         {
@@ -80,11 +110,21 @@ const ProductCard = ({ product, currency }) => {
           position: "top-right",
         }
       );
+    };
+
+    // If not logged in
+    if (!user) {
+      showToast(
+        "Please login to add items to wishlist",
+        "error",
+        <AlertTriangle className="text-red-500" size={20} />
+      );
       return;
     }
 
     try {
       setLoading(true);
+
       const res = await fetch("/api/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,28 +134,17 @@ const ProductCard = ({ product, currency }) => {
         }),
       });
 
-      if (res.ok) {
-        setIsFavorite(!isFavorite);
+      if (!res.ok) throw new Error();
 
-        toast.custom(
-          (t) => (
-            <div
-              className={`${
-                t.visible ? "animate-enter" : "animate-leave"
-              } max-w-md w-full bg-gray-50 dark:bg-gray-50 shadow-sm rounded-sm pointer-events-auto flex items-center gap-2 p-4`}
-            >
-              <p className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-800">
-                {!isFavorite ? "Added to wishlist" : "Removed from wishlist"}
-              </p>
-            </div>
-          ),
-          { duration: 2000 }
-        );
-      } else {
-        toast.error("Failed to update wishlist");
-      }
+      const newState = !isFavorite;
+      setIsFavorite(newState);
+
+      showToast(
+        newState ? "Added to wishlist" : "Removed from wishlist",
+        "success"
+      );
     } catch (error) {
-      toast.error("An error occurred");
+      showToast("Failed to update wishlist", "error");
     } finally {
       setLoading(false);
     }
