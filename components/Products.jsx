@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import useSWR from "swr";
 import ProductCard from "./ProductCard";
-import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 
@@ -32,7 +30,7 @@ const Products = () => {
   const visibleProducts = products.slice(0, visibleCount);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 10);
+    setVisibleCount((prev) => prev + 8);
   };
 
   return (
@@ -71,7 +69,7 @@ const Products = () => {
             Load more
           </button>
         ) : (
-          products.length > 10 && (
+          products.length > 8 && (
             <button
               onClick={() => router.push('/collections')}
               className="px-12 py-2.5 mt-12 cursor-pointer border rounded text-gray-500/70 hover:bg-slate-50/90 transition"

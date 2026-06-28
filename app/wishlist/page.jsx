@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Footer from "@/components/Footer";
-import { Trash2, PackageX } from "lucide-react";
+import { Trash2, PackageX, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-
+import Loading from "@/components/Loading";
 
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
@@ -87,121 +87,136 @@ export default function FavoritesPage() {
   };
 
   if (status === "loading" || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading wishlist...</p>
-      </div>
-    );
+    return <Loading type="wishlist" />;
   }
   /* -------- UI -------- */
   return (
     <>
-      <div className="p-4 flex flex-col items-center mt-8 bg-white text-black dark:bg-white dark:text-white min-h-screen px-4 md:px-16">
-        
+      <div className="min-h-screen mt-8 px-4 md:px-10 py-10">
+
         {/* Header */}
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-normal text-gray-900 tracking-tight flex items-center gap-2">
+        <div className="max-w-7xl mx-auto mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border border-zinc-200 mb-5">
+            <Heart className="w-4 h-4 text-[var(--sage)] fill-[var(--sage)]" />
+            <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">
+              Saved Items
+            </span>
+          </div>
+
+          <h1 className="text-3xl md:text-5xl font-light tracking-tight text-zinc-900">
             Wishlist
           </h1>
-          <p className="text-sm text-gray-800 dark:text-gray-800 mt-2">
-            Save the products you love and access them anytime.
+
+          <p className="mt-3 text-sm md:text-base text-zinc-500 max-w-xl mx-auto">
+            Save the products you love and revisit them anytime.
           </p>
         </div>
 
         {/* Loading */}
         {(status === "loading" || isLoading) && (
-          <p className="text-gray-500">
-            Loading wishlist...
-          </p>
-        )}
-        {/* Empty State */}
-        {isReady && favorites.length === 0 && (
-            <div className="flex flex-col items-center justify-center mt-16 text-center">
-              <img src="document.png" alt="favorites" className="w-32 h-32 opacity-70 mb-4" />
-              <p className="text-lg font-medium text-gray-800 dark:text-gray-800">
-                Your favorites list is empty
-              </p>
-              <p className="text-sm text-gray-800 dark:text-gray-800 mt-1">
-                Browse products and tap the heart to save them here.
-              </p>
-              <button
-                onClick={() => router.push("/collections/all")}
-                className="mt-6 px-6 py-3 rounded-sm shadow-sm border-t border-zinc-300 
-                cursor-pointer bg-[var(--sage)] text-white 
-                hover:bg-zinc-500 transition uppercase transition"
-              >
-                Browse Collections 
-              </button>
-            </div>
+          <Loading type="wishlist" />
         )}
 
-        {/* Favorites Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
+        {/* Empty State */}
+        {isReady && favorites.length === 0 && (
+          <div className="max-w-xl mx-auto bg-white rounded-3xl border border-zinc-200 shadow-sm p-12 text-center">
+            <img
+              src="document.png"
+              alt="favorites"
+              className="w-28 h-28 mx-auto opacity-70"
+            />
+
+            <h2 className="mt-6 text-2xl font-medium text-zinc-900">
+              Your wishlist is empty
+            </h2>
+
+            <p className="mt-3 text-zinc-500">
+              Browse products and tap the heart icon to save your favorite pieces.
+            </p>
+
+            <button
+              onClick={() => router.push("/collections/all")}
+              className="mt-8 px-8 py-3 rounded-xl bg-[var(--sage)] text-white shadow-md hover:scale-[1.02] hover:opacity-90 transition"
+            >
+              Browse Collection
+            </button>
+          </div>
+        )}
+
+        {/* Grid */}
+        <div
+          className="grid gap-7 w-full"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          }}
+        >
           {favorites.map(({ _id, productId }) => {
             const isDeleted = !productId;
-            // const rating = productId ? ratingsMap[productId._id] || { avg: 0, count: 0 } : null;
 
             return (
               <div
                 key={_id}
-                className="flex flex-col bg-white dark:bg-white transition hover:-translate-y-1 duration-200"
+                className="group rounded-sm bg-white border border-zinc-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
-                {/* Product or Deleted placeholder */}
                 {isDeleted ? (
-                  <div className="block">
-                    <div className="w-full h-48 flex items-center justify-center bg-gray-100 dark:bg-neutral-800 rounded-t-2xl">
-                      <PackageX className="w-12 h-12 text-gray-400" />
+                  <>
+                    <div className="h-[360px] bg-zinc-100 flex items-center justify-center">
+                      <PackageX className="w-14 h-14 text-zinc-400" />
                     </div>
-                    <div className="p-4">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Deleted product
+
+                    <div className="p-5">
+                      <h2 className="text-lg font-medium text-zinc-900">
+                        Deleted Product
                       </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        This product is no longer available.
+
+                      <p className="text-sm text-zinc-500 mt-2">
+                        This item is no longer available.
                       </p>
-                      <p className="text-base font-bold text-gray-400 mt-2">—</p>
                     </div>
-                  </div>
+                  </>
                 ) : (
-                    <Link
+                  <Link
                     href={`/collection/${productId.slug}`}
-                    className="group flex flex-col w-full bg-gray-50 overflow-hidden transition-all hover:scale-[1.02]"
-                    >
-                    {/* Image Section */}
-                    <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-gray-50 flex items-center justify-center overflow-hidden">
-                        <Image
+                    className="block"
+                  >
+                    {/* Image */}
+                    <div className="relative h-[380px] bg-zinc-50 overflow-hidden flex items-center justify-center">
+                      <Image
                         src={productId.image?.[0] || "/placeholder.png"}
                         alt={productId.name}
-                        width={400}
-                        height={400}
-                        className="w-[80%] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                        />
+                        width={420}
+                        height={420}
+                        className="w-[82%] h-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                      />
                     </div>
 
-                    {/* Details Section */}
-                    <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 w-full">
-                        <h3 className="text-lg md:text-xl font-light text-black tracking-wide">
-                        {productId.brand?.toUpperCase()} |{" "}
-                        {toTitleCase(productId.name)} |{" "}
-                        {toTitleCase(productId.color)}
-                        </h3>
+                    {/* Content */}
+                    <div className="p-5">
+                      <p className="text-xs uppercase tracking-[0.18em] text-zinc-400 mb-2">
+                        {productId.brand}
+                      </p>
 
-                        <p className="text-base text-gray-600">
+                      <h3 className="text-lg font-medium text-zinc-900 leading-snug line-clamp-2 min-h-[56px]">
+                        {toTitleCase(productId.name)} · {" "}
+                        {toTitleCase(productId.color)}
+                      </h3>
+
+                      <p className="text-lg font-normal text-zinc-900">
                         {currency}
                         {Number(productId.offerPrice).toLocaleString()}
-                        </p>
+                      </p>
                     </div>
-                    </Link>
+                  </Link>
                 )}
 
-                {/* Actions */}
-                <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-700 px-4 py-3 text-sm">
+                {/* Footer Action */}
+                <div className="border-t border-zinc-100 px-5 py-4">
                   <button
-                    className="flex items-center gap-1 text-red-500 dark:text-red-400 hover:text-red-600 transition"
                     onClick={() => removeFavorite(productId?._id || _id)}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl cursor-pointer border border-red-200 py-3 text-sm font-medium text-red-500 hover:bg-red-50 transition"
                   >
                     <Trash2 className="w-4 h-4" />
-                    {/* Remove */}
+                    Remove
                   </button>
                 </div>
               </div>

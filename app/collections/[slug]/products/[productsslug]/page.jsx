@@ -556,7 +556,7 @@ const { slug, productsslug } = useParams();
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (
-              <section className="mt-8 md:mt-12">
+              <section className="mt-12 md:mt-16">
 
                 {/* Title */}
                 <div className="mb-6 text-center">

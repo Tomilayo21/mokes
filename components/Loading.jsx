@@ -23,6 +23,8 @@ const Loading = ({ type = "default" }) => {
         return <HomeProductsSkeleton />;
       case "orders":
         return <OrdersSkeleton />;
+      case "wishlist":
+        return <WishlistSkeleton />;
       default:
         return <DefaultSkeleton />;
     }
@@ -556,5 +558,53 @@ const DefaultSkeleton = () => (
     <SkeletonBox className="h-4 w-5/6" />
   </div>
 );
+
+const WishlistSkeleton = () => {
+  return (
+    <div className="min-h-screen mt-8 px-4 md:px-10 py-10 w-full">
+      {/* Header Skeleton */}
+      <div className="max-w-7xl mx-auto mb-12 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-zinc-200 mb-5">
+          <SkeletonBox className="h-4 w-4 rounded-full" />
+          <SkeletonBox className="h-3 w-24" />
+        </div>
+
+        <SkeletonBox className="h-10 w-44 mx-auto" />
+        <SkeletonBox className="h-4 w-72 mx-auto mt-4" />
+      </div>
+
+      {/* Cards Skeleton */}
+      <div
+        className="grid gap-7 w-full"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        }}
+      >
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="rounded-sm bg-white border border-zinc-200 overflow-hidden shadow-sm"
+          >
+            {/* Image */}
+            <SkeletonBox className="h-[380px] w-full rounded-none" />
+
+            {/* Content */}
+            <div className="p-5 space-y-3">
+              <SkeletonBox className="h-3 w-20" />
+              <SkeletonBox className="h-5 w-full" />
+              <SkeletonBox className="h-5 w-3/4" />
+              <SkeletonBox className="h-5 w-24 mt-3" />
+            </div>
+
+            {/* Button */}
+            <div className="border-t border-zinc-100 px-5 py-4">
+              <SkeletonBox className="h-11 w-full rounded-xl" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default Loading;

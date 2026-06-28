@@ -152,89 +152,111 @@ const ProductCard = ({ product, currency }) => {
   };
 
   return (
-    <div className="w-full">
-      <div
-        onClick={handleCardClick}
-        onMouseDown={handleLongPressStart}
-        onTouchStart={handleLongPressStart}
-        onMouseUp={handleLongPressEnd}
-        onMouseLeave={handleLongPressEnd}
-        onTouchEnd={handleLongPressEnd}
-        className="group flex flex-col max-w-none w-full cursor-pointer
-            bg-gray-50 dark:bg-gray-50
-            transition-all  hover:scale-[1.02] overflow-hidden"
+      <div className="w-full group cursor-pointer">
+        
+        {/* IMAGE WRAPPER */}
+        <div
+          onClick={handleCardClick}
+          onMouseDown={handleLongPressStart}
+          onTouchStart={handleLongPressStart}
+          onMouseUp={handleLongPressEnd}
+          onMouseLeave={handleLongPressEnd}
+          onTouchEnd={handleLongPressEnd}
+          className="relative w-full aspect-[3/4] bg-white overflow-hidden border border-gray-100"
         >
-        {/* === Image Section === */}
-        <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-gray-50 flex items-center justify-center overflow-hidden">
+          {/* PRODUCT IMAGE */}
           <Image
             src={product?.image?.[0] || "/placeholder.png"}
             alt={product?.name || "Product"}
-            width={400}
-            height={400}
-            className="w-[80%] h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            width={500}
+            height={600}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
 
-          {/* Favorite Button */}
+          {/* soft overlay hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition" />
+
+          {/* Wishlist Button */}
           <button
             onClick={toggleFavorite}
-            className="absolute top-3 right-3 bg-white/90 dark:bg-white/90 p-2 rounded-full border border-black hover:scale-110 transition"
+            className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-2 rounded-full border border-gray-200 shadow-sm hover:scale-110 transition"
             aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart
               size={16}
-              className={isFavorite ? "text-orange-500 fill-orange-500" : "text-gray-500"}
+              className={
+                isFavorite ? "text-[var(--sage)] fill-[var(--sage)]" : "text-gray-500"
+              }
             />
           </button>
+
+          {/* STOCK BADGE (optional but premium feel) */}
+          {product.stock === 0 && (
+            <div className="absolute top-3 left-3 bg-black text-white text-[10px] tracking-widest px-2 py-1 uppercase">
+              Sold Out
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* === Details Section === */}
-      <div className="mt-3 flex flex-col gap-1 px-1 pb-3 text-gray-900 dark:text-white w-full">
+        {/* DETAILS */}
+        <div className="mt-3 px-1 pb-4 space-y-1">
 
-      <h3 className="text-lg md:text-xl font-light text-black tracking-wide">
-        {product.brand?.toUpperCase()} |{" "}
-        {toTitleCase(product.name)} |{" "}
-        {toTitleCase(product.color)}
-      </h3>
+          {/* BRAND + NAME */}
+          <h3 className="text-sm md:text-base font-light tracking-wide text-gray-900 leading-snug">
+            <span className="uppercase tracking-[0.2em] text-xs text-gray-500">
+              {product.brand}
+            </span>
+            {"  "}
+            <span className="text-gray-900">
+              {toTitleCase(product.name)}
+            </span>
+          </h3>
 
-      <p className="text-base text-gray-600">
-          {currency}
-          {Number(product.offerPrice).toLocaleString()}
-      </p>
+          {/* COLOR */}
+          <p className="text-xs text-gray-500">
+            {toTitleCase(product.color)}
+          </p>
 
-      {/* {availableSizes.length > 0 ? (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {availableSizes.map((item) => (
-            <button
-              key={item.size}
-              className="px-3 py-1 border rounded-lg text-sm"
-            >
-              {item.size}
-            </button>
-          ))}
-        </div>
-      ) : null} */}
-      {/* ✅ CENTER BUTTON WRAPPER */}
-      {/* <div className="flex justify-center w-full mt-4">
-          <button
-          onClick={(e) => {
+          {/* PRICE */}
+          <p className="text-sm font-medium text-gray-900 mt-1">
+            {currency}
+            {Number(product.offerPrice).toLocaleString()}
+          </p>
+
+          {/* SIZES */}
+          {/* {availableSizes?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {availableSizes.map((item) => (
+                <span
+                  key={item.size}
+                  className="px-2 py-1 text-[11px] border border-gray-200 text-gray-600 rounded-md"
+                >
+                  {item.size}
+                </span>
+              ))}
+            </div>
+          )} */}
+
+          {/* ADD TO CART */}
+          {/* <button
+            onClick={(e) => {
               e.stopPropagation();
               handleAddToCart();
-          }}
-          disabled={product.stock === 0}
-          className={`w-full py-3 py-4 border flex items-center justify-center text-sm transition-colors
+            }}
+            disabled={product.stock === 0}
+            className={`
+              w-full mt-4 py-3 text-sm tracking-wide border transition
               ${
-              product.stock === 0
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "hover:bg-gray-50 text-black"
-              }`}
+                product.stock === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white hover:bg-black hover:text-white border-gray-300"
+              }
+            `}
           >
-          {product.stock === 0 ? "Sold Out" : "Add to Cart"}
-          </button>
-      </div> */}
-
+            {product.stock === 0 ? "Sold Out" : "Add to Bag"}
+          </button> */}
+        </div>
       </div>
-    </div>
 
   );
 };

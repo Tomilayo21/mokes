@@ -226,7 +226,7 @@ const Cart = () => {
                 hover:bg-zinc-500 transition uppercase
                 px-6 py-3 rounded-sm shadow-md transition"
               >
-                Browse Products
+                Browse Collections
               </button>
             </div>
         ) : (
@@ -582,7 +582,7 @@ const Cart = () => {
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
-            <section className="mt-8 px-4 md:mt-12">
+            <section className="mt-12 px-4 md:mt-16">
 
               {/* Title */}
               <div className="mb-6 text-center">

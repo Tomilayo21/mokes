@@ -21,7 +21,6 @@ export default function SessionTracker() {
       let country = "Unknown";
       let ip = "unknown";
 
-      // 🌍 Get location + IP
       try {
         const res = await fetch("https://ipwho.is/");
         const data = await res.json();
@@ -35,8 +34,10 @@ export default function SessionTracker() {
         console.log("Location fetch failed:", err);
       }
 
-      // 🚀 Send EVERYTHING to backend
-      await fetch("/api/user/sessions", {
+      // 🔥 ADD THIS HERE
+      const savedToken = localStorage.getItem("sessionToken");
+
+      const res = await fetch("/api/user/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,8 +48,16 @@ export default function SessionTracker() {
           city,
           country,
           ip,
+          token: savedToken || null, // 🔥 IMPORTANT
         }),
       });
+
+      const data = await res.json();
+
+      // 🔥 SAVE TOKEN ON FIRST SUCCESS
+      if (data?.token) {
+        localStorage.setItem("sessionToken", data.token);
+      }
     };
 
     trackSession();

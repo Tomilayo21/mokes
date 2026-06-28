@@ -89,29 +89,35 @@ const FeaturedProduct = () => {
          </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 px-4">
           {loading ? (
-            <p className="text-center col-span-2 text-gray-500">
-              
-            </p>
+            Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[420px] md:h-[500px] bg-gray-100 animate-pulse rounded-lg"
+              />
+            ))
           ) : (
             brands.map((brand, i) => (
               <div
                 key={i}
                 onClick={() => handleBrandClick(brand.name)}
-                className="relative group overflow-hidden shadow-lg bg-white cursor-pointer"
+                className="relative group overflow-hidden rounded-xl shadow-sm bg-black/5 cursor-pointer"
               >
                 <Image
                   src={brand.image}
                   alt={brand.name}
                   width={600}
                   height={800}
-                  className="w-full h-[420px] md:h-[500px] object-cover group-hover:scale-105 transition duration-500"
+                  className="w-full h-[380px] md:h-[460px] object-cover group-hover:scale-105 transition duration-500"
                 />
 
+                {/* soft overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
                 {/* BRAND NAME */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <h2 className="text-white text-2xl md:text-3xl font-light uppercase tracking-wide backdrop-blur-sm px-4 py-2">
+                <div className="absolute inset-0 flex items-end justify-center pb-6">
+                  <h2 className="text-white text-xl md:text-2xl font-light uppercase tracking-[0.25em] px-4 py-2">
                     {brand.name}
                   </h2>
                 </div>

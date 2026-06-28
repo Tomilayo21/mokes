@@ -43,7 +43,7 @@ export async function POST(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { os, browser, city, country, ip } = await req.json();
+    const { os, browser, city, country, ip, token } = await req.json();
 
     const user = await User.findById(session.user.id);
 
@@ -51,46 +51,57 @@ export async function POST(req) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
+    // cleanup expired sessions
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - SESSION_TTL_DAYS);
+    cutoffDate.setDate(cutoffDate.getDate() - 30);
 
     user.sessions = (user.sessions || []).filter(
       (s) => new Date(s.lastActive) > cutoffDate
     );
 
-    let existingSession = user.sessions.find(
-      (s) => s.os === os && s.browser === browser && s.ip === ip
-    );
+    let existingSession = null;
+
+    // 🔥 PRIMARY MATCH: token
+    if (token) {
+      existingSession = user.sessions.find((s) => s.token === token);
+    }
+
+    // fallback (only if no token yet)
+    if (!existingSession) {
+      existingSession = user.sessions.find(
+        (s) => s.os === os && s.browser === browser && s.ip === ip
+      );
+    }
+
+    let sessionToken;
 
     if (existingSession) {
       existingSession.lastActive = new Date();
       existingSession.city = city;
       existingSession.country = country;
+      sessionToken = existingSession.token;
     } else {
-      const token = crypto.randomUUID();
+      sessionToken = crypto.randomUUID();
 
-      existingSession = {
-        token,
+      user.sessions.push({
+        token: sessionToken,
         os,
         browser,
         ip,
         city,
         country,
         lastActive: new Date(),
-      };
-
-      user.sessions.push(existingSession);
+      });
     }
 
     await user.save();
 
     return Response.json({
       success: true,
-      token: existingSession.token,
+      token: sessionToken,
     });
   } catch (error) {
     console.error(error);
-
     return Response.json(
       { error: "Failed to update session" },
       { status: 500 }

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import useSWR from "swr";
 import toast from "react-hot-toast";
 import { Heart, Star, XCircle, ShoppingCart, Tag, Package } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -17,6 +17,7 @@ const ProductCard = ({ product }) => {
   if (product.visible === false) return null;
   const currency = "₦";
   const router = useRouter();
+  const pathname = usePathname();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -114,28 +115,25 @@ const ProductCard = ({ product }) => {
   };
 
   const handleCardClick = () => {
-    const fromCollection = pathname.startsWith("/collections/")
-      ? pathname.split("/products")[0] // clean base collection
-      : null;
-
     let targetRoute;
 
-    if (pathname.startsWith("/collections/")) {
-      const base = pathname.split("/products")[0];
-      targetRoute = `${base}/products/${product.slug}`;
-    } else {
-      targetRoute = `/collections/all/products/${product.slug}`;
-    }
+    const collectionPath = pathname.split("/products")[0];
+    const isCollectionsRoute = pathname.startsWith("/collections/");
+    const isAllCollection =
+      collectionPath === "/collections/all" ||
+      pathname === "/collections/all";
 
-    if (fromCollection) {
-      targetRoute += `?from=${encodeURIComponent(fromCollection)}`;
+    if (isCollectionsRoute && !isAllCollection) {
+      targetRoute =
+        `${collectionPath}/products/${product.slug}` +
+        `?from=${encodeURIComponent(collectionPath)}`;
+    } else {
+      targetRoute = `/collection/${product.slug}`;
     }
 
     router.push(targetRoute);
     scrollTo(0, 0);
   };
-
-
 
   return (
     <div
