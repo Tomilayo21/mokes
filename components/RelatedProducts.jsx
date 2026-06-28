@@ -143,33 +143,58 @@ const ProductCard = ({ product }) => {
       onMouseUp={handleLongPressEnd}
       onMouseLeave={handleLongPressEnd}
       onTouchEnd={handleLongPressEnd}
-      className="group flex flex-col max-w-none w-full cursor-pointer
-            bg-gray-50 dark:bg-gray-50
-            transition-all  hover:scale-[1.02] overflow-hidden"
+      className="
+        group w-full cursor-pointer overflow-hidden
+        rounded-2xl bg-white border border-zinc-200
+        shadow-sm hover:shadow-xl
+        transition-all duration-500 hover:-translate-y-1
+      "
     >
       {/* Image */}
-      <div className="relative h-[200px] md:h-[280px] w-full bg-gray-50 dark:bg-gray-50 flex items-center justify-center overflow-hidden">
+      <div className="relative h-[240px] md:h-[320px] w-full bg-zinc-50 overflow-hidden flex items-center justify-center">
+        {/* subtle gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-zinc-50 to-zinc-100 opacity-70" />
+
         <Image
-          src={product.image?.[0] || "/placeholder.jpg"} // fallback image
+          src={product.image?.[0] || "/placeholder.jpg"}
           alt={product.name || "Product"}
-          width={250}
-          height={250}
-          className="object-cover"
+          width={300}
+          height={300}
+          className="
+            relative z-10 w-[78%] h-auto object-contain
+            transition-transform duration-500
+            group-hover:scale-105
+          "
         />
       </div>
 
       {/* Details */}
-      <div className="p-2 flex flex-col flex-1 text-gray-900 dark:text-gray-900">
-        <h3 className="text-xs font-normal truncate flex items-center gap-1 uppercase text-gray-800 tracking-wide">
+      <div className="p-4 md:p-5 flex flex-col gap-3">
+        {/* Product Name */}
+        <h3
+          className="
+            text-sm md:text-base
+            font-medium
+            text-zinc-900
+            tracking-wide
+            line-clamp-2
+            min-h-[42px]
+          "
+        >
           {product.name}
         </h3>
 
-        {/* Price & Rating */}
-        <div className="mt-1 flex items-center justify-between">
-          <p className="text-sm font-light text-gray-600">
+        {/* Price */}
+        <div className="flex items-end justify-between">
+          <p className="text-lg md:text-xl font-light text-black">
             {currency}
             {Number(product.offerPrice).toLocaleString()}
           </p>
+
+          {/* Optional badge */}
+          <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+            Available
+          </span>
         </div>
       </div>
     </div>

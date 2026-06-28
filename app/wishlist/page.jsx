@@ -26,11 +26,18 @@ export default function FavoritesPage() {
   }, [status, router]);
 
 
-  const fetcher = (url) =>
-    fetch(url, {
+  const fetcher = async (url) => {
+    const res = await fetch(url, {
       credentials: "include",
       cache: "no-store",
-    }).then((res) => res.json());
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch wishlist");
+    }
+
+    return res.json();
+  };
 
   const {
     data: favorites = [],
@@ -138,7 +145,7 @@ export default function FavoritesPage() {
               onClick={() => router.push("/collections/all")}
               className="mt-8 px-8 py-3 rounded-xl bg-[var(--sage)] text-white shadow-md hover:scale-[1.02] hover:opacity-90 transition"
             >
-              Browse Collection
+              Browse Collections
             </button>
           </div>
         )}
