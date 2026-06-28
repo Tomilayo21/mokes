@@ -112,44 +112,64 @@ export default function ActiveDevices() {
   if (status === "loading") return <p>Loading devices...</p>;
   if (!session?.user) return <p>No user session found.</p>;
 
-  const displaySessions = [...new Map(
-    sessions.map(s => [`${s.os}-${s.browser}-${s.ip}`, s])
-  ).values()].sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+  const displaySessions = sessions.sort(
+    (a, b) => new Date(b.lastActive) - new Date(a.lastActive)
+  );
+
+  const deviceLabel = displaySessions.length === 1 ? "device" : "devices";
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-50 border dark:border-white p-3 rounded-sm text-xs space-y-3">
-      <Toaster position="top-right" />
-      <p className="text-gray-700 dark:text-gray-700 font-medium mb-1">Active Devices</p>
+    <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4 shadow-sm">
 
-      {displaySessions.length > 0 ? (
-        displaySessions.map((s, idx) => (
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-800">
+          Active Devices
+        </h2>
+
+        <span className="text-[11px] px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+          {displaySessions.length} {deviceLabel}
+        </span>
+      </div>
+
+      {/* List */}
+      <div className="space-y-3">
+        {displaySessions.map((s) => (
           <div
-            key={idx}
-            className="flex justify-between items-start border-b dark:border-gray-700 pb-2 last:border-b-0"
+            key={s.token}
+            className="group flex items-start justify-between gap-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition"
           >
+            {/* Left */}
             <div className="space-y-1">
-              <p className="text-gray-500 dark:text-gray-400">
-                {s.os || "Unknown OS"} • {s.browser || "Unknown Browser"}
+              
+              {/* OS + Browser */}
+              <p className="text-sm font-medium text-gray-800">
+                {s.os}{" "}
+                <span className="text-gray-400">•</span>{" "}
+                {s.browser}
               </p>
 
-              <p className="text-gray-500 dark:text-gray-400">
-                {s.city && s.country ? `${s.city}, ${s.country}` : "Location unknown"}
+              {/* Location */}
+              <p className="text-xs text-gray-500">
+                📍 {s.city}, {s.country}
               </p>
-              <p className="text-gray-500 dark:text-gray-400">
-                Last Active: {new Date(s.lastActive).toLocaleString()}
+
+              {/* Time */}
+              <p className="text-[11px] text-gray-400">
+                Last active: {new Date(s.lastActive).toLocaleString()}
               </p>
             </div>
+
+            {/* Right */}
             <button
-              className="text-red-500 text-xs hover:underline mt-1"
               onClick={() => handleLogout(s.token)}
+              className="text-xs px-3 py-1.5 cursor-pointer rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition opacity-0 group-hover:opacity-100"
             >
               Log out
             </button>
           </div>
-        ))
-      ) : (
-        <p className="text-gray-500 dark:text-gray-400">No active devices found.</p>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

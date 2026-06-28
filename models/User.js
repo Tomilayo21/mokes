@@ -18,15 +18,14 @@ const userSchema = new mongoose.Schema(
     authProvider: { type: String, enum: ["credentials", "google"], default: "credentials" },
     sessions: [
       {
-        _id: false,
-        token: { type: String },    
-        os: { type: String },
-        browser: { type: String },
-        ip: { type: String },
-        city: { type: String },
-        country: { type: String },
-        lastActive: { type: Date, default: Date.now },
-      }
+        token: String,
+        os: String,
+        browser: String,
+        ip: String,
+        city: String,
+        country: String,
+        lastActive: Date,
+      },
     ],
     sessionVersion: {
       type: Number,

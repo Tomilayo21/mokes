@@ -1,3 +1,4 @@
+//app\order-placed\page.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,68 +14,56 @@ const OrderPlaced = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [finalizing, setFinalizing] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [countdown, setCountdown] = useState(5);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorState, setErrorState] = useState(null);
 
   useEffect(() => {
+    if (status === "loading") return;
+
+    const showToast = (message, type = "error") => {
+      const color =
+        type === "success"
+          ? "text-green-800"
+          : type === "info"
+          ? "text-gray-800"
+          : "text-red-800";
+
+      toast.custom(
+        (t) => (
+          <div
+            className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 ${
+              t.visible
+                ? "animate-toast-bounce opacity-100"
+                : "translate-x-10 opacity-0"
+            }`}
+          >
+            <p className={`flex-1 text-sm font-medium ${color}`}>{message}</p>
+
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-gray-400 hover:text-black"
+            >
+              ✕
+            </button>
+          </div>
+        ),
+        { duration: 5000, position: "top-right" }
+      );
+    };
+
     const finalizeOrder = async () => {
       const pending = sessionStorage.getItem("pendingOrder");
 
-      const showToast = (message, type = "error") => {
-        const color =
-          type === "success"
-            ? "text-green-800"
-            : type === "info"
-            ? "text-gray-800"
-            : "text-red-800";
-
-        toast.custom(
-          (t) => (
-            <div
-              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
-                t.visible
-                  ? "animate-toast-bounce opacity-100"
-                  : "translate-x-10 opacity-0"
-              }`}
-            >
-              <p className={`flex-1 text-sm font-medium ${color}`}>
-                {message}
-              </p>
-
-              {/* Close */}
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="text-gray-400 cursor-pointer hover:text-black transition"
-              >
-                ✕
-              </button>
-
-              {/* Progress Bar */}
-              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
-                <div
-                  className="h-full bg-[var(--sage)]"
-                  style={{
-                    animation: `toast-progress ${t.duration}ms linear forwards`,
-                  }}
-                />
-              </div>
-            </div>
-          ),
-          {
-            duration: 4000,
-            position: "top-right",
-          }
-        );
-      };
-
-      // ❌ NO ORDER FOUND
       if (!pending) {
-        showToast("We couldn’t locate your order details. Please try again.");
+        showToast("Order details not found.");
         setFinalizing(false);
         return;
       }
 
-      // ❌ NOT AUTHENTICATED
       if (status !== "authenticated") {
-        showToast("Please sign in to complete your order.", "error");
+        showToast("Please sign in.");
         setFinalizing(false);
         return;
       }
@@ -82,95 +71,168 @@ const OrderPlaced = () => {
       try {
         const orderData = JSON.parse(pending);
 
+        console.log("Pending order:", orderData);
+
         const endpoint =
-          orderData.paymentMethod.toLowerCase() === "stripe"
+          orderData.paymentMethod?.toLowerCase() === "stripe"
             ? "/api/order/stripe/create"
             : "/api/order/paystack/create";
 
         const res = await axios.post(
           endpoint,
           {
-            address: orderData.address,
-            items: orderData.items,
+            address: orderData.address || orderData.addressId,
+             items: orderData.items || [],
+            reference: orderData.reference || null,
           },
           {
-            withCredentials: true, // 🔥 THIS IS REQUIRED
+            withCredentials: true,
           }
         );
 
-        // ❌ FAILED RESPONSE
         if (!res.data.success) {
-          showToast(
-            res.data.message || "Something went wrong. Please try again."
-          );
-          return;
+          throw new Error(res.data.message);
         }
 
-        // ✅ SUCCESS
-        showToast("Your order has been placed successfully. Redirecting…", "success");
+        setProgress(100);
+        setFinalizing(false);
+        setSuccessMessage("Order placed successfully");
 
         setCartItems({});
         sessionStorage.removeItem("pendingOrder");
 
-        setTimeout(() => router.push("/my-orders"), 1500);
+        let counter = 5;
+
+        const timer = setInterval(() => {
+          counter--;
+
+          setCountdown(counter);
+
+          if (counter <= 0) {
+            clearInterval(timer);
+            router.push("/my-orders");
+          }
+        }, 1000);
       } catch (error) {
         console.error("Finalize Order Error:", error);
 
-        showToast("Please check your connection and try again.");
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Order creation failed";
+
+        setErrorState(message);
+        showToast(message);
       } finally {
         setFinalizing(false);
       }
     };
 
-    if (status === "authenticated") {
-      finalizeOrder();
-    }
-  }, [session, status, setCartItems, router]);
+    finalizeOrder();
+  }, [status]);
 
+  useEffect(() => {
+    if (!finalizing) return;
+
+    setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 92) return prev; // pause near finish
+        return prev + Math.random() * 6;
+      });
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, [finalizing]);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-6 py-10 bg-gradient-to-b from-white via-gray-50 to-gray-100">
-      
-      {/* Loader / Success Icon */}
-      <div className="relative flex justify-center items-center mb-6">
-        {finalizing ? (
-          <div className="animate-spin rounded-full h-28 w-28 border-4 border-t-orange-500 border-gray-200 dark:border-neutral-700"></div>
-        ) : (
-          <CheckCircle className="h-28 w-28 text-[var(--sage)]" />
-        )}
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 via-white to-gray-100 px-4 py-10">
 
-      {/* Title */}
-      <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 text-center">
-        {finalizing ? "Processing your order" : "Order Confirmed"}
-      </h1>
+      <div className="w-full max-w-md bg-white border border-gray-100 shadow-xl rounded-sm p-8 text-center relative overflow-hidden">
 
-      {/* Subtext */}
-      <p className="mt-3 text-sm md:text-base text-gray-500 text-center max-w-md">
-        {finalizing
-          ? "Please wait while we securely finalize your transaction. This may take a few moments."
-          : "Thank you for your purchase. Your order has been successfully placed and is now being prepared for delivery."}
-      </p>
+        {/* Soft background glow */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top,theme(colors.orange.400),transparent_60%)] pointer-events-none" />
 
-      {/* Actions */}
-      {!finalizing && (
-        <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-          <a
-            href="/my-orders"
-            className="w-full sm:w-auto px-6 py-3 rounded-sm bg-[var(--sage)] hover:bg-zinc-500 text-white font-medium shadow-md transition text-center"
-          >
-            View Orders
-          </a>
-          <a
-            href="/collections/all"
-            className="w-full sm:w-auto px-6 py-3 rounded-sm border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium shadow-sm transition text-center"
-          >
-            Continue Shopping
-          </a>
+        {/* Loader / Success Icon */}
+        <div className="flex justify-center mb-6 relative z-10">
+          {!finalizing && !errorState && (
+            <div className="flex items-center justify-center h-24 w-24 rounded-full bg-green-50 animate-[pop_0.35s_ease-out]">
+              <CheckCircle className="h-14 w-14 text-green-500" />
+            </div>
+          )}
+
+          {!finalizing && errorState && (
+            <div className="flex items-center justify-center h-24 w-24 rounded-full bg-red-50">
+              <XCircle className="h-14 w-14 text-red-500" />
+            </div>
+          )}
         </div>
-      )}
 
-    </div> 
+        {!finalizing && !errorState && (
+          <div className="inline-flex mb-4 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold tracking-wide uppercase">
+            Payment Verified
+          </div>
+        )}
+
+        {/* Title */}
+        <h1 className="text-2xl md:text-3xl font-medium text-gray-900 relative z-10">
+          {finalizing
+            ? "Finalizing your order"
+            : errorState
+            ? "Order Failed"
+            : "Order Confirmed"}
+        </h1>
+
+        {/* Subtext */}
+        <p className="mt-3 text-sm md:text-base text-gray-500 leading-relaxed relative z-10">
+          {finalizing &&
+            "Please wait while we verify payment and complete your purchase."}
+
+          {!finalizing && !errorState && (
+            <>
+              {/* {successMessage} */}
+              <br />
+              <span className="text-green-600 font-medium">
+                Redirecting to your orders in {countdown}s...
+              </span>
+            </>
+          )}
+
+          {!finalizing && errorState && errorState}
+        </p>
+
+        {/* Progress hint while loading */}
+        {finalizing && (
+          <div className="mt-8 relative z-10">
+            <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <div className="flex justify-between mt-3">
+              <p className="text-sm text-gray-500">
+                Securing payment...
+              </p>
+              <p className="text-sm font-semibold text-gray-700">
+                {Math.floor(progress)}%
+              </p>
+            </div>
+          </div>
+        )}
+
+
+        {/* Footer hint */}
+        {!finalizing && (
+          <p className="text-xs text-gray-400 mt-6 relative z-10">
+            A confirmation email has been sent to your inbox.
+          </p>
+        )}
+
+      </div>
+    </div>
   );
 };
 

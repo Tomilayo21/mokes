@@ -528,15 +528,14 @@ export default function ProductPage() {
                     {productData.stock === 0 ? "Sold Out" : "Add to Cart"}
                   </button>
 
-                  {productData.stock > 0 && (
-                    <Link
-                      href="/cart"
-                      className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-500 text-sm hover:text-black  transition"
-                    >
-                      Go to Cart
-                      <ArrowRight size={18} />
-                    </Link>
-                  )}
+                  <Link
+                    href="/cart"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 text-gray-500 text-sm hover:text-black  transition"
+                  >
+                    Go to Cart
+                    <ArrowRight size={18} />
+                  </Link>
+
                 </div>
 
               {/* Description */}

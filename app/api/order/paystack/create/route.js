@@ -1,3 +1,4 @@
+//app\api\order\paystack\create\route.js
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Clothing from "@/models/Clothing";
@@ -6,6 +7,7 @@ import User from "@/models/User";
 import NotificationPreferences from "@/models/NotificationPreferences";
 import { sendEmail } from "@/lib/email";
 import Address from "@/models/Address";
+import mongoose from "mongoose";
 
 // ✅ NEXTAUTH FIX (IMPORTANT)
 import { getServerSession } from "next-auth";
@@ -15,7 +17,6 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    // ✅ GET SESSION FROM NEXTAUTH (FIX FOR 401)
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -29,73 +30,143 @@ export async function POST(req) {
 
     const { items, address, reference } = await req.json();
 
-    if (!userId)
+    if (!userId) {
       return NextResponse.json(
         { success: false, message: "User ID missing" },
         { status: 401 }
       );
+    }
 
+    // =========================
+    // NORMALIZE ITEMS (FIXED)
+    // =========================
     let normalizedItems = [];
 
-    if (Array.isArray(items)) normalizedItems = items;
-    else if (items && typeof items === "object") {
-      normalizedItems = Object.entries(items).map(([product, quantity]) => ({
+    if (Array.isArray(items)) {
+      normalizedItems = items
+        .map((item) => ({
+          product: String(item._id || item.product || item.productId),
+          quantity: Number(item.qty || item.quantity || 1),
+          sizes: item.sizes || {},
+          name: item.name,
+          image: item.image,
+        }))
+        .filter((item) => mongoose.Types.ObjectId.isValid(item.product));
+    } else if (items && typeof items === "object") {
+      normalizedItems = Object.entries(items).map(([product, qty]) => ({
         product,
-        quantity,
+        quantity: Number(qty),
       }));
-    } else
+    } else {
       return NextResponse.json(
-        { success: false, message: "Invalid items format" },
-        { status: 400 }
-      );
-
-    if (!address || normalizedItems.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Invalid order data" },
+        {
+          success: false,
+          message: "Invalid items format",
+        },
         { status: 400 }
       );
     }
 
+    // =========================
+    // STRONG VALIDATION (NEW)
+    // =========================
+    normalizedItems = normalizedItems.filter(
+      (item) => item.product && item.quantity > 0
+    );
+
+    if (!normalizedItems.length) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "No valid items found in cart",
+        },
+        { status: 400 }
+      );
+    }
+
+    // =========================
+    // DUPLICATE ORDER CHECK
+    // =========================
     if (reference) {
       const existingOrder = await MokesOrder.findOne({
         referenceId: reference,
       });
 
-      if (existingOrder)
+      if (existingOrder) {
         return NextResponse.json({
           success: true,
           order: existingOrder,
           message: "Order already exists",
         });
+      }
     }
 
+    // =========================
+    // CALCULATE ORDER
+    // =========================
     let totalAmount = 0;
     const orderItems = [];
 
-    for (const { product, quantity } of normalizedItems) {
-      const p = await Clothing.findById(product);
+    for (const item of normalizedItems) {
+      const productId = item.product;
+      const quantity = item.quantity;
+      const p = await Clothing.findById(productId);
 
-      if (!p) throw new Error(`Product not found: ${product}`);
-      if (p.stock < quantity)
-        throw new Error(`Insufficient stock for ${p.name}`);
+      if (!p) {
+        return NextResponse.json(
+          { success: false, message: `Product not found: ${productId}` },
+          { status: 404 }
+        );
+      }
+
+      if (item.sizes) {
+        for (const [sizeName, qty] of Object.entries(item.sizes)) {
+          const sizeObj = p.sizes.find((s) => s.size === sizeName);
+
+          if (!sizeObj) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `Size ${sizeName} not found for ${p.name}`,
+              },
+              { status: 400 }
+            );
+          }
+
+          if (sizeObj.stock < qty) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `Insufficient stock for ${p.name} (${sizeName})`,
+              },
+              { status: 400 }
+            );
+          }
+
+          sizeObj.stock -= qty;
+        }
+      }
 
       const snapshotPrice = p.offerPrice || p.price;
       totalAmount += snapshotPrice * quantity;
 
       orderItems.push({
-        product,
+        product: productId,
         quantity,
         price: snapshotPrice,
+        sizes: item.sizes || {},
       });
 
-      p.stock -= quantity;
       await p.save();
     }
 
+    // =========================
+    // CREATE ORDER
+    // =========================
     const order = await MokesOrder.create({
       userId,
       items: orderItems,
-      address,
+      address: address._id || address,
       amount: totalAmount,
       paymentMethod: "paystack",
       paymentStatus: "Successful",
@@ -106,12 +177,14 @@ export async function POST(req) {
 
     await User.findByIdAndUpdate(userId, { cartItems: {} });
 
+    // =========================
+    // EMAIL SYSTEM (UNCHANGED LOGIC)
+    // =========================
     try {
       const buyer = await User.findById(userId);
       const buyerEmail = buyer?.email;
       const buyerName = buyer?.name || "Customer";
 
-      // ✅ FIX: renamed to avoid variable conflict
       const addressDoc = await Address.findById(order.address);
 
       const formattedAddress = addressDoc
@@ -147,16 +220,14 @@ export async function POST(req) {
                 <td style="padding:8px; display:flex; align-items:center; gap:10px;">
                   ${
                     item.product?.image?.length
-                      ? `<img src="${item.product.image[0]}" alt="${item.product.name}" width="40" height="40" style="border-radius:6px; object-fit:cover;" />`
+                      ? `<img src="${item.product.image[0]}" width="40" height="40" style="border-radius:6px; object-fit:cover;" />`
                       : ""
                   }
-                  <span style="font-weight:500; color:#333;">${
-                    item.product?.name || "Unnamed Product"
-                  }</span>
+                  <span style="font-weight:500; color:#333;">
+                    ${item.product?.name || "Unnamed Product"}
+                  </span>
                 </td>
-                <td style="padding:8px; text-align:center;">${
-                  item.quantity
-                }</td>
+                <td style="padding:8px;">${item.quantity}</td>
                 <td style="padding:8px;">₦${item.price.toLocaleString()}</td>
                 <td style="padding:8px;">₦${(
                   item.quantity * item.price
@@ -177,7 +248,7 @@ export async function POST(req) {
               <p>A new order has just been placed!</p>
 
               <h3>Order Details</h3>
-              <p><b>Order ID:</b> ${order.orderId}</p>
+              <p><b>Order ID:</b> ${order._id}</p>
               <p><b>Total:</b> ₦${order.amount.toLocaleString()}</p>
 
               <h3>Shipping Address</h3>
@@ -198,7 +269,7 @@ export async function POST(req) {
       if (buyerEmail && buyerWantsEmail) {
         await sendEmail({
           to: buyerEmail,
-          subject: `🧾 Your Order Confirmation — ${order.orderId}`,
+          subject: `🧾 Your Order Confirmation — ${order._id}`,
           html: emailHTML,
         });
       }
@@ -206,7 +277,7 @@ export async function POST(req) {
       for (const email of adminEmails) {
         await sendEmail({
           to: email,
-          subject: `🛒 New Order Placed — ${order.orderId}`,
+          subject: `🛒 New Order Placed — ${order._id}`,
           html: emailHTML,
         });
       }

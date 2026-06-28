@@ -87,17 +87,45 @@ const MyOrders = () => {
         toast.custom(
           (t) => (
             <div
-              className={`max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
                 t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
               }`}
             >
-              <Package className="text-orange-500" size={20} />
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Order cancelled
-              </p>
+
+              {/* Text */}
+              <div className="flex-1">
+                <p className="text-sm font-normal text-black tracking-wide">
+                  Order updated
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Your order has been successfully cancelled and will no longer be processed.
+                </p>
+              </div>
+
+              {/* Close */}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-gray-400 cursor-pointer hover:text-black transition"
+              >
+                ✕
+              </button>
+
+              {/* Progress bar */}
+              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+                <div
+                  className="h-full bg-[var(--sage)]"
+                  style={{
+                    animation: `toast-progress ${t.duration}ms linear forwards`,
+                  }}
+                />
+              </div>
             </div>
           ),
-          { duration: 2000, position: "top-right" }
+          {
+            duration: 4000,
+            position: "top-right",
+          }
         );
 
         setOrders((prev) =>
@@ -130,17 +158,45 @@ const MyOrders = () => {
         toast.custom(
           (t) => (
             <div
-              className={`max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg flex items-center gap-3 p-4 transform transition-all duration-300 ${
+              className={`relative overflow-hidden max-w-md w-full bg-white border border-gray-200 shadow-lg rounded-sm flex items-center gap-4 p-4 transition-all duration-300 ${
                 t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
               }`}
             >
-              <Trash2 className="text-red-500" size={20} />
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Order deleted
-              </p>
+
+              {/* Text */}
+              <div className="flex-1">
+                <p className="text-sm font-normal text-black tracking-wide">
+                  Order deleted
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  This order has been permanently removed from your account.
+                </p>
+              </div>
+
+              {/* Close */}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-gray-400 cursor-pointer hover:text-black transition"
+              >
+                ✕
+              </button>
+
+              {/* Progress bar */}
+              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-gray-100">
+                <div
+                  className="h-full bg-red-500"
+                  style={{
+                    animation: `toast-progress ${t.duration}ms linear forwards`,
+                  }}
+                />
+              </div>
             </div>
           ),
-          { duration: 2000, position: "top-right" }
+          {
+            duration: 4000,
+            position: "top-right",
+          }
         );
 
         setOrders((prev) => prev.filter((o) => o._id !== orderId));
@@ -376,32 +432,47 @@ const MyOrders = () => {
           {totalPages > 1 && (
             <div className="mt-10 flex justify-center items-center gap-2">
 
+              {/* Previous */}
               <button
                 disabled={page === 1}
                 onClick={() => setPage(p => Math.max(p - 1, 1))}
-                className="px-4 py-2 bg-white dark:bg-neutral-800 border rounded-lg text-sm disabled:opacity-40"
+                className="px-4 py-2 rounded-xl text-sm font-medium border
+                bg-white text-zinc-700 shadow-sm
+                hover:bg-zinc-50 active:scale-[0.98] transition
+                disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 Previous
               </button>
 
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={`px-4 py-2 text-sm rounded-lg ${
-                    page === i + 1
-                      ? "bg-orange-600 text-white"
-                      : "bg-white dark:bg-neutral-800 border hover:bg-gray-100 dark:hover:bg-neutral-700"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              {/* Pages */}
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const isActive = page === i + 1;
 
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i + 1)}
+                    className={`min-w-[40px] px-4 py-2 text-sm rounded-xl font-medium transition
+                    border shadow-sm active:scale-[0.98]
+                    ${
+                      isActive
+                        ? "bg-[var(--sage)] text-white border-[var(--sage)]"
+                        : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+
+              {/* Next */}
               <button
                 disabled={page === totalPages}
                 onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-                className="px-4 py-2 bg-white dark:bg-neutral-800 border rounded-lg text-sm disabled:opacity-40"
+                className="px-4 py-2 rounded-xl text-sm font-medium border
+                bg-white text-zinc-700 shadow-sm
+                hover:bg-zinc-50 active:scale-[0.98] transition
+                disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 Next
               </button>

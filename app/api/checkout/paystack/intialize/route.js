@@ -1,3 +1,4 @@
+//app\api\checkout\paystack\intialize\route.js
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Clothing from "@/models/Clothing";
@@ -6,6 +7,7 @@ import User from "@/models/User";
 import NotificationPreferences from "@/models/NotificationPreferences";
 import { sendEmail } from "@/lib/email";
 import Address from "@/models/Address";
+import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
@@ -22,8 +24,6 @@ export async function POST(req) {
       );
     }
 
-    const { items, address, reference } = await req.json();
-
     const userId = session.user.id || session.user.email;
 
     if (!userId) {
@@ -33,21 +33,44 @@ export async function POST(req) {
       );
     }
 
+    const { items, address, reference } = await req.json();
+
+    // =========================
+    // SAFE NORMALIZATION
+    // =========================
+
     let normalizedItems = [];
 
-    if (Array.isArray(items)) {
-      normalizedItems = items;
-    } else if (items && typeof items === "object") {
-      normalizedItems = Object.entries(items).map(([product, quantity]) => ({
-        product,
-        quantity,
-      }));
-    } else {
+    if (!Array.isArray(items)) {
       return NextResponse.json(
         { success: false, message: "Invalid items format" },
         { status: 400 }
       );
     }
+
+    normalizedItems = items
+      .map(item => ({
+        product: String(item.product || item._id || item.productId),
+        quantity: Number(item.quantity || item.qty || 1),
+        sizes: item.sizes || {},
+      }))
+      .filter(item => mongoose.Types.ObjectId.isValid(item.product));
+
+      if (normalizedItems.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "No valid cart items after validation" },
+          { status: 400 }
+        );
+      }      
+    // =========================
+    // VALIDATION
+    // =========================
+    normalizedItems = normalizedItems.filter(
+      (item) =>
+        item.product &&
+        mongoose.Types.ObjectId.isValid(item.product) &&
+        item.quantity > 0
+    );
 
     if (!address || normalizedItems.length === 0) {
       return NextResponse.json(
@@ -56,6 +79,9 @@ export async function POST(req) {
       );
     }
 
+    // =========================
+    // DUPLICATE ORDER CHECK
+    // =========================
     if (reference) {
       const existingOrder = await MokesOrder.findOne({
         referenceId: reference,
@@ -70,34 +96,74 @@ export async function POST(req) {
       }
     }
 
+    // =========================
+    // ORDER CALCULATION
+    // =========================
     let totalAmount = 0;
     const orderItems = [];
 
-    for (const { product, quantity } of normalizedItems) {
-      const p = await Clothing.findById(product);
+    for (const item of normalizedItems) {
+      const productId = item.product;
+      const quantity = item.quantity;
 
-      if (!p) throw new Error(`Product not found: ${product}`);
-      if (p.stock < quantity)
-        throw new Error(`Insufficient stock for ${p.name}`);
+      const p = await Clothing.findById(productId);
+
+      if (!p) {
+        return NextResponse.json(
+          { success: false, message: `Product not found: ${productId}` },
+          { status: 404 }
+        );
+      }
+
+      // Handle size-based stock
+      if (item.sizes && Object.keys(item.sizes).length > 0) {
+        for (const [sizeName, qty] of Object.entries(item.sizes)) {
+          const sizeObj = p.sizes.find((s) => s.size === sizeName);
+
+          if (!sizeObj) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `Size ${sizeName} not found for ${p.name}`,
+              },
+              { status: 400 }
+            );
+          }
+
+          if (sizeObj.stock < qty) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `Insufficient stock for ${p.name} (${sizeName})`,
+              },
+              { status: 400 }
+            );
+          }
+
+          sizeObj.stock -= qty;
+        }
+      }
 
       const price = p.offerPrice || p.price;
-
       totalAmount += price * quantity;
 
       orderItems.push({
-        product,
+        product: productId,
         quantity,
         price,
+        sizes: item.sizes || {},
       });
 
-      p.stock -= quantity;
       await p.save();
     }
 
+    // =========================
+    // CREATE ORDER
+    // =========================
     const order = await MokesOrder.create({
       userId,
       items: orderItems,
-      address,
+      address: address._id || address,
       amount: totalAmount,
       paymentMethod: "paystack",
       paymentStatus: "Successful",
@@ -108,7 +174,9 @@ export async function POST(req) {
 
     await User.findByIdAndUpdate(userId, { cartItems: {} });
 
-    // ================= EMAIL SECTION (UNCHANGED LOGIC) =================
+    // =========================
+    // EMAIL SECTION (UNCHANGED LOGIC)
+    // =========================
     try {
       const buyer = await User.findById(userId);
       const buyerEmail = buyer?.email;
@@ -143,23 +211,23 @@ export async function POST(req) {
       const orderItemsHTML = populatedOrder.items
         .map(
           (item, i) => `
-              <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;">${i + 1}</td>
-                <td style="padding:8px; display:flex; align-items:center; gap:10px;">
-                  ${
-                    item.product?.image?.length
-                      ? `<img src="${item.product.image[0]}" width="40" height="40" style="border-radius:6px;" />`
-                      : ""
-                  }
-                  <span>${item.product?.name || "Unnamed Product"}</span>
-                </td>
-                <td style="padding:8px;">${item.quantity}</td>
-                <td style="padding:8px;">₦${item.price.toLocaleString()}</td>
-                <td style="padding:8px;">₦${(
-                  item.quantity * item.price
-                ).toLocaleString()}</td>
-              </tr>
-            `
+            <tr style="border-bottom:1px solid #eee;">
+              <td style="padding:8px;">${i + 1}</td>
+              <td style="padding:8px; display:flex; align-items:center; gap:10px;">
+                ${
+                  item.product?.image?.length
+                    ? `<img src="${item.product.image[0]}" width="40" height="40" style="border-radius:6px;" />`
+                    : ""
+                }
+                <span>${item.product?.name || "Unnamed Product"}</span>
+              </td>
+              <td style="padding:8px;">${item.quantity}</td>
+              <td style="padding:8px;">₦${item.price.toLocaleString()}</td>
+              <td style="padding:8px;">₦${(
+                item.quantity * item.price
+              ).toLocaleString()}</td>
+            </tr>
+          `
         )
         .join("");
 
@@ -167,7 +235,7 @@ export async function POST(req) {
         <div style="font-family:Arial; padding:20px;">
           <h2>Order Confirmation</h2>
           <p>New order placed!</p>
-          <p><b>Order ID:</b> ${order.orderId}</p>
+          <p><b>Order ID:</b> ${order._id}</p>
           <p><b>Total:</b> ₦${order.amount.toLocaleString()}</p>
         </div>
       `;
@@ -178,7 +246,7 @@ export async function POST(req) {
       if (buyerEmail && buyerWantsEmail) {
         await sendEmail({
           to: buyerEmail,
-          subject: `🧾 Order Confirmation — ${order.orderId}`,
+          subject: `🧾 Order Confirmation — ${order._id}`,
           html: emailHTML,
         });
       }
@@ -186,7 +254,7 @@ export async function POST(req) {
       for (const email of adminEmails) {
         await sendEmail({
           to: email,
-          subject: `🛒 New Order — ${order.orderId}`,
+          subject: `🛒 New Order — ${order._id}`,
           html: emailHTML,
         });
       }

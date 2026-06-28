@@ -19,9 +19,27 @@ const mokesOrderSchema = new mongoose.Schema({
 
   items: [
     {
-      product: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'clothing' },
-      quantity: { type: Number, required: true, min: 1 },
-      price: { type: Number, required: true },
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "clothing",
+      },
+
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+
+      price: {
+        type: Number,
+        required: true,
+      },
+
+      sizes: {
+        type: Object,
+        default: {},
+      },
     },
   ],
 
@@ -49,7 +67,7 @@ const mokesOrderSchema = new mongoose.Schema({
 
   // 🔹 New gateway-specific IDs
   paymentIntentId: { type: String, index: true }, // Stripe
-  referenceId: { type: String, index: true },     // Paystack
+  referenceId: { type: String, index: true },    
 
   orderStatus: {
     type: String,

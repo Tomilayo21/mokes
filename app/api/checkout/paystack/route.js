@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Clothing from "@/models/Clothing";
-import MokesOrder from "@/models/MokesOrder";
-import User from "@/models/User";
-import NotificationPreferences from "@/models/NotificationPreferences";
-import { sendEmail } from "@/lib/email";
-import Address from "@/models/Address";
+import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
 export async function POST(req) {
   try {
-    await connectDB();
+    console.log("========== PAYSTACK INIT START ==========");
 
     const session = await getServerSession(authOptions);
+    console.log("SESSION USER:", session?.user);
 
     if (!session) {
       return NextResponse.json(
@@ -22,189 +19,172 @@ export async function POST(req) {
       );
     }
 
-    const { items, address, reference } = await req.json();
-
     const userId = session.user.id || session.user.email;
 
-    if (!userId) {
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+
+    console.log(
+      "PAYSTACK KEY PREFIX:",
+      PAYSTACK_SECRET_KEY?.slice(0, 10)
+    );
+
+    if (!PAYSTACK_SECRET_KEY) {
       return NextResponse.json(
-        { success: false, message: "User ID missing" },
-        { status: 401 }
+        { success: false, message: "Server misconfigured" },
+        { status: 500 }
       );
     }
 
-    let normalizedItems = [];
+    await connectDB();
+    console.log("MongoDB connected");
 
-    if (Array.isArray(items)) {
-      normalizedItems = items;
-    } else if (items && typeof items === "object") {
-      normalizedItems = Object.entries(items).map(([product, quantity]) => ({
-        product,
-        quantity,
-      }));
-    } else {
+    const { items, address } = await req.json();
+
+    console.log("RAW ITEMS:", items);
+    console.log("RAW ADDRESS:", address);
+
+    if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Invalid items format" },
+        { success: false, message: "Cart is empty" },
         { status: 400 }
       );
     }
 
-    if (!address || normalizedItems.length === 0) {
+    const itemsArray = items.map((item) => ({
+      product: item._id || item.product,
+      quantity: item.qty || item.quantity || 1,
+      sizes: item.sizes || {},
+    }));
+
+    console.log("NORMALIZED ITEMS:", itemsArray);
+
+    const validIds = itemsArray
+      .map((item) => item.product)
+      .filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+    console.log("VALID IDS:", validIds);
+
+    if (!validIds.length) {
       return NextResponse.json(
-        { success: false, message: "Invalid order data" },
+        {
+          success: false,
+          message: "No valid product IDs found",
+        },
         { status: 400 }
       );
     }
 
-    if (reference) {
-      const existingOrder = await MokesOrder.findOne({
-        referenceId: reference,
-      });
-
-      if (existingOrder) {
-        return NextResponse.json({
-          success: true,
-          order: existingOrder,
-          message: "Order already exists",
-        });
-      }
-    }
-
-    let totalAmount = 0;
-    const orderItems = [];
-
-    for (const { product, quantity } of normalizedItems) {
-      const p = await Clothing.findById(product);
-
-      if (!p) throw new Error(`Product not found: ${product}`);
-      if (p.stock < quantity)
-        throw new Error(`Insufficient stock for ${p.name}`);
-
-      const price = p.offerPrice || p.price;
-
-      totalAmount += price * quantity;
-
-      orderItems.push({
-        product,
-        quantity,
-        price,
-      });
-
-      p.stock -= quantity;
-      await p.save();
-    }
-
-    const order = await MokesOrder.create({
-      userId,
-      items: orderItems,
-      address,
-      amount: totalAmount,
-      paymentMethod: "paystack",
-      paymentStatus: "Successful",
-      orderStatus: "Order Placed",
-      referenceId: reference || null,
-      date: Date.now(),
+    const dbProducts = await Clothing.find({
+      _id: { $in: validIds },
     });
 
-    await User.findByIdAndUpdate(userId, { cartItems: {} });
+    console.log(
+      "DB PRODUCTS:",
+      dbProducts.map((p) => ({
+        id: p._id.toString(),
+        name: p.name,
+        price: p.offerPrice ?? p.price,
+      }))
+    );
 
-    // ================= EMAIL SECTION (UNCHANGED LOGIC) =================
-    try {
-      const buyer = await User.findById(userId);
-      const buyerEmail = buyer?.email;
+    if (!dbProducts.length) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Products not found in DB",
+        },
+        { status: 400 }
+      );
+    }
 
-      const addressDoc = await Address.findById(order.address);
-
-      const formattedAddress = addressDoc
-        ? `
-          <p style="margin: 0; color: #444;">
-            <b>${addressDoc.fullName}</b><br />
-            ${addressDoc.area},<br />
-            ${addressDoc.city}, ${addressDoc.state}<br />
-            ${addressDoc.country}<br />
-            <small>Phone: ${addressDoc.phoneNumber}</small>
-          </p>
-        `
-        : "<p>No address provided</p>";
-
-      const subscribedUsers = await NotificationPreferences.find({
-        "orders.newOrder": true,
-      }).populate("userId", "email name");
-
-      const adminEmails = subscribedUsers
-        .map((pref) => pref.userId?.email)
-        .filter(Boolean);
-
-      const populatedOrder = await MokesOrder.findById(order._id).populate(
-        "items.product",
-        "name image price"
+    const totalAmount = itemsArray.reduce((sum, item) => {
+      const product = dbProducts.find(
+        (p) => p._id.toString() === item.product
       );
 
-      const orderItemsHTML = populatedOrder.items
-        .map(
-          (item, i) => `
-              <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;">${i + 1}</td>
-                <td style="padding:8px; display:flex; align-items:center; gap:10px;">
-                  ${
-                    item.product?.image?.length
-                      ? `<img src="${item.product.image[0]}" width="40" height="40" style="border-radius:6px;" />`
-                      : ""
-                  }
-                  <span>${item.product?.name || "Unnamed Product"}</span>
-                </td>
-                <td style="padding:8px;">${item.quantity}</td>
-                <td style="padding:8px;">₦${item.price.toLocaleString()}</td>
-                <td style="padding:8px;">₦${(
-                  item.quantity * item.price
-                ).toLocaleString()}</td>
-              </tr>
-            `
-        )
-        .join("");
+      const price = product?.offerPrice ?? product?.price ?? 0;
 
-      const emailHTML = `
-        <div style="font-family:Arial; padding:20px;">
-          <h2>Order Confirmation</h2>
-          <p>New order placed!</p>
-          <p><b>Order ID:</b> ${order.orderId}</p>
-          <p><b>Total:</b> ₦${order.amount.toLocaleString()}</p>
-        </div>
-      `;
+      console.log("ITEM CALC:", {
+        productId: item.product,
+        quantity: item.quantity,
+        found: !!product,
+        price,
+        subtotal: price * item.quantity,
+      });
 
-      const buyerPrefs = await NotificationPreferences.findOne({ userId });
-      const buyerWantsEmail = buyerPrefs?.orders?.newOrder ?? true;
+      return sum + price * item.quantity;
+    }, 0);
 
-      if (buyerEmail && buyerWantsEmail) {
-        await sendEmail({
-          to: buyerEmail,
-          subject: `🧾 Order Confirmation — ${order.orderId}`,
-          html: emailHTML,
-        });
+    console.log("TOTAL AMOUNT:", totalAmount);
+
+    const email =
+      address?.email ||
+      session.user.email ||
+      "customer@fallback.com";
+
+    console.log("FINAL EMAIL:", email);
+
+    const domain =
+      process.env.NEXTAUTH_URL || "http://localhost:3000";
+      // process.env.NEXT_PUBLIC_LOCAL || "http://localhost:3000";
+
+    const payload = {
+      email,
+      amount: Math.round(totalAmount * 100),
+      currency: "NGN",
+      callback_url: `${domain}/order-placed`,
+      metadata: {
+        userId: String(userId),
+        addressId: String(address?._id),
+        itemCount: itemsArray.length,
+      },
+    };
+
+    console.log("PAYSTACK PAYLOAD:", payload);
+
+    const response = await fetch(
+      "https://api.paystack.co/transaction/initialize",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       }
+    );
 
-      for (const email of adminEmails) {
-        await sendEmail({
-          to: email,
-          subject: `🛒 New Order — ${order.orderId}`,
-          html: emailHTML,
-        });
-      }
-    } catch (emailErr) {
-      console.error("Email error:", emailErr);
+    console.log("PAYSTACK HTTP STATUS:", response.status);
+
+    const paystackData = await response.json();
+
+    console.log("PAYSTACK RESPONSE:", paystackData);
+
+    if (!paystackData.status) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: paystackData.message || "Paystack init failed",
+        },
+        { status: 400 }
+      );
     }
+
+    console.log("========== PAYSTACK INIT SUCCESS ==========");
 
     return NextResponse.json({
       success: true,
-      order,
+      authorizationUrl: paystackData.data.authorization_url,
+      reference: paystackData.data.reference,
     });
-  } catch (err) {
-    console.error("[PAYSTACK_ORDER_CREATE_ERROR]", err);
+  } catch (error) {
+    console.error("[PAYSTACK_INIT_ERROR]", error);
+    console.error(error.stack);
 
     return NextResponse.json(
       {
         success: false,
-        message: err.message,
+        message: error.message,
       },
       { status: 500 }
     );

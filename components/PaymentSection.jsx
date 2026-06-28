@@ -155,7 +155,7 @@ export default function PaymentSection({
       {/* BUTTON */}
       <button
         onClick={() => handlePayment(paymentMethod)}
-        className="w-full bg-black text-white py-3 rounded-lg font-medium mt-4"
+        className="w-full bg-black hover:bg-zinc-500 cursor-pointer text-white hover:text-black py-3 rounded-lg font-medium mt-4"
       >
         Pay with {paymentMethod.toUpperCase()}
       </button>

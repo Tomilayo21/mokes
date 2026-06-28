@@ -363,6 +363,30 @@ export default function AvatarMenu() {
     return errors;
   }
 
+  useEffect(() => {
+    const parser = new UAParser();
+    const result = parser.getResult();
+    setDeviceInfo({
+      os: result.os.name || "Unknown OS",
+      browser: result.browser.name || "Unknown Browser",
+    });
+
+
+    const now = new Date();
+    setTime(
+      now.toLocaleString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+    );
+
+    // Get location (city, country) using a free IP-based service
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => setLocation(`${data.city}, ${data.country_name}`))
+      .catch(() => setLocation("Unknown Location"));
+  }, []);
 
 
   return (
@@ -609,241 +633,289 @@ export default function AvatarMenu() {
           <Dialog.Panel className="w-full max-w-3xl md:max-w-4xl max-h-[90vh] md:max-h-[80vh] rounded-sm bg-white dark:bg-white shadow-2xl overflow-hidden flex flex-col md:flex-row">
             
             {/* Sidebar */}
-            <div className="flex md:flex-col w-full md:w-48 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
+            <div className="flex md:flex-col w-full md:w-52 border-b md:border-b-0 md:border-r border-gray-200 bg-white">
+
               {["profile", "security"].map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`flex-1 md:flex-none text-center md:text-left px-3 py-2 font-medium border-b md:border-b-0 md:border-l md:first:border-l-0
+                  className={`relative flex-1 md:flex-none text-sm font-medium px-4 py-3 transition-all duration-200
+                    text-left
+                    hover:bg-gray-50
                     ${tab === t
-                      ? "bg-gray-100 text-gray-600 dark:bg-gray-100 dark:text-gray-600"
-                      : "text-gray-700 dark:text-gray-700 hover:bg-gray-100 dark:hover:bg-neutral-100"
-                    }`}
+                      ? "bg-gray-100 text-black"
+                      : "text-gray-600"
+                    }
+                  `}
                 >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+
+                  {/* Active Indicator Bar */}
+                  {tab === t && (
+                    <span className="absolute left-0 top-0 h-full w-[3px] bg-black rounded-r" />
+                  )}
+
+                  {/* Label */}
+                  <span className="ml-1">
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </span>
+
                 </button>
               ))}
+
             </div>
 
             {/* Content */}
             <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-5">
               {tab === "profile" && (
-                <div className="space-y-5">
-                  {/* Avatar */}
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <div className="w-20 h-20 border dark:border-white rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                      {imagePreview ? (
-                        <div 
-                          className="relative w-full h-full rounded-full overflow-hidden cursor-pointer"
-                          onClick={() => {
-                            setViewerImage(user.image);
-                            setViewerOpen(true);
-                            setZoom(1);
-                          }}
+                <div className="space-y-6">
+
+                  {/* Profile Card */}
+                  <div className="bg-white border rounded-lg p-5 space-y-6">
+
+                    {/* Avatar Section */}
+                    <div className="flex flex-col sm:flex-row items-center gap-5">
+
+                      {/* Avatar */}
+                      <div className="w-24 h-24 rounded-full border overflow-hidden bg-gray-100 flex items-center justify-center shadow-sm">
+                        {imagePreview ? (
+                          <div
+                            className="relative w-full h-full cursor-pointer"
+                            onClick={() => {
+                              setViewerImage(user.image);
+                              setViewerOpen(true);
+                              setZoom(1);
+                            }}
                           >
-                          <Image
-                            src={user.image}
-                            alt={imagePreview || "User"}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="bg-black w-full h-full flex items-center justify-center">
-                          <User className="w-8 h-8 text-white" />
-                        </div>
-                      )}
-                    </div>
+                            <Image
+                              src={user.image}
+                              alt="User avatar"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <User className="w-10 h-10 text-gray-500" />
+                        )}
+                      </div>
 
-                    <div className="flex-1 w-full">
-                      <label className="block font-normal text-black dark:text-black">
-                        Change avatar
-                      </label>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <label className="inline-block cursor-pointer border dark:border-white bg-[var(--sage)] dark:bg-[var(--sage)] text-white dark:text-white text-sm px-4 py-2 rounded-md hover:bg-zinc-500 dark:hover:bg-zinc-500 transition">
-                          Choose File
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </label>
+                      {/* Upload Actions */}
+                      <div className="flex-1 w-full space-y-2">
+                        <p className="text-sm font-medium text-gray-700">
+                          Profile Picture
+                        </p>
 
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="font-normal text-red-600 hover:underline"
-                        >
-                          Remove
-                        </button>
+                        <div className="flex flex-wrap items-center gap-3">
+
+                          <label className="cursor-pointer bg-black text-white text-sm px-4 py-2 rounded-md hover:opacity-90 transition">
+                            Choose Image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileChange}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="text-sm text-red-600 hover:underline"
+                          >
+                            Remove
+                          </button>
+
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Name & Username */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="font-normal text-black dark:text-black w-full sm:w-1/3">
-                      Full Name
-                    </p>
-                    <input
-                      value={localName}
-                      onChange={(e) => setLocalName(e.target.value)}
-                      className="w-full sm:w-2/3 px-2 py-1 rounded border border-gray-300 dark:border-gray-700
-                        bg-white dark:bg-white text-gray-800 dark:text-gray-800
-                        placeholder-gray-400 dark:placeholder-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-white
-                        transition-colors duration-300"
-                    />
-                  </div>
+                    {/* Inputs */}
+                    <div className="grid gap-5">
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <p className="font-normal text-black dark:text-black w-full sm:w-1/3">
-                      Username
-                    </p>
-                    <input
-                      value={localUsername}
-                      onChange={(e) => setLocalUsername(e.target.value)}
-                      className="w-full sm:w-2/3 px-2 py-1 rounded border border-gray-300 dark:border-gray-700
-                        bg-white dark:bg-white text-gray-800 dark:text-gray-800
-                        placeholder-gray-400 dark:placeholder-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-white
-                        transition-colors duration-300"
-                    />
-                  </div>
+                      {/* Full Name */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <label className="sm:w-1/3 text-sm font-medium text-gray-700">
+                          Full Name
+                        </label>
 
-                  {/* Email */}
-                  <div>
-                    <p className="font-normal text-black dark:text-black">
-                      Email Address
-                    </p>
-                    <p className="text-gray-500 font-normal dark:text-gray-400 break-all text-sm">
-                      {user?.email}
-                    </p>
-                  </div>
+                        <input
+                          value={localName}
+                          onChange={(e) => setLocalName(e.target.value)}
+                          className="w-full sm:w-2/3 px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-black text-black"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
 
-                  {/* Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <button
-                      onClick={handleSaveProfile}
-                      disabled={savingProfile}
-                      className="bg-gray-600 text-sm text-white px-5 py-2 rounded-sm cursor-pointer hover:bg-gray-700 transition"
-                    >
-                      {savingProfile ? "Saving..." : "Save changes"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setModalOpen(false);
-                        setTab("profile");
-                      }}
-                      className="text-sm text-gray-600 dark:text-white hover:underline"
-                    >
-                      Cancel
-                    </button>
+                      {/* Username */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <label className="sm:w-1/3 text-sm font-medium text-gray-700">
+                          Username
+                        </label>
+
+                        <input
+                          value={localUsername}
+                          onChange={(e) => setLocalUsername(e.target.value)}
+                          className="w-full sm:w-2/3 px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-black text-black"
+                          placeholder="Enter username"
+                        />
+                      </div>
+
+                      {/* Email */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <p className="sm:w-1/3 text-sm font-medium text-gray-700">
+                          Email Address
+                        </p>
+
+                        <p className="w-full sm:w-2/3 text-sm text-gray-600 break-all">
+                          {user?.email}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+
+                      <button
+                        onClick={handleSaveProfile}
+                        disabled={savingProfile}
+                        className="bg-black text-white text-sm px-5 py-2 rounded-md hover:opacity-90 transition"
+                      >
+                        {savingProfile ? "Saving..." : "Save Changes"}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setModalOpen(false);
+                          setTab("profile");
+                        }}
+                        className="text-sm text-gray-600 hover:underline"
+                      >
+                        Cancel
+                      </button>
+
+                    </div>
                   </div>
                 </div>
-
               )}
 
               {/* Security */}
               {!isLoading && tab === "security" && (
-                <div className="space-y-5">
+                <div className="space-y-6">
 
-                  {/* Password Section */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <p className="font-normal text-black dark:text-black">Password</p>
-                    <button
-                      className="text-sm text-gray-600 hover:underline"
-                      onClick={() => setTab("password")}
-                    >
-                      Update password
-                    </button>
+                  {/* PASSWORD SECTION CARD */}
+                  <div className="bg-white border rounded-lg p-5 space-y-4">
+
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-800">
+                        Password Security
+                      </h3>
+
+                      <button
+                        className="text-xs text-gray-600 hover:underline"
+                        onClick={() => setTab("password")}
+                      >
+                        Change password
+                      </button>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleChangePassword} className="space-y-4">
+
+                      {/* Current Password */}
+                      <div className="relative">
+                        <input
+                          disabled={isGoogleUser}
+                          type={showCurrent ? "text" : "password"}
+                          placeholder="Current password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className={`w-full px-3 py-2 text-sm border rounded-md text-black pr-10
+                            ${isGoogleUser ? "bg-gray-100 cursor-not-allowed" : "bg-white"}
+                            focus:outline-none focus:ring-1 focus:ring-black`}
+                        />
+
+                        <button
+                          type="button"
+                          disabled={isGoogleUser}
+                          onClick={() => setShowCurrent(!showCurrent)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        >
+                          {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+
+                      {/* New Password */}
+                      <div className="relative">
+                        <input
+                          disabled={isGoogleUser}
+                          type={showNew ? "text" : "password"}
+                          placeholder="New password"
+                          value={newPassword}
+                          onChange={(e) => {
+                            if (isGoogleUser) return;
+                            const val = e.target.value;
+                            setNewPassword(val);
+                            setPasswordErrors(checkPasswordRules(val));
+                          }}
+                          className={`w-full px-3 py-2 text-sm border text-black rounded-md pr-10
+                            ${isGoogleUser ? "bg-gray-100 cursor-not-allowed" : "bg-white"}
+                            focus:outline-none focus:ring-1 focus:ring-black`}
+                        />
+
+                        <button
+                          type="button"
+                          disabled={isGoogleUser}
+                          onClick={() => setShowNew(!showNew)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        >
+                          {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+
+                      {/* Password Errors */}
+                      {passwordErrors.length > 0 && (
+                        <div className="bg-red-50 border border-red-200 p-3 rounded-md">
+                          <ul className="text-xs text-red-600 space-y-1">
+                            {passwordErrors.map((err, idx) => (
+                              <li key={idx}>• {err}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Submit */}
+                      <button
+                        type="submit"
+                        disabled={isGoogleUser || changingPass}
+                        className={`text-sm px-5 py-2 rounded-md transition
+                          ${isGoogleUser
+                            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                            : "bg-black text-white hover:opacity-90"
+                          }`}
+                      >
+                        {isGoogleUser
+                          ? "Google account (locked)"
+                          : changingPass
+                            ? "Updating..."
+                            : "Update password"}
+                      </button>
+
+                    </form>
                   </div>
 
-                  {/* Password Change Form */}
-                  <form onSubmit={handleChangePassword} className="space-y-3">
-                    {/* Current Password */}
-                    <div className="relative w-full sm:w-2/3 md:w-1/2">
-                      <input
-                        disabled={isGoogleUser}
-                        type={showCurrent ? "text" : "password"}
-                        placeholder="Current password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        className={`w-full px-3 py-2 font-normal rounded border 
-                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-white"}
-                          border-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-800
-                          placeholder-gray-400 dark:placeholder-gray-500 pr-10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-300`}
-                      />
-                      <button
-                        type="button"
-                        disabled={isGoogleUser}
-                        onClick={() => setShowCurrent(!showCurrent)}
-                        className={`absolute right-2 top-1/2 transform -translate-y-1/2
-                          ${isGoogleUser ? "text-gray-400 cursor-not-allowed" : "text-gray-500 dark:text-gray-400"}`}
-                      >
-                        {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
+                  {/* DEVICE SECTION CARD */}
+                    <ActiveDevices />
 
-                    {/* New Password */}
-                    <div className="relative w-full sm:w-2/3 md:w-1/2">
-                      <input
-                        disabled={isGoogleUser}
-                        type={showNew ? "text" : "password"}
-                        placeholder="New password"
-                        value={newPassword}
-                        onChange={(e) => {
-                          if (isGoogleUser) return;
-                          const val = e.target.value;
-                          setNewPassword(val);
-                          setPasswordErrors(checkPasswordRules(val));
-                        }}
-                        className={`w-full px-3 py-2 font-normal rounded border 
-                          ${isGoogleUser ? "bg-gray-200 dark:bg-neutral-800 opacity-60 cursor-not-allowed" : "bg-white dark:bg-white"}
-                          border-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-800
-                          placeholder-gray-400 dark:placeholder-gray-400 pr-10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-300`}
-                      />
-                      <button
-                        type="button"
-                        disabled={isGoogleUser}
-                        onClick={() => setShowNew(!showNew)}
-                        className={`absolute right-2 top-1/2 transform -translate-y-1/2
-                          ${isGoogleUser ? "text-gray-400 cursor-not-allowed" : "text-gray-500 dark:text-gray-400"}`}
-                      >
-                        {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
+                  {/* DELETE ACCOUNT */}
+                  <div className="bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                      Danger Zone
+                    </h3>
 
-                    {passwordErrors.length > 0 && (
-                      <ul className="text-xs text-red-500 space-y-1 mt-1">
-                        {passwordErrors.map((err, idx) => (
-                          <li key={idx}>• {err}</li>
-                        ))}
-                      </ul>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={isGoogleUser || changingPass}
-                      className={`text-sm px-5 py-2 rounded-md transition cursor-pointer 
-                        ${isGoogleUser ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-gray-600 text-white hover:bg-gray-700"}`}
-                    >
-                      {isGoogleUser ? "Google Account — Password Locked" 
-                                    : changingPass ? "Updating..." 
-                                    : "Update password"}
-                    </button>
-                  </form>
-
-                  {/* Active Sessions / Devices */}
-
-                  <ActiveDevices />
-
-
-                  {/* Delete Account */}
-                  <div className="mt-2 flex flex-col gap-1">
                     <DeleteAccountModal />
                   </div>
+
                 </div>
               )}
 

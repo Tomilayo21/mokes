@@ -34,7 +34,7 @@ export default function DeleteAccountModal({ triggerButtonClass = "", triggerTex
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`flex items-center gap-1 text-red-600 dark:text-red-400 text-sm hover:underline ${triggerButtonClass}`}
+        className={`flex items-center gap-1 text-red-600 text-sm hover:underline ${triggerButtonClass}`}
       >
         <AlertCircle className="w-4 h-4" />
         {triggerText}
@@ -50,22 +50,22 @@ export default function DeleteAccountModal({ triggerButtonClass = "", triggerTex
         <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
 
         {/* Panel */}
-        <Dialog.Panel className="relative bg-white dark:bg-neutral-900 rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-xl flex flex-col gap-4">
+        <Dialog.Panel className="relative bg-white rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-xl flex flex-col gap-4">
           
           {/* Header */}
           <div className="flex justify-between items-center">
-            <Dialog.Title className="text-lg font-normal text-black dark:text-white">
+            <Dialog.Title className="text-lg font-medium text-black">
               Confirm Deletion
             </Dialog.Title>
-            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
+            <button onClick={() => setIsOpen(false)} className="text-gray-500 cursor-pointer hover:text-gray-700">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Warning */}
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+          <div className="flex items-center gap-2 text-red-600">
             <AlertCircle className="w-5 h-5" />
-            <p className="text-sm font-thin">
+            <p className="text-sm font-normal">
               This will permanently delete your account. Are you sure?
             </p>
           </div>
@@ -74,14 +74,14 @@ export default function DeleteAccountModal({ triggerButtonClass = "", triggerTex
           <div className="flex justify-end gap-3 mt-2">
             <button
               onClick={() => setIsOpen(false)}
-              className="text-sm text-gray-600 dark:text-white hover:underline"
+              className="text-sm cursor-pointer text-gray-600 hover:underline"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={loading}
-              className="px-5 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm disabled:opacity-70"
+              className="px-5 py-2 cursor-pointer rounded-sm bg-red-600 hover:bg-red-700 text-white text-sm disabled:opacity-70"
             >
               {loading ? "Deleting..." : "Delete"}
             </button>

@@ -459,7 +459,7 @@ const HomeProductsSkeleton = () => {
 
 const OrdersSkeleton = () => {
   return (
-    <div className="w-full pt-12 px-6 md:px-16 lg:px-32 space-y-8">
+    <div className="w-full pt-20 px-6 md:px-16 lg:px-32 space-y-8">
 
       {/* PAGE HEADER */}
       <div className="text-center space-y-2">

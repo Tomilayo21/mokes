@@ -27,7 +27,6 @@ export default function Page() {
 }
 
 const AllProducts = () => {
-  // const { products, loading, themeColor, secondaryColor, tertiaryColor, fontSize, layoutStyle, layoutStyle: effectiveLayout } = useAppContext();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -88,7 +87,7 @@ const AllProducts = () => {
       });
     }
 
-    // ✅ unified filter (category + subcategory + color + name)
+    // unified filter
     if (category) {
       filtered = filtered.filter(
         (p) => p.category?.toLowerCase() === category.toLowerCase()
@@ -108,6 +107,7 @@ const AllProducts = () => {
         (p) => p.color?.toLowerCase() === color.toLowerCase()
       );
     }
+
     filtered = filtered.filter((p) => {
       const offerPrice =
         typeof p.offerPrice === "string"
@@ -252,90 +252,91 @@ const AllProducts = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="w-full flex justify-center mt-12 mb-16">
-            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white shadow border max-w-fit">
+            <div className="flex items-center gap-1 px-3 py-2 rounded-2xl bg-white/80 backdrop-blur-md shadow-sm border border-zinc-200">
+
               {/* Prev */}
               <button
                 onClick={() => changePage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`flex items-center gap-1 px-3 py-1 rounded border text-sm font-medium transition ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
                   currentPage === 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-orange-100"
+                    ? "text-zinc-300 cursor-not-allowed"
+                    : "text-zinc-700 hover:bg-zinc-100"
                 }`}
               >
-                <ChevronLeft className="w-4 h-4" /> Prev
+                <ChevronLeft className="w-4 h-4" />
+                Previous
               </button>
 
-              {/* Page numbers */}
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNum = index + 1;
+              {/* Divider */}
+              <div className="w-px h-5 bg-zinc-200 mx-1" />
 
-                if (totalPages <= 7) {
+              {/* Pages */}
+              <div className="flex items-center gap-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+
+                  const isActive = pageNum === currentPage;
+
+                  const isVisible =
+                    totalPages <= 7 ||
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+
+                  if (!isVisible) {
+                    if (
+                      (pageNum === 2 && currentPage > 4) ||
+                      (pageNum === totalPages - 1 && currentPage < totalPages - 3)
+                    ) {
+                      return (
+                        <span
+                          key={`dots-${pageNum}`}
+                          className="px-2 text-zinc-400 select-none"
+                        >
+                          …
+                        </span>
+                      );
+                    }
+                    return null;
+                  }
+
                   return (
                     <button
                       key={pageNum}
                       onClick={() => changePage(pageNum)}
-                      className={`px-3 py-1 rounded border text-sm font-medium transition ${
-                        pageNum === currentPage
-                          ? "bg-orange-600 text-white"
-                          : "bg-white text-gray-800 hover:bg-orange-100"
+                      className={`min-w-[36px] h-9 flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-200
+                      ${
+                        isActive
+                          ? "bg-[var(--sage)] text-white shadow-sm scale-105"
+                          : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                       }`}
                     >
                       {pageNum}
                     </button>
                   );
-                }
+                })}
+              </div>
 
-                const isVisible =
-                  pageNum === 1 ||
-                  pageNum === totalPages ||
-                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
-
-                if (isVisible) {
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => changePage(pageNum)}
-                      className={`px-3 py-1 rounded border text-sm font-medium transition ${
-                        pageNum === currentPage
-                          ? "bg-orange-600 text-white"
-                          : "bg-white text-gray-800 hover:bg-orange-100"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                }
-
-                if (
-                  (pageNum === 2 && currentPage > 4) ||
-                  (pageNum === totalPages - 1 && currentPage < totalPages - 3)
-                ) {
-                  return (
-                    <span
-                      key={pageNum}
-                      className="px-2 text-gray-400 select-none"
-                    >
-                      ...
-                    </span>
-                  );
-                }
-
-                return null;
-              })}
+              {/* Divider */}
+              <div className="w-px h-5 bg-zinc-200 mx-1" />
 
               {/* Next */}
               <button
                 onClick={() => changePage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`flex items-center gap-1 px-3 py-1 rounded border text-sm font-medium transition ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
                   currentPage === totalPages
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-orange-100"
+                    ? "text-zinc-300 cursor-not-allowed"
+                    : "text-zinc-700 hover:bg-zinc-100"
                 }`}
               >
-                Next <ChevronRight className="w-4 h-4" />
+                Next
+                <ChevronRight className="w-4 h-4" />
               </button>
+
             </div>
           </div>
         )}

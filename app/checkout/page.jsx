@@ -35,7 +35,7 @@ export default function CheckoutPage() {
   const [useShippingAsBilling, setUseShippingAsBilling] = useState(true);
   const [saveInfo, setSaveInfo] = useState(false);
   const [processing, setProcessing] = useState(false);
-
+  const [processingStep, setProcessingStep] = useState("idle");
   const RADIUS_FILTERS = {
     tight: 5,
     normal: 10,
@@ -174,7 +174,7 @@ const pickupLocations = [
       const res = await axios.get("/api/user/get-address");
       if (res.data.success) {
         setUserAddresses(res.data.addresses);
-        setSelectedAddress(res.data.addresses?.[0] || null);
+        setSelectedAddress(res.data.addresses?.[0] ?? null);
       }
     };
 
@@ -232,6 +232,7 @@ const pickupLocations = [
       eta: formatDriveTime(distance),
     };
   };
+
   const filterByRadius = (stores, userLocation, radiusKm) => {
     return stores.filter((store) => {
       const distance = getDistanceKm(
@@ -443,9 +444,15 @@ const pickupLocations = [
 
     if (res.data.success) {
       setUserAddresses(res.data.addresses);
-      setSelectedAddress(res.data.addresses?.[0] || null);
+      setSelectedAddress(res.data.addresses?.[0] ?? null);
     }
   };
+
+  useEffect(() => {
+    if (!selectedAddress && userAddresses.length > 0) {
+      setSelectedAddress(userAddresses[0]);
+    }
+  }, [userAddresses]);
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this address?")) return;
@@ -516,36 +523,24 @@ const pickupLocations = [
   };
 
   const handlePayment = async (method) => {
-    if (!selectedAddress) {
-      toast.custom((t) => (
-        <div
-          className={`max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-gray-900 transform transition-all duration-300 ${
-            t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-          }`}
-        >
-          Please select an address
-        </div>
-      ), { duration: 2500, position: "top-right" });
-
-      return;
-    }
-
-    if (!checkoutData) {
-      toast.custom((t) => (
-        <div
-          className={`max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-gray-900 transform transition-all duration-300 ${
-            t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-          }`}
-        >
-          Checkout data missing
-        </div>
-      ), { duration: 2500, position: "top-right" });
-
-      return;
-    }
+    if (!selectedAddress || !checkoutData) return;
 
     if (processing) return;
+
+    const itemsArray = Object.entries(checkoutData.cartItems).map(
+      ([productId, sizes]) => {
+        const quantity = Object.values(sizes).reduce((a, b) => a + b, 0);
+
+        return {
+          product: productId,  
+          quantity,            
+          sizes,              
+        };
+      }
+    );
+
     setProcessing(true);
+    setProcessingStep("creating");
 
     try {
       const payload = {
@@ -560,19 +555,6 @@ const pickupLocations = [
         },
       };
 
-      // helper toast
-      const redirectToast = (text) => {
-        toast.custom((t) => (
-          <div
-            className={`max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-gray-900 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            {text}
-          </div>
-        ), { duration: 2000, position: "top-right" });
-      };
-
       // 🔹 STRIPE
       if (method === "stripe") {
         const { data } = await axios.post("/api/checkout/stripe", {
@@ -583,96 +565,92 @@ const pickupLocations = [
 
         if (!data?.url) throw new Error("Stripe URL missing");
 
+        setProcessingStep("redirecting");
+
         sessionStorage.setItem(
           "pendingOrder",
           JSON.stringify({
             addressId: selectedAddress._id,
             paymentMethod: "stripe",
+            items: itemsArray,
+            reference: data.reference,
           })
         );
 
-        redirectToast("Redirecting to Stripe...");
-        window.location.href = data.url;
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 700);
+
         return;
       }
 
       // 🔹 PAYSTACK
       if (method === "paystack") {
-        const flattenItems = Object.entries(checkoutData.cartItems).reduce(
-        (acc, [productId, sizes]) => {
-          const totalQty = Object.values(sizes).reduce((a, b) => a + b, 0);
-          acc[productId] = totalQty;
-          return acc;
-        },
-        {}
-      );
+        setProcessingStep("creating");
+
         const { data } = await axios.post("/api/checkout/paystack", {
-        items: flattenItems,
-        address: selectedAddress,
-      });
+          items: itemsArray,
+          address: selectedAddress,
+        });
+
         if (!data?.authorizationUrl) throw new Error("Paystack init failed");
+
+        setProcessingStep("redirecting");
 
         sessionStorage.setItem(
           "pendingOrder",
           JSON.stringify({
             addressId: selectedAddress._id,
             paymentMethod: "paystack",
+            items: itemsArray,
+            reference: data.reference,
           })
         );
 
-        redirectToast("Redirecting to Paystack...");
-        window.location.href = data.authorizationUrl;
+        setTimeout(() => {
+          window.location.href = data.authorizationUrl;
+        }, 700);
+
         return;
       }
 
       // 🔹 PAYPAL
       if (method === "paypal") {
+        setProcessingStep("creating");
+
         const { data } = await axios.post("/api/payment/paypal", payload);
 
         if (!data?.url) throw new Error("PayPal URL missing");
+
+        setProcessingStep("redirecting");
 
         sessionStorage.setItem(
           "pendingOrder",
           JSON.stringify({
             addressId: selectedAddress._id,
             paymentMethod: "paypal",
+            items: itemsArray,
+            reference: data.reference,
           })
         );
 
-        redirectToast("Redirecting to PayPal...");
-        window.location.href = data.url;
-        return;
-      }
-
-      // 🔹 KLARNA
-      if (method === "klarna") {
-        toast.custom((t) => (
-          <div
-            className={`max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-gray-900 transform transition-all duration-300 ${
-              t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            Klarna is not available yet
-          </div>
-        ), { duration: 2500, position: "top-right" });
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 700);
 
         return;
       }
 
       throw new Error("Invalid payment method");
     } catch (err) {
-      toast.custom((t) => (
-        <div
-          className={`max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-red-600 transform transition-all duration-300 ${
-            t.visible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-          }`}
-        >
+      toast.custom(() => (
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-4 text-sm font-medium text-red-600">
           {err.message || "Payment failed"}
         </div>
-      ), { duration: 2500, position: "top-right" });
-
+      ));
     } finally {
       setProcessing(false);
+      setProcessingStep("idle");
     }
   };
 
@@ -837,83 +815,78 @@ if (checkoutError || !checkoutData) {
                     {/* ADDRESS LIST */}
                     <div className="space-y-4">
                       {userAddresses.map((addr, index) => {
-                        const isOpen = selectedAddress?._id === addr._id;
+                        const isSelected = selectedAddress?._id === addr._id;
 
                         return (
-                          <div
+                          <label
                             key={addr._id}
-                            className={`bg-white border rounded-lg p-4 transition ${
-                              isOpen ? "border-black" : "border-gray-200"
+                            className={`block cursor-pointer rounded-xl border p-4 transition ${
+                              isSelected
+                                ? "border-[var(--sage)] bg-green-50/30"
+                                : "border-gray-200 hover:border-gray-300"
                             }`}
                           >
                             {/* HEADER ROW */}
-                            <div className="flex justify-between items-center mb-3">
-                              <p className="text-sm font-medium text-black">
-                                Shipping Address {index + 1}
-                              </p>
+                            <div className="flex items-start justify-between gap-4">
 
+                              {/* RADIO + TITLE */}
+                              <div className="flex items-start gap-3">
+                                
+                                <input
+                                  type="radio"
+                                  name="shippingAddress"
+                                  checked={isSelected}
+                                  onChange={() => setSelectedAddress(addr)}
+                                  className="mt-1 accent-[var(--sage)]"
+                                />
+
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    Shipping Address {index + 1}
+                                  </p>
+
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {addr.area}, {addr.city}, {addr.state}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* ACTIONS */}
                               <div className="flex items-center gap-3">
                                 <button
-                                  onClick={() =>
-                                    setSelectedAddress(isOpen ? null : addr)
-                                  }
-                                  className="text-sm text-orange-600 font-medium"
-                                >
-                                  {isOpen ? "Hide" : "Show"}
-                                </button>
-
-                                <button
                                   onClick={(e) => {
-                                    e.stopPropagation();
+                                    e.preventDefault();
                                     setEditingAddress(addr);
                                     setShowEditModal(true);
                                   }}
-                                  className="text-sm text-blue-600 font-medium"
+                                  className="text-xs font-medium text-[var(--sage)] hover:underline"
                                 >
                                   Edit
                                 </button>
 
                                 <button
-                                  onClick={() => handleDelete(addr._id)}
-                                  className="text-sm text-red-600 font-medium"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleDelete(addr._id);
+                                  }}
+                                  className="text-xs font-medium text-red-500 hover:underline"
                                 >
                                   Delete
                                 </button>
                               </div>
                             </div>
 
-                            {/* CONTENT */}
-                            {isOpen && (
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <p className="text-xs text-gray-700">Address</p>
-                                  <p className="text-sm font-medium text-gray-400">{addr.area}</p>
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-gray-700">City</p>
-                                  <p className="text-sm font-medium text-gray-400">{addr.city}</p>
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-gray-700">State</p>
-                                  <p className="text-sm font-medium text-gray-400">{addr.state}</p>
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-gray-700">Country</p>
-                                  <p className="text-sm font-medium text-gray-400">{addr.country}</p>
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-gray-700">Phone Number</p>
-                                  <p className="text-sm font-medium text-gray-500">
-                                    {addr.phoneNumber}
-                                  </p>
-                                </div>
+                            {/* DETAILS (only for selected) */}
+                            {isSelected && (
+                              <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-gray-600 border-t pt-3">
+                                <p><span className="text-gray-400">Phone:</span> {addr.phoneNumber}</p>
+                                <p><span className="text-gray-400">Country:</span> {addr.country}</p>
+                                <p className="col-span-2">
+                                  <span className="text-gray-400">Full:</span> {addr.area}
+                                </p>
                               </div>
                             )}
-                          </div>
+                          </label>
                         );
                       })}
                     </div>
@@ -1111,6 +1084,32 @@ if (checkoutError || !checkoutData) {
           setSelectedAddress(updated);
         }}
       />
+
+      {processing && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          
+          <div className="bg-white rounded-xl px-8 py-6 flex flex-col items-center gap-3 shadow-lg w-[260px]">
+
+            {/* SPINNER */}
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+
+              <div className="absolute inset-0 rounded-full border-4 border-t-black border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+            </div>
+
+            {/* TEXT */}
+            <p className="text-sm font-medium text-gray-700 text-center">
+              {processingStep === "creating" && "Creating order..."}
+              {processingStep === "redirecting" && "Redirecting to payment..."}
+            </p>
+
+            <p className="text-xs text-gray-400 text-center">
+              Please do not refresh this page
+            </p>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
