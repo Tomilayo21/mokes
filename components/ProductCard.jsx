@@ -235,7 +235,9 @@ const ProductCard = ({ product, currency }) => {
             <span className="uppercase tracking-[0.2em] text-xs text-gray-500">
               {product.brand}
             </span>
-            {"  "}
+          </h3>
+
+          <h3 className="text-sm md:text-base font-light tracking-wide text-gray-900 leading-snug">
             <span className="text-gray-900">
               {toTitleCase(product.name)}
             </span>

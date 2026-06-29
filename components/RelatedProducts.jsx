@@ -136,67 +136,43 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div
-      onClick={handleCardClick}
-      onMouseDown={handleLongPressStart}
-      onTouchStart={handleLongPressStart}
-      onMouseUp={handleLongPressEnd}
-      onMouseLeave={handleLongPressEnd}
-      onTouchEnd={handleLongPressEnd}
-      className="
-        group w-full cursor-pointer overflow-hidden
-        rounded-2xl bg-white border border-zinc-200
-        shadow-sm hover:shadow-xl
-        transition-all duration-500 hover:-translate-y-1
-      "
-    >
-      {/* Image */}
-      <div className="relative h-[240px] md:h-[320px] w-full bg-zinc-50 overflow-hidden flex items-center justify-center">
-        {/* subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-zinc-50 to-zinc-100 opacity-70" />
+    <div className="w-full group cursor-pointer overflow-hidden rounded-sm bg-white border border-zinc-200 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full">
+
+      {/* IMAGE */}
+      <div className="relative w-full aspect-[3/4] bg-zinc-50 overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-zinc-50 to-zinc-100 opacity-60" />
 
         <Image
           src={product.image?.[0] || "/placeholder.jpg"}
           alt={product.name || "Product"}
           width={300}
           height={300}
-          className="
-            relative z-10 w-[78%] h-auto object-contain
-            transition-transform duration-500
-            group-hover:scale-105
-          "
+          className="relative z-10 w-[78%] h-auto object-contain transition-transform duration-500 group-hover:scale-105"
         />
       </div>
 
-      {/* Details */}
-      <div className="p-4 md:p-5 flex flex-col gap-3">
-        {/* Product Name */}
-        <h3
-          className="
-            text-sm md:text-base
-            font-medium
-            text-zinc-900
-            tracking-wide
-            line-clamp-2
-            min-h-[42px]
-          "
-        >
+      {/* DETAILS */}
+      <div className="p-5 md:p-6 flex flex-col gap-2 flex-1 justify-between">
+
+        <h3 className="text-sm md:text-base font-medium text-zinc-900 tracking-wide line-clamp-2 leading-snug md:leading-normal min-h-[56px] md:min-h-[52px]">
           {product.name}
         </h3>
 
-        {/* Price */}
-        <div className="flex items-end justify-between">
-          <p className="text-lg md:text-xl font-light text-black">
+        <div className="mt-1 flex flex-col md:flex-row md:items-end md:justify-between">
+
+          <p className="text-lg font-light text-black">
             {currency}
             {Number(product.offerPrice).toLocaleString()}
           </p>
 
-          {/* Optional badge */}
-          <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-400 mt-1 md:mt-0">
             Available
           </span>
+
         </div>
+
       </div>
+
     </div>
   );
 };

@@ -22,7 +22,7 @@ const Products = () => {
   // }
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <p></p>;
   }
 
   const products = data?.products || [];
