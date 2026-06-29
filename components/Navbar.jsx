@@ -417,7 +417,7 @@ export default function Navbar() {
                     <div className="flex-1 text-black no-scrollbar min-h-0 overflow-y-auto px-4 py-6 text-sm uppercase space-y-2">
 
                     <Link href="/" className="block py-3">Home</Link>
-                    <Link href="/about" className="block py-3">About Us</Link>
+                    <Link href="/info/about" className="block py-3">About Us</Link>
                     <Link href="/collections/all" className="block py-3">Shop</Link>
                 
                     {(menuData[genderTab] || []).map((subcategory) => (

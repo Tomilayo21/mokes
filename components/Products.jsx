@@ -71,7 +71,7 @@ const Products = () => {
         ) : (
           products.length > 8 && (
             <button
-              onClick={() => router.push('/collections')}
+              onClick={() => router.push('/collections/all')}
               className="px-12 py-2.5 mt-12 cursor-pointer border rounded text-gray-500/70 hover:bg-slate-50/90 transition"
             >
               See all

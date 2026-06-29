@@ -565,8 +565,6 @@ const pickupLocations = [
 
         if (!data?.url) throw new Error("Stripe URL missing");
 
-        setProcessingStep("redirecting");
-
         sessionStorage.setItem(
           "pendingOrder",
           JSON.stringify({
@@ -577,9 +575,11 @@ const pickupLocations = [
           })
         );
 
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 700);
+        setProcessingStep("redirecting");
+
+        requestAnimationFrame(() => {
+          window.location.assign(data.url);
+        });
 
         return;
       }
@@ -588,6 +588,8 @@ const pickupLocations = [
       if (method === "paystack") {
         setProcessingStep("creating");
 
+        console.time("paystack");
+
         const { data } = await axios.post("/api/checkout/paystack", {
           items: itemsArray,
           address: selectedAddress,
@@ -595,7 +597,6 @@ const pickupLocations = [
 
         if (!data?.authorizationUrl) throw new Error("Paystack init failed");
 
-        setProcessingStep("redirecting");
 
         sessionStorage.setItem(
           "pendingOrder",
@@ -607,10 +608,13 @@ const pickupLocations = [
           })
         );
 
-        setTimeout(() => {
-          window.location.href = data.authorizationUrl;
-        }, 700);
+        setProcessingStep("redirecting");
 
+        console.timeLog("paystack", "API returned");
+
+        requestAnimationFrame(() => {
+          window.location.assign(data.authorizationUrl);
+        });
         return;
       }
 
@@ -622,8 +626,6 @@ const pickupLocations = [
 
         if (!data?.url) throw new Error("PayPal URL missing");
 
-        setProcessingStep("redirecting");
-
         sessionStorage.setItem(
           "pendingOrder",
           JSON.stringify({
@@ -634,10 +636,11 @@ const pickupLocations = [
           })
         );
 
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 700);
+        setProcessingStep("redirecting");
 
+        requestAnimationFrame(() => {
+          window.location.assign(data.url);
+        });
         return;
       }
 
@@ -648,9 +651,6 @@ const pickupLocations = [
           {err.message || "Payment failed"}
         </div>
       ));
-    } finally {
-      setProcessing(false);
-      setProcessingStep("idle");
     }
   };
 
