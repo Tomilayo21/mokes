@@ -259,6 +259,7 @@ const ProductListPanel = () => {
   const handleProductUpdate = async (product) => {
     try {
       setIsUpdating(true);
+      
       const formData = new FormData();
 
       formData.append("name", product.name);
@@ -328,7 +329,7 @@ const ProductListPanel = () => {
     } catch (err) {
       console.error(err);
 
-      // ❌ Custom Error Toast
+      //Custom Error Toast
       toast.custom(
         (t) => (
           <div
@@ -397,6 +398,9 @@ const ProductListPanel = () => {
       "seasonal-gifts",
     ],
   };
+
+  const getTotalStock = (sizes = []) =>
+    sizes.reduce((sum, s) => sum + Number(s.stock || 0), 0);
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between bg-gray-50">
@@ -823,378 +827,390 @@ const ProductListPanel = () => {
 
         {/* Modal Pop-Up */}
         {openProduct && editableProduct && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-            <div className="bg-white rounded-sm p-6 max-w-2xl w-full relative space-y-6 text-sm max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4"> 
+            <div className="bg-white w-full max-w-2xl h-[90vh] flex flex-col rounded-sm shadow-xl overflow-hidden">
 
-              {/* Close Button */}
-              <button
-                onClick={() => setOpenProduct(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer transition"
-              >
-                ✖
-              </button>
+              <div className="flex justify-between items-center p-6 border-b bg-white shrink-0">
+                <h2 className="text-xl tracking-wide uppercase font-normal text-gray-900">
+                  Edit Product
+                </h2>
 
-              {/* Title */}
-              <h2 className="text-xl tracking-wide uppercase font-normal text-gray-900 border-b pb-3">
-                Edit Product
-              </h2>
+                <button
+                  onClick={() => setOpenProduct(null)}
+                  className="text-gray-500 hover:text-red-500 text-xl cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
 
-              {/* Product Info Section */}
-              <div className="space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
+                {/* Product Info Section */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input
+                      type="text"
+                      value={editableProduct.name}
+                      onChange={(e) =>
+                        setEditableProduct({ ...editableProduct, name: e.target.value })
+                      }
+                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Category */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
+                      <select
+                        value={editableProduct.category}
+                        onChange={(e) =>
+                          setEditableProduct({
+                            ...editableProduct,
+                            category: e.target.value,
+                          })
+                        }
+                        className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                      >
+                        <option value="" disabled>Select Category</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="homegifts">Home and Gifts</option>
+                      </select>
+                    </div>
+
+                    {/* SubCategory */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        SubCategory
+                      </label>
+                      <select
+                        value={editableProduct.subcategory}
+                        onChange={(e) =>
+                          setEditableProduct({
+                            ...editableProduct,
+                            subcategory: e.target.value,
+                          })
+                        }
+                        className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                      >
+                        <option value="" disabled>
+                          Select Subcategory
+                        </option>
+
+                        {(subcategoryMap[editableProduct.category] || []).map((item) => (
+                          <option key={item} value={item}>
+                            {item.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Brand */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                      <select
+                        value={editableProduct.brand}
+                        onChange={(e) =>
+                          setEditableProduct({ ...editableProduct, brand: e.target.value })
+                        }
+                        className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                      >
+                        <option value="" disabled>Select Brand</option>
+                        <option value="Nike">Nike</option>
+                        <option value="Adidas">Adidas</option>
+                        <option value="Reebok">Reebok</option>
+                        <option value="Puma">Puma</option>
+                        <option value="Converse">Converse</option>
+                        <option value="Reebok">Reebok</option>
+                        <option value="Uniqlo">Uniqlo</option>
+                        <option value="H&M">H&M</option>
+                        <option value="Zara">Zara</option>
+                        <option value="Supreme">Supreme</option>
+                        <option value="Carhartt-WIP">Carhartt WIP</option>
+                        <option value="The-North-Face">The North Face</option>
+                        <option value="Vans">Vans</option>
+                        <option value="New-Balance">New Balance</option>
+                        <option value="Under-Armour">Under Armour</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Color */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Color
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Enter product color"
+                      value={editableProduct.color || ""}
+                      onChange={(e) =>
+                        setEditableProduct({
+                          ...editableProduct,
+                          color: e.target.value,
+                        })
+                      }
+                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Pricing Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-gray-300 pt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ({currency})</label>
+                    <input
+                      id="product-price"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="0"
+                      className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                      value={
+                        editableProduct.price
+                          ? Number(editableProduct.price).toLocaleString()
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/,/g, "");
+
+                        if (/^\d*$/.test(rawValue)) {
+                          setEditableProduct({
+                            ...editableProduct,
+                            price: rawValue === "" ? "" : rawValue, // store raw number string
+                          });
+                        }
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Offer Price ({currency})</label>
+                    <input
+                      id="product-offer-price"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="0"
+                      className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
+                      value={
+                        editableProduct.offerPrice
+                          ? Number(editableProduct.offerPrice).toLocaleString()
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/,/g, "");
+
+                        if (/^\d*$/.test(rawValue)) {
+                          setEditableProduct({
+                            ...editableProduct,
+                            offerPrice: rawValue === "" ? "" : rawValue,
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Stock */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={editableProduct.name}
-                    onChange={(e) =>
-                      setEditableProduct({ ...editableProduct, name: e.target.value })
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Size Inventory
+                  </label>
+
+                  <div className="space-y-3">
+                    {editableProduct.sizes?.map((item, index) => (
+                      <div
+                        key={item.size}
+                        className="flex items-center gap-4"
+                      >
+                        <span className="w-24 text-black">{item.size}</span>
+
+                        <input
+                          type="number"
+                          min="0"
+                          value={item.stock}
+                          onChange={(e) => {
+                            const updatedSizes = [...editableProduct.sizes];
+
+                            updatedSizes[index] = {
+                              ...updatedSizes[index],
+                              stock: Number(e.target.value),
+                            };
+
+                            const totalStock = getTotalStock(updatedSizes);
+
+                            setEditableProduct({
+                              ...editableProduct,
+                              sizes: updatedSizes,
+                              visible: totalStock > 0, // 👈 AUTO TOGGLE
+                            });
+                          }}
+                          className="border text-black px-3 py-2 rounded-sm w-28"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <TiptapEditor
+                    description={editableProduct.description}
+                    setDescription={(value) =>
+                      setEditableProduct({ ...editableProduct, description: value })
                     }
-                    className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Category */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={editableProduct.category}
-                      onChange={(e) =>
-                        setEditableProduct({
-                          ...editableProduct,
-                          category: e.target.value,
-                        })
-                      }
-                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                    >
-                      <option value="" disabled>Select Category</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="homegifts">Home and Gifts</option>
-                    </select>
-                  </div>
-
-                  {/* SubCategory */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      SubCategory
-                    </label>
-                    <select
-                      value={editableProduct.subcategory}
-                      onChange={(e) =>
-                        setEditableProduct({
-                          ...editableProduct,
-                          subcategory: e.target.value,
-                        })
-                      }
-                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                    >
-                      <option value="" disabled>
-                        Select Subcategory
-                      </option>
-
-                      {(subcategoryMap[editableProduct.category] || []).map((item) => (
-                        <option key={item} value={item}>
-                          {item.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Brand */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-                    <select
-                      value={editableProduct.brand}
-                      onChange={(e) =>
-                        setEditableProduct({ ...editableProduct, brand: e.target.value })
-                      }
-                      className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                    >
-                      <option value="" disabled>Select Brand</option>
-                      <option value="Nike">Nike</option>
-                      <option value="Adidas">Adidas</option>
-                      <option value="Reebok">Reebok</option>
-                      <option value="Puma">Puma</option>
-                      <option value="Converse">Converse</option>
-                      <option value="Reebok">Reebok</option>
-                      <option value="Uniqlo">Uniqlo</option>
-                      <option value="H&M">H&M</option>
-                      <option value="Zara">Zara</option>
-                      <option value="Supreme">Supreme</option>
-                      <option value="Carhartt-WIP">Carhartt WIP</option>
-                      <option value="The-North-Face">The North Face</option>
-                      <option value="Vans">Vans</option>
-                      <option value="New-Balance">New Balance</option>
-                      <option value="Under-Armour">Under Armour</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Color */}
+                {/* Visibility */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Color
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder="Enter product color"
-                    value={editableProduct.color || ""}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+                  <select
+                    value={editableProduct.visible ? "visible" : "hidden"}
                     onChange={(e) =>
                       setEditableProduct({
                         ...editableProduct,
-                        color: e.target.value,
+                        visible: e.target.value === "visible",
                       })
                     }
                     className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                  />
+                  >
+                    <option value="visible">Visible</option>
+                    <option value="hidden">Hidden</option>
+                  </select>
                 </div>
-              </div>
 
-              {/* Pricing Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-gray-300 pt-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ({currency})</label>
-                  <input
-                    id="product-price"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                    value={
-                      editableProduct.price
-                        ? Number(editableProduct.price).toLocaleString()
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/,/g, "");
+                {/* Created Date */}
+                {openProduct.date ? (
+                  <div className="text-xs text-gray-500">
+                    Created {new Date(openProduct.date).toLocaleString()} ({dayjs(openProduct.date).fromNow()})
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400">Created date not available</div>
+                )}
 
-                      if (/^\d*$/.test(rawValue)) {
-                        setEditableProduct({
-                          ...editableProduct,
-                          price: rawValue === "" ? "" : rawValue, // store raw number string
-                        });
-                      }
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Offer Price ({currency})</label>
-                  <input
-                    id="product-offer-price"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    className="w-full mt-1 placeholder:text-gray-400 text-black py-2.5 px-3 rounded-sm border border-gray-300 outline-none focus:ring-2 focus:ring-[var(--sage)]"
-                    value={
-                      editableProduct.offerPrice
-                        ? Number(editableProduct.offerPrice).toLocaleString()
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/,/g, "");
+                {/* Images */}
+                <div className="border-t border-gray-300 pt-4">
+                  <p className="text-base font-medium text-gray-700 mb-1">Product Images</p>
+                  <div className="flex flex-wrap items-start gap-3">
+                    {[...(editableProduct.image || []), ...(editableProduct.newImagesPreview || [])].map((img, index) => {
+                      const totalExisting = editableProduct.image?.length || 0;
+                      const isNew = index >= totalExisting;
+                      const realIndex = isNew ? index - totalExisting : index;
 
-                      if (/^\d*$/.test(rawValue)) {
-                        setEditableProduct({
-                          ...editableProduct,
-                          offerPrice: rawValue === "" ? "" : rawValue,
-                        });
-                      }
-                    }}
-                  />
-                </div>
-              </div>
+                      return (
+                        <div key={index} className="relative w-24 h-24 flex-shrink-0 group">
+                          <div className="w-24 h-24 border border-gray-300 rounded-sm overflow-hidden relative shadow-sm">
+                            <Image
+                              src={typeof img === "string" ? img : URL.createObjectURL(img)}
+                              alt={`image-${index}`}
+                              width={96}
+                              height={96}
+                              className="object-cover w-full h-full group-hover:scale-105 transition"
+                            />
 
-              {/* Stock */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Size Inventory
-                </label>
+                            {/* Primary Toggle */}
+                            <button
+                              onClick={() => {
+                                const allImages = [
+                                  ...(editableProduct.image || []),
+                                  ...(editableProduct.newImagesPreview || []),
+                                ];
+                                const selected = allImages[index];
+                                const reordered = [selected, ...allImages.filter((_, i) => i !== index)];
 
-                <div className="space-y-3">
-                  {editableProduct.sizes?.map((item, index) => (
-                    <div
-                      key={item.size}
-                      className="flex items-center gap-4"
-                    >
-                      <span className="w-24 text-black">{item.size}</span>
-
-                      <input
-                        type="number"
-                        min="0"
-                        value={item.stock}
-                        onChange={(e) => {
-                          const updatedSizes = [...editableProduct.sizes];
-
-                          updatedSizes[index] = {
-                            ...updatedSizes[index],
-                            stock: Number(e.target.value),
-                          };
-
-                          setEditableProduct({
-                            ...editableProduct,
-                            sizes: updatedSizes,
-                          });
-                        }}
-                        className="border text-black px-3 py-2 rounded-sm w-28"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <TiptapEditor
-                  description={editableProduct.description}
-                  setDescription={(value) =>
-                    setEditableProduct({ ...editableProduct, description: value })
-                  }
-                />
-              </div>
-
-              {/* Visibility */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
-                <select
-                  value={editableProduct.visible ? "visible" : "hidden"}
-                  onChange={(e) =>
-                    setEditableProduct({
-                      ...editableProduct,
-                      visible: e.target.value === "visible",
-                    })
-                  }
-                  className="w-full text-black px-3 py-2 border rounded-sm focus:ring-2 focus:ring-[var(--sage)] outline-none"
-                >
-                  <option value="visible">Visible</option>
-                  <option value="hidden">Hidden</option>
-                </select>
-              </div>
-
-              {/* Created Date */}
-              {openProduct.date ? (
-                <div className="text-xs text-gray-500">
-                  Created {new Date(openProduct.date).toLocaleString()} ({dayjs(openProduct.date).fromNow()})
-                </div>
-              ) : (
-                <div className="text-xs text-gray-400">Created date not available</div>
-              )}
-
-              {/* Images */}
-              <div className="border-t border-gray-300 pt-4">
-                <p className="text-base font-medium text-gray-700 mb-1">Product Images</p>
-                <div className="flex flex-wrap items-start gap-3">
-                  {[...(editableProduct.image || []), ...(editableProduct.newImagesPreview || [])].map((img, index) => {
-                    const totalExisting = editableProduct.image?.length || 0;
-                    const isNew = index >= totalExisting;
-                    const realIndex = isNew ? index - totalExisting : index;
-
-                    return (
-                      <div key={index} className="relative w-24 h-24 flex-shrink-0 group">
-                        <div className="w-24 h-24 border border-gray-300 rounded-sm overflow-hidden relative shadow-sm">
-                          <Image
-                            src={typeof img === "string" ? img : URL.createObjectURL(img)}
-                            alt={`image-${index}`}
-                            width={96}
-                            height={96}
-                            className="object-cover w-full h-full group-hover:scale-105 transition"
-                          />
-
-                          {/* Primary Toggle */}
-                          <button
-                            onClick={() => {
-                              const allImages = [
-                                ...(editableProduct.image || []),
-                                ...(editableProduct.newImagesPreview || []),
-                              ];
-                              const selected = allImages[index];
-                              const reordered = [selected, ...allImages.filter((_, i) => i !== index)];
-
-                              const newImageArray = reordered.filter((i) => typeof i === "string");
-                              const newFileArray = reordered.filter((i) => typeof i !== "string");
-
-                              setEditableProduct((prev) => ({
-                                ...prev,
-                                image: newImageArray,
-                                newImages: newFileArray,
-                                newImagesPreview: newFileArray,
-                              }));
-                            }}
-                            className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs py-1 text-center hover:bg-black"
-                          >
-                            {index === 0 ? "Primary" : "Make Primary"}
-                          </button>
-
-                          {/* Remove Button */}
-                          <button
-                            onClick={() => {
-                              if (!isNew) {
-                                setEditableProduct((prev) => ({
-                                  ...prev,
-                                  image: prev.image.filter((_, i) => i !== realIndex),
-                                }));
-                              } else {
-                                const newImgs = [...(editableProduct.newImages || [])];
-                                const previews = [...(editableProduct.newImagesPreview || [])];
-                                newImgs.splice(realIndex, 1);
-                                previews.splice(realIndex, 1);
+                                const newImageArray = reordered.filter((i) => typeof i === "string");
+                                const newFileArray = reordered.filter((i) => typeof i !== "string");
 
                                 setEditableProduct((prev) => ({
                                   ...prev,
-                                  newImages: newImgs,
-                                  newImagesPreview: previews,
+                                  image: newImageArray,
+                                  newImages: newFileArray,
+                                  newImagesPreview: newFileArray,
                                 }));
-                              }
-                            }}
-                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-800"
-                            title="Remove"
-                          >
-                            –
-                          </button>
+                              }}
+                              className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs py-1 text-center hover:bg-black"
+                            >
+                              {index === 0 ? "Primary" : "Make Primary"}
+                            </button>
+
+                            {/* Remove Button */}
+                            <button
+                              onClick={() => {
+                                if (!isNew) {
+                                  setEditableProduct((prev) => ({
+                                    ...prev,
+                                    image: prev.image.filter((_, i) => i !== realIndex),
+                                  }));
+                                } else {
+                                  const newImgs = [...(editableProduct.newImages || [])];
+                                  const previews = [...(editableProduct.newImagesPreview || [])];
+                                  newImgs.splice(realIndex, 1);
+                                  previews.splice(realIndex, 1);
+
+                                  setEditableProduct((prev) => ({
+                                    ...prev,
+                                    newImages: newImgs,
+                                    newImagesPreview: previews,
+                                  }));
+                                }
+                              }}
+                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-800"
+                              title="Remove"
+                            >
+                              –
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
 
-                  {/* Add Image Input */}
-                  {((editableProduct.image?.length || 0) + (editableProduct.newImagesPreview?.length || 0)) < 6 && (
-                    <label className="w-24 h-24 border border-dashed border-gray-400 rounded-sm cursor-pointer flex items-center justify-center hover:border-[var(--sage)] hover:text-[var(--sage)] transition">
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-                          setEditableProduct((prev) => ({
-                            ...prev,
-                            newImages: [...(prev.newImages || []), file],
-                            newImagesPreview: [...(prev.newImagesPreview || []), file],
-                          }));
-                        }}
-                      />
-                      <ImagePlus className="w-6 h-6" />
-                    </label>
-                  )}
+                    {/* Add Image Input */}
+                    {((editableProduct.image?.length || 0) + (editableProduct.newImagesPreview?.length || 0)) < 6 && (
+                      <label className="w-24 h-24 border border-dashed border-gray-400 rounded-sm cursor-pointer flex items-center justify-center hover:border-[var(--sage)] hover:text-[var(--sage)] transition">
+                        <input
+                          type="file"
+                          hidden
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            setEditableProduct((prev) => ({
+                              ...prev,
+                              newImages: [...(prev.newImages || []), file],
+                              newImagesPreview: [...(prev.newImagesPreview || []), file],
+                            }));
+                          }}
+                        />
+                        <ImagePlus className="w-6 h-6" />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Submit */}
-              <button
-                className="mt-4 w-full bg-[var(--sage)] text-white 
-                  hover:bg-zinc-500 py-2.5 
-                  rounded-sm cursor-pointer uppercase font-medium disabled:opacity-50  disabled:cursor-not-allowed
-                  transition"
-                onClick={() => handleProductUpdate(editableProduct)}
-                disabled={isUpdating}
-              >
-                {isUpdating ? "Updating..." : "Update Product"}
-              </button>
+              <div className="border-t p-4 bg-white flex justify-end gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setOpenProduct(null)}
+                  className="px-5 py-2 border rounded-sm text-black cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="px-5 py-2 bg-[var(--sage)] text-white rounded-sm cursor-pointer disabled:opacity-50"
+                  onClick={() => handleProductUpdate(editableProduct)}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Updating..." : "Save Product"}
+                </button>
+
+              </div>
             </div>
           </div>
         )}

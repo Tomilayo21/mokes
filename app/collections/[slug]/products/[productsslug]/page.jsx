@@ -363,6 +363,11 @@ const { slug, productsslug } = useParams();
       JSON.stringify(updated)
     );
   }, [productData]);
+
+  const hasStock =
+    productData?.sizes?.some(size => size.stock > 0);
+
+  const isDisabled = !hasStock;
   
   if (!productsslug) return null; 
 
@@ -528,10 +533,14 @@ const { slug, productsslug } = useParams();
                   </div>
                   <button
                     onClick={handleAddToCart}
-                    disabled={productData.stock === 0}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sage)] cursor-pointer text-white shadow hover:bg-gray-50 hover:text-gray-700 transition disabled:opacity-50"
+                    disabled={isDisabled}
+                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sage)] text-white shadow transition
+                      ${isDisabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer hover:bg-gray-50 hover:text-gray-700"}
+                    `}
                   >
-                    {productData.stock === 0 ? "Sold Out" : "Add to Cart"}
+                    {!hasStock ? "Sold Out" : "Add to Cart"}
                   </button>
 
                   <Link
