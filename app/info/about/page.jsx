@@ -4,6 +4,8 @@ import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";   
+import ProductListPanel from "@/components/Admin/ProductListPanel";
+import AddProductPanel from "@/components/Admin/AddProductPanel";
 
 const AboutPage = () => {
   const router = useRouter();
@@ -11,6 +13,9 @@ const AboutPage = () => {
   return (
     <>
       <Navbar />
+
+      <AddProductPanel />
+      <ProductListPanel />
 
       <div className="px-8 md:px-8 lg:px-8 pt-10 mt-8 mb-20">
 
@@ -272,6 +277,7 @@ const AboutPage = () => {
         </section>
 
       </div>
+
 
       <Footer />
     </>

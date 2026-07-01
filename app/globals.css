@@ -115,3 +115,143 @@ h1, h2, h3, h4 {
 .animate-spin-slow {
   animation: spin-slow 2.5s linear infinite;
 }
+
+.quill-content img,
+.quill-content video,
+.quill-content iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.quill-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.quill-content pre,
+.quill-content code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.preview-content {
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* HARD CONTAIN EVERYTHING */
+.preview-content * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* IMAGES */
+.preview-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+/* VIDEOS / EMBEDS (VERY IMPORTANT FOR QUIll) */
+.preview-content iframe,
+.preview-content video {
+  max-width: 100% !important;
+}
+
+/* PREVENT LONG TEXT / URLs FROM BREAKING LAYOUT */
+.preview-content pre {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-x: auto !important;
+  max-width: 100%;
+}
+
+/* FORCE SPANS / INLINE ELEMENTS */
+.preview-content span {
+  white-space: normal !important;
+}
+
+/* TABLE FIX (MOST COMMON HIDDEN CAUSE) */
+.preview-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* TD/TH FIX */
+.preview-content td,
+.preview-content th {
+  word-break: break-word;
+}
+
+.ql-editor {
+  color: black;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.ql-editor p {
+  margin-bottom: 10px;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3 {
+  font-weight: bold;
+}
+
+.ql-editor {
+  color: #000;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Paragraph spacing */
+.ql-editor p {
+  margin: 0 0 1rem 0;
+}
+
+/* Headings */
+.ql-editor h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ql-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.ql-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Bold */
+.ql-editor strong,
+.ql-editor b {
+  font-weight: 700 !important;
+}
+
+/* Italics */
+.ql-editor em,
+.ql-editor i {
+  font-style: italic !important;
+}
+
+/* Lists */
+.ql-editor ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.ql-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.ql-editor li {
+  margin-bottom: 0.25rem;
+}

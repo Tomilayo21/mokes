@@ -34,7 +34,7 @@ const Products = () => {
   };
 
   return (
-    <div className="flex flex-col items-center mt-24 mb-24 px-4">
+    <div className="flex flex-col items-center mt-24 mb-12 px-4">
 
       {/* HEADER */}
       <div className="text-center">
@@ -72,7 +72,7 @@ const Products = () => {
           products.length > 8 && (
             <button
               onClick={() => router.push('/collections/all')}
-              className="px-12 py-2.5 mt-12 cursor-pointer border rounded text-gray-500/70 hover:bg-slate-50/90 transition"
+              className="px-12 py-2.5 mt-4 cursor-pointer border rounded text-gray-500/70 hover:bg-slate-50/90 transition"
             >
               See all
             </button>
