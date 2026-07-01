@@ -176,17 +176,20 @@ const ProductListPanel = () => {
 
   const handleDelete = async (productId) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
+
     try {
-      const token = await getToken();
-      const { data } = await axios.delete(`/api/product/${productId}`, {
-        headers: { Authorization: `Bearer ${token}`, userid: user.id },
-      });
+      const { data } = await axios.delete(`/api/product/${productId}`);
+
       if (data.success) {
         toast.success("Product deleted");
-        setProducts((prev) => prev.filter((p) => p._id !== productId));
-        setFilteredProducts((prev) => prev.filter((p) => p._id !== productId));
-      } else {
-        toast.error(data.message || "Failed to delete");
+
+        setProducts(prev =>
+          prev.filter(p => p._id !== productId)
+        );
+
+        setFilteredProducts(prev =>
+          prev.filter(p => p._id !== productId)
+        );
       }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
@@ -278,6 +281,7 @@ const ProductListPanel = () => {
           formData.append("newImages", product.newImages[i]);
         }
       }
+
 
       const res = await fetch(`/api/product/${product._id}`, {
         method: "PUT",
@@ -1194,7 +1198,6 @@ const ProductListPanel = () => {
             </div>
           </div>
         )}
-
 
         {viewProduct && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">

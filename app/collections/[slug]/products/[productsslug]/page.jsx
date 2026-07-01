@@ -74,7 +74,7 @@ const { slug, productsslug } = useParams();
         setLoading(true);
 
         const [productRes, listRes] = await Promise.all([
-          fetch(`/api/product/${productsslug}`),
+          fetch(`/api/product/slug/${productsslug}`),
           fetch("/api/product/list"),
         ]);
 

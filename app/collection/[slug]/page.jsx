@@ -63,7 +63,7 @@ export default function ProductPage() {
         setLoading(true);
 
         const [productRes, listRes] = await Promise.all([
-          fetch(`/api/product/${slug}`),
+          fetch(`/api/product/slug/${slug}`),
           fetch("/api/product/list"),
         ]);
 
