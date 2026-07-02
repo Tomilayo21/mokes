@@ -25,12 +25,6 @@ export default function Navbar() {
   const { getCartCount } = useAppContext();
   const [menuOpen, setMenuOpen] = useState(false);
   const [genderTab, setGenderTab] = useState("male");
-  const tabs = [
-    { key: "male", label: "Men" },
-    { key: "female", label: "Women" },
-    { key: "brand", label: "Brands" },
-    { key: "homegifts", label: "Home & Gifts" },
-    ];
   const [mounted, setMounted] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [menuData, setMenuData] = useState({
@@ -39,6 +33,25 @@ export default function Navbar() {
     brand: [],
     homegifts: [],
   });
+
+    const allTabs = [
+    { key: "male", label: "Men" },
+    { key: "female", label: "Women" },
+    { key: "brand", label: "Brands" },
+    { key: "homegifts", label: "Home & Gifts" },
+    ];
+
+    const tabs = allTabs.filter((tab) => {
+    const data = menuData[tab.key];
+    return Array.isArray(data) && data.length > 0;
+    });
+
+  useEffect(() => {
+    if (!tabs.find((t) => t.key === genderTab)) {
+        setGenderTab(tabs[0]?.key || "");
+    }
+  }, [menuData]);
+
   const [megaMenu, setMegaMenu] = useState(null);
 
     const createSlug = (str) =>
@@ -89,46 +102,52 @@ export default function Navbar() {
         const fetchCategories = async () => {
             try {
             const res = await fetch("/api/product/list");
-
             const data = await res.json();
 
-            console.log("API RESPONSE:", data);
+            const isProductActive = (p) => {
+                const totalStock = (p.sizes || []).reduce(
+                (sum, s) => sum + Number(s.stock || 0),
+                0
+                );
 
-            // ✅ FIX
-            const products = data.products || [];
+                return p.visible === true && totalStock > 0;
+            };
 
-                const grouped = products.reduce((acc, product) => {
+            const products = (data.products || []).filter(isProductActive);
+
+            const grouped = products.reduce((acc, product) => {
                 const category = createSlug(product.category);
                 const subcategory = createSlug(
-                    product.subCategory || product.subcategory
+                product.subCategory || product.subcategory
                 );
                 const brand = createSlug(product.brand);
 
                 if (category && subcategory) {
-                    if (!acc[category]) acc[category] = [];
-                    if (!acc[category].includes(subcategory)) {
+                if (!acc[category]) acc[category] = [];
+                if (!acc[category].includes(subcategory)) {
                     acc[category].push(subcategory);
-                    }
+                }
                 }
 
                 if (brand) {
-                    if (!acc.brand) acc.brand = [];
-                    if (!acc.brand.includes(brand)) {
+                if (!acc.brand) acc.brand = [];
+                if (!acc.brand.includes(brand)) {
                     acc.brand.push(brand);
-                    }
+                }
                 }
 
                 return acc;
-                }, {});
+            }, {});
 
-            console.log("GROUPED:", grouped);
+            // ✅ CLEAN EMPTY GROUPS (IMPORTANT)
+            const cleaned = {
+                male: grouped.male?.length ? grouped.male : [],
+                female: grouped.female?.length ? grouped.female : [],
+                brand: grouped.brand?.length ? grouped.brand : [],
+                homegifts: grouped.homegifts?.length ? grouped.homegifts : [],
+            };
 
-            setMenuData({
-                male: grouped.male || [],
-                female: grouped.female || [],
-                brand: grouped.brand || [],
-                homegifts: grouped.homegifts || [],
-            });
+            setMenuData(cleaned);
             } catch (error) {
             console.log("FETCH ERROR:", error);
             }

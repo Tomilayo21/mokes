@@ -74,6 +74,7 @@ const AllProducts = () => {
 
   const filteredProducts = useMemo(() => {
     let filtered = Array.isArray(products) ? [...products] : [];
+    filtered = filtered.filter(p => p.visible);
 
     if (type) filtered = filtered.filter((p) => p.type === type);
     if (brand) {
@@ -208,11 +209,11 @@ const AllProducts = () => {
         {/* Filters */}
         <div className="mt-6 w-full bg-white p-4">
           <Filter
-            products={products}
+            products={filteredProducts}
             searchQuery={searchQuery}
             brand={brand}
-            displayCount={filteredProducts.length}
-            totalCount={products.length}
+            displayCount={paginatedProducts.length}
+            totalCount={filteredProducts.length}
           />
           {searchQuery && (
             <button
