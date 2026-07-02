@@ -351,6 +351,13 @@ const ProductListPanel = () => {
     }
   };
 
+  const getTotalStock = (sizes = []) => {
+    return sizes.reduce(
+      (sum, size) => sum + Number(size.stock || 0),
+      0
+    );
+  };
+  
   if (!isAdmin) return <p className="p-8 text-center text-red-500">Access denied. You are not an admin.</p>;
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
@@ -399,8 +406,6 @@ const ProductListPanel = () => {
     ],
   };
 
-  const getTotalStock = (sizes = []) =>
-    sizes.reduce((sum, s) => sum + Number(s.stock || 0), 0);
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between bg-gray-50">
@@ -509,179 +514,210 @@ const ProductListPanel = () => {
                 </tr>
               </thead>
               <tbody className="text-sm text-gray-700">
-                {paginatedProducts.map((product, index) => (
-                  <tr
-                    key={product._id}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-zinc-50"
-                    } border-t border-gray-200 hover:bg-gray-50 transition cursor-pointer`}
-                  >
-                    {/* Product */}
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col items-center space-y-2">
-                        <Image
-                          src={product.image[0]}
-                          alt="product image"
-                          className="w-14 h-14 object-cover rounded-sm border shadow-sm"
-                          width={56}
-                          height={56}
-                        />
-                        <span className="font-medium text-center text-sm break-words">
-                          {product.name}
-                        </span>
-                        {/* <span className="truncate font-medium text-center text-sm w-full">
-                          {product.name}
-                        </span> */}
-                      </div>
-                    </td>
+                {paginatedProducts.map((product, index) => {
+                    const totalStock = product.sizes?.reduce(
+                      (sum, size) => sum + Number(size.stock || 0),
+                      0
+                    );
 
-                    {/* Category */}
-                    <td className="px-4 py-3 ">{product.category}</td>
-                    <td className="px-4 py-3 font-normal text-gray-800">
-                      {currency}
-                      {Number(product.offerPrice).toLocaleString()}
-                    </td>
+                    const disabled = totalStock === 0;
+                    return (
+                      <tr
+                        key={product._id}
+                        className={`${
+                          index % 2 === 0 ? "bg-white" : "bg-zinc-50"
+                        } border-t border-gray-200 hover:bg-gray-50 transition cursor-pointer`}
+                      >
+                        {/* Product */}
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col items-center space-y-2">
+                            <Image
+                              src={product.image[0]}
+                              alt="product image"
+                              className="w-14 h-14 object-cover rounded-sm border shadow-sm"
+                              width={56}
+                              height={56}
+                            />
+                            <span className="font-medium text-center text-sm break-words">
+                              {product.name}
+                            </span>
+                            {/* <span className="truncate font-medium text-center text-sm w-full">
+                              {product.name}
+                            </span> */}
+                          </div>
+                        </td>
 
-                    {/*Sizes & Stock*/}
-                    <td className="px-4 py-3 ">
-                      <button
-                        onClick={() =>
-                          setStockPreview(
-                            stockPreview?._id === product._id ? null : product
-                          )
-                        }
-                        className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium bg-gray-100 rounded-md hover:bg-gray-200 transition"
-                      >
-                        <span>
-                          {product.sizes?.reduce(
-                            (sum, size) => sum + Number(size.stock || 0),
-                            0
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500">units</span>
-                      </button>
-                    </td>
+                        {/* Category */}
+                        <td className="px-4 py-3 ">{product.category}</td>
+                        <td className="px-4 py-3 font-normal text-gray-800">
+                          {currency}
+                          {Number(product.offerPrice).toLocaleString()}
+                        </td>
 
-                    {/* Visibility */}
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => toggleVisibility(product._id)}
-                        className={`px-3 py-1.5 rounded-md text-white text-xs font-medium transition ${
-                          product.visible ? "bg-[var(--sage)] hover:bg-zinc-500" : "bg-gray-400 hover:bg-gray-500"
-                        }`}
-                      >
-                        {product.visible ? "Visible" : "Hidden"}
-                      </button>
-                    </td>
+                        {/*Sizes & Stock*/}
+                        <td className="px-4 py-3 ">
+                          <button
+                            onClick={() =>
+                              setStockPreview(
+                                stockPreview?._id === product._id ? null : product
+                              )
+                            }
+                            className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium bg-gray-100 rounded-md hover:bg-gray-200 transition"
+                          >
+                            <span>
+                              {product.sizes?.reduce(
+                                (sum, size) => sum + Number(size.stock || 0),
+                                0
+                              )}
+                            </span>
+                            <span className="text-xs text-gray-500">units</span>
+                          </button>
+                        </td>
 
-                    {/* Actions */}
-                    <td className="px-4 py-3 flex flex-col gap-2">
-                      <button
-                        onClick={() => setOpenProduct(product)}
-                        className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                      >
-                        <Pencil className="w-4 h-4" /> Edit
-                      </button>
-                      <button
-                        onClick={() => setViewProduct(product)}
-                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product._id)}
-                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        {/* Visibility */}
+                        <td className="px-4 py-3">
+                          <button
+                            disabled={disabled}
+                            onClick={() => !disabled && toggleVisibility(product._id)}
+                            className={`relative inline-flex h-6 w-12 items-center rounded-full transition
+                              ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                              ${product.visible ? "bg-[var(--sage)]" : "bg-gray-300"}
+                            `}
+                          >
+                            <span
+                              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                                product.visible ? "translate-x-6" : "translate-x-1"
+                              }`}
+                            />
+                          </button>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-3 flex flex-col gap-2">
+                          <button
+                            onClick={() => setOpenProduct(product)}
+                            className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                          >
+                            <Pencil className="w-4 h-4" /> Edit
+                          </button>
+                          <button
+                            onClick={() => setViewProduct(product)}
+                            className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product._id)}
+                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 justify-center transition"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                })}
               </tbody>
             </table>
           </div>
 
           {/* Mobile Cards */}
           <div className="block md:hidden space-y-4">
-            {paginatedProducts.map((product) => (
-              <div
-                key={product._id}
-                className="bg-white border border-gray-200 rounded-sm p-4 flex gap-4 hover:shadow-md transition"
-              >
-                <Image
-                  src={product.image[0]}
-                  alt="product image"
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 object-cover rounded-sm border"
-                />
+            {paginatedProducts.map((product) => {
+              const totalStock = product.sizes?.reduce(
+                (sum, size) => sum + Number(size.stock || 0),
+                0
+              );
 
-                <div className="flex-1 space-y-1">
-                  <h3 className="font-semibold text-base truncate text-gray-800">{product.name}</h3>
-                  <p className="text-xs text-gray-500">{product.category}</p>
-                  <p className="text-sm font-normal text-gray-800">              
-                    {currency}
-                    {Number(product.offerPrice).toLocaleString()}
-                  </p>
+              const disabled = totalStock === 0;
 
-                  <div className="mt-2 flex items-center gap-2">
-                    <button
-                      onClick={() => setStockPreview(product)}
-                      className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition"
-                    >
-                      <span className="text-xs font-semibold text-gray-700">
-                        Stock
-                      </span>
+              return (
+                <div
+                  key={product._id}
+                  className="bg-white border border-gray-200 rounded-sm p-4 flex gap-4 hover:shadow-md transition"
+                >
+                  <Image
+                    src={product.image[0]}
+                    alt="product image"
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover rounded-sm border"
+                  />
 
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          product.sizes?.reduce(
+                  <div className="flex-1 space-y-1">
+                    <h3 className="font-semibold text-base text-gray-800 break-words leading-snug">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-gray-500">{product.category}</p>
+                    <p className="text-sm font-normal text-gray-800">              
+                      {currency}
+                      {Number(product.offerPrice).toLocaleString()}
+                    </p>
+
+                    <div className="mt-2 flex items-center gap-2">
+                      <button
+                        onClick={() => setStockPreview(product)}
+                        className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                      >
+                        <span className="text-xs font-semibold text-gray-700">
+                          Stock
+                        </span>
+
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            product.sizes?.reduce(
+                              (sum, size) => sum + Number(size.stock || 0),
+                              0
+                            ) <= 3
+                              ? "bg-red-100 text-red-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
+                        >
+                          {product.sizes?.reduce(
                             (sum, size) => sum + Number(size.stock || 0),
                             0
-                          ) <= 3
-                            ? "bg-red-100 text-red-600"
-                            : "bg-green-100 text-green-600"
-                        }`}
-                      >
-                        {product.sizes?.reduce(
-                          (sum, size) => sum + Number(size.stock || 0),
-                          0
-                        )}
-                      </span>
-                    </button>
-                  </div>
+                          )}
+                        </span>
+                      </button>
+                    </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setOpenProduct(product)}
-                      className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                    >
-                      <Pencil className="w-4 h-4" /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                    >
-                      <Trash2 className="w-4 h-4" /> Delete
-                    </button>
-                    <button
-                      onClick={() => setViewProduct(product)}
-                      className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 transition"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => toggleVisibility(product._id)}
-                      className={`px-3 py-1.5 text-xs rounded-md text-white transition ${
-                        product.visible ? "bg-[var(--sage)] hover:bg-zinc-500" : "bg-gray-400 hover:bg-gray-500"
-                      }`}
-                    >
-                      {product.visible ? "Visible" : "Hidden"}
-                    </button>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setOpenProduct(product)}
+                        className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                      >
+                        <Pencil className="w-4 h-4" /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                      <button
+                        onClick={() => setViewProduct(product)}
+                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md text-xs flex items-center gap-1 transition"
+                      >
+                        View
+                      </button>
+                      <button
+                        disabled={disabled}
+                        onClick={() => !disabled && toggleVisibility(product._id)}
+                        className={`relative inline-flex h-6 w-12 items-center rounded-full transition
+                          ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                          ${product.visible ? "bg-[var(--sage)]" : "bg-gray-300"}
+                        `}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                            product.visible ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>  
           {stockPreview && (
             <>
